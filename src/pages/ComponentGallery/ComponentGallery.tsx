@@ -1,7 +1,8 @@
 import { useState } from "react";
 import "tailwindcss";
 import Navigation from '../../components/common/Navigation';
-import { Modal } from "../../components/common/Modal";
+import Modal from "../../components/common/Modal";
+import ProfileImageUpload, {type ProfileImage} from "../../components/common/ProfileImage";
 
 export const ComponentGallery = () => {
   // 모달 상태 관리
@@ -16,7 +17,15 @@ export const ComponentGallery = () => {
     alert('확인 버튼을 눌렀습니다.');
     setIsDefaultModalOpen(false);
   };
+
+  const handleImageSelect = (image: ProfileImage) => {
+    alert(`이미지가 선택되었습니다: ${image.name}`);
+  } 
   
+  const handleImageRemove = () => {
+    alert('이미지가 제거되었습니다');
+  };
+
   return (
     <div>
       <h1>공통 컴포넌트 테스트 용 페이지</h1>
@@ -44,7 +53,13 @@ export const ComponentGallery = () => {
       >
         버튼
       </button>
-    
+
+      {/* 프로필 이미지 업로드 테스트 */}
+      <ProfileImageUpload 
+        onImageSelect={handleImageSelect}
+        onImageRemove={handleImageRemove}
+        maxSizeInMB={5}
+      />
     </div>
   );
 };
