@@ -24,7 +24,6 @@ export const ProfileImageUpload: React.FC<ProfileImageUploadProps> = ({
   defaultImage
 }) => {
   const [selectedImage, setSelectedImage] = useState<ProfileImage | null>(null);
-  const [error, setError] = useState<string>('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const validateFile = useCallback((file: File): string | null => {
@@ -45,12 +44,10 @@ export const ProfileImageUpload: React.FC<ProfileImageUploadProps> = ({
   const handleFileSelect = useCallback((file: File) => {
     const validationError = validateFile(file);
     if (validationError) {
-      setError(validationError);
       alert(validationError); // 에러 메시지를 alert으로 표시
       return;
     }
 
-    setError('');
     const url = URL.createObjectURL(file);
     const profileImage: ProfileImage = {
       file,
@@ -77,7 +74,6 @@ export const ProfileImageUpload: React.FC<ProfileImageUploadProps> = ({
       URL.revokeObjectURL(selectedImage.url);
     }
     setSelectedImage(null);
-    setError('');
     onImageRemove?.();
     
     // 파일 입력 초기화
@@ -89,15 +85,7 @@ export const ProfileImageUpload: React.FC<ProfileImageUploadProps> = ({
   const handleUploadClick = () => {
     fileInputRef.current?.click();
   };
-
-  const formatFileSize = (bytes: number): string => {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-  };
-
+  
   // 선택된 이미지가 있으면 해당 이미지, 없으면 기본 이미지 사용
   const displayImage = selectedImage?.url || defaultImage || defaultProfileImage;
   const isCustomImage = selectedImage !== null; // 사용자가 선택한 이미지인지 확인
