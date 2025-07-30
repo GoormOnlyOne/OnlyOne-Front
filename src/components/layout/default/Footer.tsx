@@ -3,7 +3,7 @@ import Navigation from '../../common/Navigation';
 
 export default function Footer() {
   const location = useLocation();
-  const showNavigation = ['/', '/category', '/meetings', '/profile'].includes(location.pathname);
+  const showNavigation = ['/', '/category', '/meeting', '/mypage'].includes(location.pathname);
 
   if (!showNavigation) return null;
 
