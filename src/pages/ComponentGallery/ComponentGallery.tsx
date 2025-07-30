@@ -3,7 +3,6 @@ import "tailwindcss";
 import Navigation from '../../components/common/Navigation';
 import Modal from "../../components/common/Modal";
 import ProfileImageUpload, {type ProfileImage} from "../../components/common/ProfileImage";
-import NotificationList from "../NotificationList";
 
 export const ComponentGallery = () => {
   // 모달 상태 관리
@@ -61,13 +60,6 @@ export const ComponentGallery = () => {
         onImageRemove={handleImageRemove}
         maxSizeInMB={5}
       />
-
-      {/* NotificationList (Mock Data) */}
-      <section>
-        <h2 className="text-xl font-semibold">NotificationList (Mock Data)</h2>
-        <NotificationList />
-      </section>
-      
     </div>
   );
 };
