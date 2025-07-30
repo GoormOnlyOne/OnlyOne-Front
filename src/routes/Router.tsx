@@ -10,11 +10,13 @@ import { Category } from '../pages/Category/Category.tsx';
 import { Meeting } from '../pages/Meeting/Meeting.tsx';
 import { Mypage } from '../pages/Mypage/Mypage.tsx';
 import { Search } from '../pages/Search.tsx';
+import { Login } from '../pages/Login.tsx';
+import { Signup } from '../pages/Signup/Signup.tsx';
 
 import { ComponentGallery } from '../pages/ComponentGallery/ComponentGallery.tsx';
 
 export const router = createBrowserRouter([
-  // 기본 레이아웃이 적용되는 라우트들
+  // [기본] 레이아웃이 적용되는 라우트들
   {
     path: '/',
     element: <DefaultLayout />,
@@ -38,19 +40,27 @@ export const router = createBrowserRouter([
     ],
   },
 
-  // 검색 레이아웃이 적용되는 라우트들
+  // [검색] 레이아웃이 적용되는 라우트들
   {
     path: '/search',
-      element: <SearchLayout />,
-      children: [
-        {
-          index: true,
-          element: <Search />,
-        },
-      ]
+    element: <SearchLayout />,
+    children: [
+      {
+        index: true,
+        element: <Search />,
+      },
+    ]
   },
 
   // 레이아웃이 적용되지 않는 라우트들
+  {
+    path: '/login',
+    element: <Login />,
+  },
+  {
+    path: '/signup',
+    element: <Signup />,
+  },
   {
     path: '/components',
     element: <ComponentGallery />,
