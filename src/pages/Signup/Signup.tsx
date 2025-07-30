@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import CategorySection from '../../components/domain/category/CategorySection';
 import AddressSelector from '../../components/common/AddressSelector';
+import ProfileImageUpload from '../../components/common/ProfileImage';
 
 export const Signup = () => {
   const navigate = useNavigate();
@@ -153,6 +154,9 @@ export const Signup = () => {
       </p>
       
       <div className="space-y-6">
+        {/* 프로필 */}
+        <ProfileImageUpload />
+        
         {/* 닉네임 입력 */}
         <div>
           <label htmlFor="nickname" className="block text-sm font-medium text-gray-700 mb-2">
