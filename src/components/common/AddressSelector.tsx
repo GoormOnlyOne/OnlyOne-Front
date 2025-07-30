@@ -93,12 +93,20 @@ const AddressSelector: React.FC<AddressSelectorProps> = ({
 
   const handleCityChange = useCallback((city: string) => {
     setSelectedCity(city);
-    setSelectedDistrict(""); // 시/도가 바뀌면 구/군 초기화
+
+		// 새로 선택된 시/도의 구/군 목록 가져오기
+		const newDistricts = typedKoreaData.korea_administrative_divisions[city]?.districts || [];
+
+		const firstDistrict = newDistricts.length > 0 ? newDistricts[0] : "";
+    setSelectedDistrict(firstDistrict);
 
     // 콜백 호출
     onCityChange?.(city);
+		if(firstDistrict) {
+			onDistrictChange?.(firstDistrict);
+		}
 
-  }, [onCityChange]);
+  }, [onCityChange, onDistrictChange]);
 
   const handleDistrictChange = useCallback((district: string) => {
     setSelectedDistrict(district);
