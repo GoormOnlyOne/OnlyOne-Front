@@ -5,6 +5,7 @@ import { Category } from '../pages/Category/Category.tsx';
 import { Meeting } from '../pages/Meeting/Meeting.tsx';
 import { Mypage } from '../pages/Mypage/Mypage.tsx';
 import { ComponentGallery } from '../pages/ComponentGallery/ComponentGallery.tsx';
+import  NotificationList from '../pages/NotificationList.tsx';
 
 export const router = createBrowserRouter([
   {
@@ -34,5 +35,10 @@ export const router = createBrowserRouter([
   {
     path: '/components',
     element: <ComponentGallery />,
+  },
+
+  { 
+    path: '/notificaionList',
+    element: <NotificationList />,
   },
 ]);

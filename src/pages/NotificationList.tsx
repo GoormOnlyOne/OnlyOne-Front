@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import NotificationItem from '../../components/notification/NotificationItem';
-import type { Notification } from '../../components/notification/NotificationType';
+import NotificationItem from '../components/notification/NotificationItem';
+import type { Notification } from '../components/notification/NotificationType';
 
 const mockNotifications: Notification[] = [
   {
