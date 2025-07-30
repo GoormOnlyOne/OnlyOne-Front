@@ -6,7 +6,7 @@ interface OtherChatMessageProps {
   message: string;
   timestamp: string;
   showProfile?: boolean; // 연속된 메시지에서 프로필 표시 여부
-  userId: number
+  userId: number;
 }
 
 const OtherChatMessage: React.FC<OtherChatMessageProps> = ({
@@ -14,7 +14,7 @@ const OtherChatMessage: React.FC<OtherChatMessageProps> = ({
   username = '사용자',
   message,
   timestamp,
-  showProfile = true
+  showProfile = true,
   userId
 }) => {
   return (
