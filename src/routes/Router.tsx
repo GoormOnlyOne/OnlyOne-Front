@@ -14,6 +14,7 @@ import { Login } from '../pages/Login.tsx';
 import { Signup } from '../pages/Signup/Signup.tsx';
 
 import { ComponentGallery } from '../pages/ComponentGallery/ComponentGallery.tsx';
+import { MeetingDetail } from '../pages/Meeting/MeetingDetail.tsx';
 
 export const router = createBrowserRouter([
   // [기본] 레이아웃이 적용되는 라우트들
@@ -37,6 +38,10 @@ export const router = createBrowserRouter([
         path: 'mypage',
         element: <Mypage />,
       },
+			{
+				path: 'meeting/:id',
+				element: <MeetingDetail />
+			},
     ],
   },
 
