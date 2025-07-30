@@ -7,6 +7,7 @@ import OtherChatMessage from "../Chat/OtherChatMessage";
 import DefaultImage from "../../assets/user_profile.jpg";
 import MyChatMessage from "../Chat/MyChatMessage";
 import AddressSelector, { type AddressData } from "../../components/common/AddressSelector";
+import TabBar from "../Meeting/TabBar";
 
 export const ComponentGallery = () => {
   // 모달
@@ -43,13 +44,8 @@ export const ComponentGallery = () => {
     console.log('선택된 주소: ', newAddress);
   }
 
-  const handleAddressSubmit = () => {
-    if(address.isComplete) {
-      console.log(`선택된 주소: ${address.city} ${address.district}`);
-    } else {
-      console.log('시/도, 시/군/구를 모두 선택해주세요');
-    }
-  }
+	// 탭바
+
   return (
     <div>
       <h1>공통 컴포넌트 테스트 용 페이지</h1>
@@ -130,6 +126,9 @@ export const ComponentGallery = () => {
         initialDistrict="종로구"
         className="mb-4"
       />
+
+			{/* 탭바 */}
+			<TabBar />
     </div>
   );
 };
