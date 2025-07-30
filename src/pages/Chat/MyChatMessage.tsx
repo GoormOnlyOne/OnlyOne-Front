@@ -4,15 +4,17 @@ interface MyChatMessageProps {
   message: string;
   timestamp: string;
   isRead?: boolean; // 읽음 표시 여부
+  userId: number;
 }
 
 const MyChatMessage: React.FC<MyChatMessageProps> = ({
   message,
   timestamp,
-  isRead = false
+  isRead = false,
+  userId
 }) => {
   return (
-    <div className="flex items-end justify-end space-x-2 mb-4">
+    <div className="flex items-end justify-end space-x-2 mb-4" data-user-id={userId}>
       {/* 읽음 표시와 시간 */}
       <div className="flex flex-col items-end space-y-1">
         {/* 읽음 표시 */}

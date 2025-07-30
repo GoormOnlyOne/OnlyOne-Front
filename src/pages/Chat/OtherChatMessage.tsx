@@ -18,7 +18,7 @@ const OtherChatMessage: React.FC<OtherChatMessageProps> = ({
   userId
 }) => {
   return (
-    <div className="flex items-start space-x-3 mb-4">
+    <div className="flex items-start space-x-3 mb-4" data-user-id={userId}>
       {/* 프로필 이미지 - 연속 메시지가 아닐 때만 표시 */}
       <div className="flex-shrink-0">
         {showProfile ? (
