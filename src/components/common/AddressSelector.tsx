@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import KoreaData from "../../assets/json/korea_administrative_divisions.json";
+import KoreaData from '../../assets/json/korea_administrative_divisions.json';
 
 // JSON 데이터 타입 정의
 interface DistrictData {
@@ -50,12 +50,12 @@ const AddressSelector: React.FC<AddressSelectorProps> = ({
   onAddressChange,
   onCityChange,
   onDistrictChange,
-  className = "",
-  initialCity = "",
-  initialDistrict = "",
+  className = '',
+  initialCity = '',
+  initialDistrict = '',
   placeholder = {
-    city: "시/도를 선택하세요",
-    district: "시/군/구를 선택하세요"
+    city: '시/도를 선택하세요',
+    district: '시/군/구를 선택하세요'
   }
 }) => {
   const [selectedCity, setSelectedCity] = useState<string>(initialCity);
@@ -70,7 +70,7 @@ const AddressSelector: React.FC<AddressSelectorProps> = ({
 
     // 선택된 시/도에 구/군이 있는 경우 구/군도 선택되어야함
     if (districts.length > 0) {
-      return selectedDistrict !== "";
+      return selectedDistrict !== '';
     }
 
     // 구/군이 없는 경우 (세종)
@@ -118,7 +118,7 @@ const AddressSelector: React.FC<AddressSelectorProps> = ({
   return (
     <div className={`w-full max-w-4xl mx-auto border border-gray-300 ${className}`}>
       {/* 모든 화면에서 좌우 분할 */}
-      <div className="flex h-80 sm:h-96">
+      <div className="flex h-40 sm:h-56">
         {/* 좌측: 시/도 선택 */}
         <div className="w-2/5 sm:w-1/3 border-r border-gray-300 bg-gray-50">
           <div className="overflow-y-auto h-full">

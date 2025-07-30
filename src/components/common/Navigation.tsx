@@ -7,8 +7,8 @@ export default function Navigation() {
   const tabs = [
     { id: 'home', label: '홈', icon: 'ri-home-line', activeIcon: 'ri-home-fill', href: '/' },
     { id: 'category', label: '카테고리', icon: 'ri-apps-line', activeIcon: 'ri-apps-fill', href: '/category' },
-    { id: 'meetings', label: '모임', icon: 'ri-group-line', activeIcon: 'ri-group-fill', href: '/meetings' },
-    { id: 'profile', label: '마이페이지', icon: 'ri-user-line', activeIcon: 'ri-user-fill', href: '/profile' }
+    { id: 'meeting', label: '모임', icon: 'ri-group-line', activeIcon: 'ri-group-fill', href: '/meeting' },
+    { id: 'mypage', label: '마이페이지', icon: 'ri-user-line', activeIcon: 'ri-user-fill', href: '/mypage' }
   ];
 
   return (

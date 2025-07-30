@@ -7,7 +7,9 @@ export const Home = () => {
   return (
     <div className="flex flex-col bg-gray-50">
       {/* 카테고리 섹션 */}
-      <CategorySection mode="navigation" />
+      <div className="px-4 py-6">
+        <CategorySection mode="navigation" />
+      </div>
 
       {/* 모임 만들기 카드 */}
       <div className="px-4 pb-4">
