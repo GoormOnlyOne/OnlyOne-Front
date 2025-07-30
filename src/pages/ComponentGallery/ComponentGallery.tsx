@@ -14,22 +14,22 @@ export const ComponentGallery = () => {
   const [isDefaultModalOpen, setIsDefaultModalOpen] = useState(true);
 
   const handleCancel = () => {
-    alert('취소 버튼을 눌렀습니다.');
+    console.log('취소 버튼을 눌렀습니다.');
     setIsDefaultModalOpen(false);
   };
 
   const handleConfirm = () => {
-    alert('확인 버튼을 눌렀습니다.');
+    console.log('확인 버튼을 눌렀습니다.');
     setIsDefaultModalOpen(false);
   };
 
   // 이미지
   const handleImageSelect = (image: ProfileImage) => {
-    alert(`이미지가 선택되었습니다: ${image.name}`);
+    console.log(`이미지가 선택되었습니다: ${image.name}`);
   }
 
   const handleImageRemove = () => {
-    alert('이미지가 제거되었습니다');
+    console.log('이미지가 제거되었습니다');
   };
 
   // 주소
@@ -39,12 +39,10 @@ export const ComponentGallery = () => {
     isComplete: false
   });
 
-  const handleAddressChange = (newAddress: AddressData) => {
-    setAddress(newAddress);
-    console.log('선택된 주소: ', newAddress);
+  const handleAddressChange = (address: AddressData) => {
+    setAddress(address);
+		console.log(address);
   }
-
-	// 탭바
 
   return (
     <div>
