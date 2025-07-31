@@ -92,7 +92,7 @@ const mockScheduleData: Schedule[] = [
 		leader: false,
 		dday: "D+3"
 	},
-		{
+	{
 		scheduleId: 7,
 		name: "금요일 영화관람",
 		status: "READY",
@@ -164,36 +164,20 @@ export default function ScheduleList() {
 	};
 
 	const getParticipationStatus = (schedule: Schedule) => {
-		switch (schedule.status) {
-			case 'READY':
-				return (
-					<button
-						onClick={() => handleStatusClick(schedule)}
-						className="bg-gray-100 text-gray-700 px-3 py-1 rounded text-sm font-medium hover:bg-gray-200 transition-colors cursor-pointer"
-					>
-						참여 현황 ({schedule.userCount}/{schedule.userLimit === 0 ? '무제한' : schedule.userLimit})
-					</button>
-				);
-			case 'ENDED':
-			case 'SETTLING':
-				return (
-					<button
-						onClick={() => handleStatusClick(schedule)}
-						className="bg-blue-100 text-blue-700 px-3 py-1 rounded text-sm font-medium hover:bg-blue-200 transition-colors cursor-pointer"
-					>
-						정산 현황 ({schedule.userCount}/{schedule.userLimit === 0 ? '무제한' : schedule.userLimit})
-					</button>
-				);
-			default:
-				return (
-					<button
-						onClick={() => handleStatusClick(schedule)}
-						className="bg-gray-100 text-gray-700 px-3 py-1 rounded text-sm font-medium hover:bg-gray-200 transition-colors cursor-pointer"
-					>
-						참여 현황 ({schedule.userCount}/{schedule.userLimit === 0 ? '무제한' : schedule.userLimit})
-					</button>
-				);
-		}
+		const isSettlement = schedule.status === 'ENDED' || schedule.status === 'SETTLING';
+		const buttonText = isSettlement ? '정산 현황' : '참여 현황';
+		const buttonClass = isSettlement
+			? "bg-blue-100 text-blue-700 px-3 py-1 rounded text-sm font-medium hover:bg-blue-200 transition-colors cursor-pointer"
+			: "bg-gray-100 text-gray-700 px-3 py-1 rounded text-sm font-medium hover:bg-gray-200 transition-colors cursor-pointer";
+
+		return (
+			<button
+				onClick={() => handleStatusClick(schedule)}
+				className={buttonClass}
+			>
+				{buttonText} ({schedule.userCount}/{schedule.userLimit === 0 ? '무제한' : schedule.userLimit})
+			</button>
+		);
 	};
 
 	const handleActionClick = (action: string, schedule: Schedule) => {
@@ -205,7 +189,7 @@ export default function ScheduleList() {
 			case 'READY':
 				if (schedule.joined) {
 					return (
-						<button 
+						<button
 							onClick={() => handleActionClick('나가기', schedule)}
 							className="bg-blue-500 text-white px-4 py-2 rounded text-sm font-medium hover:bg-blue-600 transition-colors"
 						>
@@ -214,7 +198,7 @@ export default function ScheduleList() {
 					);
 				} else {
 					return (
-						<button 
+						<button
 							onClick={() => handleActionClick('참여하기', schedule)}
 							className="bg-red-500 text-white px-4 py-2 rounded text-sm font-medium hover:bg-red-600 transition-colors"
 						>
@@ -226,7 +210,7 @@ export default function ScheduleList() {
 			case 'ENDED':
 				if (schedule.joined) {
 					return (
-						<button 
+						<button
 							onClick={() => handleActionClick('정산하기', schedule)}
 							className="bg-gray-400 text-white px-4 py-2 rounded text-sm font-medium hover:bg-gray-500 transition-colors"
 						>
@@ -239,7 +223,7 @@ export default function ScheduleList() {
 			case 'SETTLING':
 				if (schedule.joined) {
 					return (
-						<button 
+						<button
 							onClick={() => handleActionClick('정산하기', schedule)}
 							className="bg-gray-400 text-white px-4 py-2 rounded text-sm font-medium hover:bg-gray-500 transition-colors"
 						>
