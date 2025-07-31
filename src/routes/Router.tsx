@@ -13,7 +13,7 @@ import { MeetingDetail } from '../pages/Meeting/MeetingDetail.tsx';
 import { Search } from '../pages/Search.tsx';
 import { Notice } from '../pages/Notice.tsx';
 import { Login } from '../pages/Login.tsx';
-import { Signup } from '../pages/Signup/Signup.tsx';
+import { Signup } from '../pages/Signup.tsx';
 import { Mypage } from '../pages/Mypage/Mypage.tsx';
 import { Interest } from '../pages/Mypage/Interest.tsx';
 import { Profile } from '../pages/Mypage/Profile.tsx';
