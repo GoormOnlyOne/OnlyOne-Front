@@ -6,15 +6,18 @@ import SearchLayout from '../components/layout/search/Layout.tsx';
 import TitleLayout from '../components/layout/title/Layout.tsx';
 
 // page
-import { Home } from '../pages/Home/Home.tsx';
+import { Home } from '../pages/Home.tsx';
 import { Category } from '../pages/Category/Category.tsx';
 import { Meeting } from '../pages/Meeting/Meeting.tsx';
 import { MeetingDetail } from '../pages/Meeting/MeetingDetail.tsx';
-import { Mypage } from '../pages/Mypage/Mypage.tsx';
 import { Search } from '../pages/Search.tsx';
+import { Notice } from '../pages/Notice.tsx';
 import { Login } from '../pages/Login.tsx';
 import { Signup } from '../pages/Signup/Signup.tsx';
-import { Notice } from '../pages/NotificationList.tsx';
+import { Mypage } from '../pages/Mypage/Mypage.tsx';
+import { Interest } from '../pages/Mypage/Interest.tsx';
+import { Profile } from '../pages/Mypage/Profile.tsx';
+import { Settlement } from '../pages/Mypage/Settlement.tsx';
 
 import { ComponentGallery } from '../pages/ComponentGallery/ComponentGallery.tsx';
 
@@ -35,10 +38,6 @@ export const router = createBrowserRouter([
       {
         path: 'meeting',
         element: <Meeting />,
-      },
-      {
-        path: 'mypage',
-        element: <Mypage />,
       },
 			{
 				path: 'meeting/:id',
@@ -64,6 +63,22 @@ export const router = createBrowserRouter([
     path: '/',
     element: <TitleLayout />,
     children: [
+      {
+        path: 'mypage',
+        element: <Mypage />,
+      },
+      {
+        path: 'mypage/interest',
+        element: <Interest />,
+      },
+      {
+        path: 'mypage/profile',
+        element: <Profile />,
+      },
+      {
+        path: 'mypage/settlement',
+        element: <Settlement />,
+      },
       {
         path: 'notice',
         element: <Notice />,
