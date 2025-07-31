@@ -49,7 +49,7 @@ export const Mypage = () => {
           {/* 프로필 이미지 */}
           <ProfileImageUpload
             maxSizeInMB={5}
-            editable={true}
+            editable={false}
           />
 
           {/* 사용자 정보 */}
