@@ -1,16 +1,20 @@
 import ProfileImageUpload from '../../common/ProfileImage';
+import type { AddressData } from '../../common/AddressSelector';
 
 interface Step3Props {
   formData: {
     nickname: string;
     gender: string;
     birth: string;
+    categories?: string[];
+    profileImage?: string;
+    address?: AddressData;
   };
   onFormChange: (field: string, value: string) => void;
   onProfileImageChange?: (imageUrl: string) => void;
 }
 
-const Step3 = ({ formData, onFormChange }: Step3Props) => {
+const Step3 = ({ formData, onFormChange, onProfileImageChange }: Step3Props) => {
   return (
     <div className="animate-fade-in">
       <h2 className="text-2xl font-bold text-center mb-2">정보 입력</h2>
@@ -20,9 +24,11 @@ const Step3 = ({ formData, onFormChange }: Step3Props) => {
       
       <div className="space-y-6">
         {/* 프로필 */}
-        <ProfileImageUpload />
-        {/* TODO: ProfileImageUpload 컴포넌트의 실제 props 확인 필요 */}
-        {/* 예: onChange, onUpload, onSelect 등의 prop 이름 확인 */}
+        <ProfileImageUpload 
+          defaultImage={formData.profileImage}
+          onImageSelect={(image) => onProfileImageChange?.(image.url)}
+          onImageRemove={() => onProfileImageChange?.('')}
+        />
         
         {/* 닉네임 입력 */}
         <div>
