@@ -18,7 +18,7 @@ export const Category = () => {
   }
   return (
     <div className="flex flex-col bg-gray-50">
-      { type === 2 ? (
+      { type === 1 ? (
         // 1. 카테고리 섹션 - 단일 선택 
         <div className='px-4 py-6'>
           <CategorySection
