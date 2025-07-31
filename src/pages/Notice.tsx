@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
-import NotificationItem from '../components/notification/NotificationItem';
-import type { Notification } from '../components/notification/NotificationType';
+import { useEffect, useState } from 'react';
+import NotificationItem from '../components/domain/notification/NotificationItem';
+import type { Notification } from '../components/domain/notification/NotificationType';
 
 const mockNotifications: Notification[] = [
   {
@@ -36,7 +36,7 @@ const mockNotifications: Notification[] = [
   }
 ];
 
-const NotificationList: React.FC = () => {
+export const Notice = () => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
 
   useEffect(() => {
@@ -61,5 +61,3 @@ const NotificationList: React.FC = () => {
     </div>
   );
 };
-
-export default NotificationList;

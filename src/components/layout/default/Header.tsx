@@ -17,7 +17,7 @@ export default function Header() {
           </Link>
           
           <Link
-            to="/alert"
+            to="/notice"
             className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-50 hover:bg-gray-100 transition-colors relative"
           >
             <i className="ri-notification-2-line text-gray-600 text-lg"></i>
