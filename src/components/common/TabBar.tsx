@@ -4,7 +4,6 @@ import { clsx } from 'clsx';
 export interface TabItem {
   id: string;
   label: string;
-  content: React.ReactNode;
 }
 
 interface TabBarProps {
@@ -38,30 +37,20 @@ const TabBar: React.FC<TabBarProps> = ({
     );
   };
 
-  const activeTabContent = tabs.find(tab => tab.id === activeTab)?.content;
-
   return (
-    <div>
-      {/* 탭 헤더 */}
-      <div className="flex border-b border-gray-200">
-        {tabs.map((tab) => {
-          const isActive = activeTab === tab.id;
-          return (
-            <button
-              key={tab.id}
-              onClick={() => handleTabClick(tab.id)}
-              className={getTabStyles(isActive)}
-            >
-              {tab.label}
-            </button>
-          );
-        })}
-      </div>
-
-      {/* 탭 콘텐츠 */}
-      <div className="mt-4">
-        {activeTabContent}
-      </div>
+    <div className="flex border-b border-gray-200">
+      {tabs.map((tab) => {
+        const isActive = activeTab === tab.id;
+        return (
+          <button
+            key={tab.id}
+            onClick={() => handleTabClick(tab.id)}
+            className={getTabStyles(isActive)}
+          >
+            {tab.label}
+          </button>
+        );
+      })}
     </div>
   );
 };
