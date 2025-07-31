@@ -1,7 +1,7 @@
-import CategorySection from '../../components/domain/category/CategorySection';
-import CreateMeetingCard from '../../components/domain/meeting/CreateMeetingCard';
-import MeetingList from '../../components/domain/meeting/MeetingList';
-import ScrollToTopButton from '../../components/common/ScrollToTopButton';
+import CategorySection from '../components/domain/category/CategorySection';
+import CreateMeetingCard from '../components/domain/meeting/CreateMeetingCard';
+import MeetingList from '../components/domain/meeting/MeetingList';
+import ScrollToTopButton from '../components/common/ScrollToTopButton';
 
 export const Home = () => {
   return (
