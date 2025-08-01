@@ -87,17 +87,6 @@ export default function TitleLayout() {
       };
       break;
     
-    // 모임 상세 페이지 - 동적 경로 처리
-    case /^\/meeting\/[^/]+$/.test(pathname):
-      headerProps = {
-        isBack: true,
-        isTitle: true,
-        titleText: dynamicTitle || '모임 상세',
-        isLike: true,
-        isOut: true,
-      };
-      break;
-    
     case pathname === '/meeting/create':
       headerProps = {
         isBack: true,
@@ -115,6 +104,17 @@ export default function TitleLayout() {
         titleText: '모임 수정하기',
         isLike: false,
         isOut: false,
+      };
+      break;
+    
+    // 모임 상세 페이지 - 동적 경로 처리
+    case /^\/meeting\/(?!create$|edit)([^/]+)$/.test(pathname):
+      headerProps = {
+        isBack: true,
+        isTitle: true,
+        titleText: dynamicTitle || '모임 상세',
+        isLike: true,
+        isOut: true,
       };
       break;
 
