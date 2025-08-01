@@ -44,6 +44,7 @@ const Step3 = ({ formData, onFormChange, onProfileImageChange }: Step3Props) => 
             placeholder="닉네임을 입력해주세요"
             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
             maxLength={10}
+            minLength={2}
           />
           <p className="text-xs text-gray-500 mt-1">
             최소 2자 이상 10자 이하, 특수문자 제외
