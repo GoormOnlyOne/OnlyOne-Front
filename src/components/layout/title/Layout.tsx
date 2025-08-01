@@ -10,9 +10,6 @@ export default function TitleLayout() {
   const [ dynamicTitle, setDynamicTitle ] = useState('');
   
   useEffect(() => {
-    console.log('params', params);
-    console.log('pathname', pathname);
-    
     if (params.id && pathname.startsWith('/meeting/') && pathname !== '/meeting/create') {
 
       // API 호출 예시
