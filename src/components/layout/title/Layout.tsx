@@ -69,7 +69,7 @@ export default function TitleLayout() {
       };
       break;
 
-    case pathname === '/meeting/edit':
+    case pathname.startsWith('/meeting/edit'):
       headerProps = {
         isBack: true,
         isTitle: true,

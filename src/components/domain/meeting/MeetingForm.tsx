@@ -1,18 +1,28 @@
-import { useEffect, useState, type ChangeEvent } from 'react';
+import { useRef, useEffect, useState, type ChangeEvent } from 'react';
 import CategorySection from '../../../components/domain/category/CategorySection';
 import AddressSelector, { type AddressData } from '../../../components/common/AddressSelector';
 
-interface FormData {
+export interface FormData {
   meetingName: string;
   introduction: string;
   profileImage: File | null;
   capacity: number;
   accountNumber: string;
+  address?: AddressData;
+}
+
+export interface InitialData {
+  meetingName?: string;
+  introduction?: string;
+  profileImage?: string | File | null;
+  capacity?: number;
+  accountNumber?: string;
+  address?: AddressData;
 }
 
 interface MeetingFormProps {
   mode: 'create' | 'edit';
-  initialData?: Partial<FormData> & { address?: AddressData };
+  initialData?: InitialData;
   onSubmit: (data: FormData, address: AddressData) => void;
 }
 
@@ -26,18 +36,20 @@ export const MeetingForm = ({ mode, initialData, onSubmit }: MeetingFormProps) =
   });
 
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [selectedAddress, setSelectedAddress] = useState<AddressData>({
     city: '',
     district: '',
     isComplete: false,
   });
 
-  // 초기값 세팅
   useEffect(() => {
     if (initialData) {
       setFormData((prev) => ({
         ...prev,
         ...initialData,
+        profileImage:
+          typeof initialData.profileImage === 'string' ? null : initialData.profileImage ?? null,
       }));
 
       if (initialData.address) {
@@ -69,6 +81,16 @@ export const MeetingForm = ({ mode, initialData, onSubmit }: MeetingFormProps) =
         }
       };
       reader.readAsDataURL(file);
+    }
+  };
+
+  const handleImageRemove = () => {
+    onFormChange('profileImage', null);
+    setImagePreview(null);
+
+    // input 초기화
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
     }
   };
 
@@ -159,27 +181,47 @@ export const MeetingForm = ({ mode, initialData, onSubmit }: MeetingFormProps) =
           {/* 대표 사진 */}
           <div>
             <label htmlFor="profileImage" className="block text-sm font-medium text-gray-700 mb-2">
-              <span className="text-red-400 mr-1">*</span>
-              모임 대표 사진
+              <span className="text-red-400 mr-1">*</span>모임 대표 사진
             </label>
             <div className="flex items-start space-x-4">
-              <div className="flex-1">
-                <input
-                  type="file"
-                  id="profileImage"
-                  accept="image/*"
-                  onChange={handleImageUpload}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-                  required
-                />
-                <p className="text-xs text-gray-500 mt-1">JPG, PNG 파일만 업로드 가능</p>
-              </div>
-              {imagePreview && (
-                <div className="w-20 h-20 rounded-lg border border-gray-300 overflow-hidden">
-                  <img src={imagePreview} alt="미리보기" className="w-full h-full object-cover" />
+              {imagePreview ? (
+                <div className="relative w-20 h-20">
+                  <img
+                    src={imagePreview}
+                    alt="미리보기"
+                    className="w-full h-full object-cover rounded border border-gray-300 cursor-pointer"
+                    onClick={() => fileInputRef.current?.click()} // 클릭 시 input 열기
+                  />
+                  <button
+                    type="button"
+                    className="absolute top-0 right-0 bg-white text-xs px-1 rounded-bl border border-gray-300"
+                    onClick={handleImageRemove}
+                  >
+                    ✕
+                  </button>
                 </div>
+              ) : (
+                // 파일이 없을 경우에만 버튼/박스 노출
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 bg-white hover:bg-gray-50"
+                >
+                  이미지 선택하기
+                </button>
               )}
+
+              {/* 실제 파일 input은 숨김 */}
+              <input
+                type="file"
+                id="profileImage"
+                accept="image/*"
+                onChange={handleImageUpload}
+                ref={fileInputRef}
+                className="hidden" // 숨김 처리
+              />
             </div>
+            <p className="text-xs text-gray-500 mt-1">JPG, PNG 파일만 업로드 가능</p>
           </div>
 
           {/* 지역 */}
@@ -213,7 +255,7 @@ export const MeetingForm = ({ mode, initialData, onSubmit }: MeetingFormProps) =
             />
           </div>
 
-          {/* 계좌번호 (선택) */}
+          {/* 계좌번호 */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               모임 계좌번호 (선택)
@@ -235,7 +277,7 @@ export const MeetingForm = ({ mode, initialData, onSubmit }: MeetingFormProps) =
               disabled={!isFormValid}
               onClick={handleSubmit}
               className={`w-full py-3 px-4 rounded-lg font-medium transition-colors focus:ring-2 focus:ring-offset-2 
-              ${isFormValid
+                ${isFormValid
                   ? 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500'
                   : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                 }`}
