@@ -87,7 +87,7 @@ export const router = createBrowserRouter([
 				element: <MeetingDetail />
 			},
 			{
-        path: 'schedule/:scheduleId/participation',
+        path: 'meeting/:meetingId/schedule/:scheduleId/participation',
         element: <ParticipationStatus />,
       },
       {
