@@ -118,6 +118,19 @@ export default function TitleLayout() {
       };
       break;
 
+    case pathname.startsWith('/schedule/') && pathname.endsWith('/participation'):
+      // URL에서 type 파라미터 확인
+      const urlParams = new URLSearchParams(window.location.search);
+      const type = urlParams.get('type');
+      headerProps = {
+        isBack: true,
+        isTitle: true,
+        titleText: type === 'settlement' ? '정산 현황' : '참여 현황',
+        isLike: false,
+        isOut: false,
+      };
+      break;
+
     default:
       headerProps = null; // 헤더 표시 안 함
   }

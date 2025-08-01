@@ -161,6 +161,7 @@ export default function ScheduleList() {
 	};
 
 	const getParticipationStatus = (schedule: Schedule) => {
+
 		const isSettlement = schedule.status === 'ENDED' || schedule.status === 'SETTLING';
 		const buttonText = isSettlement ? '정산 현황' : '참여 현황';
 		const buttonClass = isSettlement
