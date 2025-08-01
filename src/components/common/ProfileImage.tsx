@@ -91,7 +91,7 @@ export const ProfileImageUpload: React.FC<ProfileImageUploadProps> = ({
   
   // 선택된 이미지가 있으면 해당 이미지, 없으면 기본 이미지 사용
   const displayImage = selectedImage?.url || defaultImage || defaultProfileImage;
-  const isCustomImage = selectedImage !== null; // 사용자가 선택한 이미지인지 확인
+  const hasImage = selectedImage !== null || defaultImage !== undefined;
 
   return (
     <div className="flex justify-center w-full max-w-md mx-auto">
@@ -101,11 +101,11 @@ export const ProfileImageUpload: React.FC<ProfileImageUploadProps> = ({
         className={clsx(
           'w-24 h-24 rounded-full relative mb-4 group',
           editable ? 'cursor-pointer' : '',
-          !selectedImage ? 'bg-gray-300 flex items-center justify-center' : ''
+          !hasImage ? 'bg-gray-300 flex items-center justify-center' : ''
         )}
       >
         {/* 이미지 또는 기본 아이콘 */}
-        {selectedImage ? (
+        {hasImage ? (
           <img
             src={displayImage}
             alt="프로필 이미지"
@@ -128,7 +128,7 @@ export const ProfileImageUpload: React.FC<ProfileImageUploadProps> = ({
         )}
 
         {/* X 버튼 (사용자 이미지가 있을 때 + 수정 가능할 때) */}
-        {isCustomImage && editable && (
+        {hasImage && editable && (
           <button
             onClick={handleRemoveImage}
             className="absolute -top-2 -right-2 w-5 h-5 bg-black/70 text-white rounded-full flex items-center justify-center hover:bg-black transition-colors z-10"

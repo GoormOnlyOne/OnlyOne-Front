@@ -10,10 +10,12 @@ import { Home } from '../pages/Home.tsx';
 import { Category } from '../pages/Category/Category.tsx';
 import { Meeting } from '../pages/Meeting/Meeting.tsx';
 import { MeetingDetail } from '../pages/Meeting/MeetingDetail.tsx';
+import { MeetingCreate } from '../pages/Meeting/MeetingCreate.tsx';
+import { MeetingEdit } from '../pages/Meeting/MeetingEdit.tsx';
 import { Search } from '../pages/Search.tsx';
 import { Notice } from '../pages/Notice.tsx';
 import { Login } from '../pages/Login.tsx';
-import { Signup } from '../pages/Signup/Signup.tsx';
+import { Signup } from '../pages/Signup.tsx';
 import { Mypage } from '../pages/Mypage/Mypage.tsx';
 import { Interest } from '../pages/Mypage/Interest.tsx';
 import { Profile } from '../pages/Mypage/Profile.tsx';
@@ -82,6 +84,14 @@ export const router = createBrowserRouter([
       {
         path: 'notice',
         element: <Notice />,
+      },
+      {
+        path: 'meeting/create',
+        element: <MeetingCreate />,
+      },
+      {
+        path: 'meeting/edit/:id',
+        element: <MeetingEdit />,
       },
     ]
   },
