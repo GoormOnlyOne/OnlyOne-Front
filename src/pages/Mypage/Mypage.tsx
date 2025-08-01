@@ -10,6 +10,9 @@ export const Mypage = () => {
     interests: ["관심사 1", "관심사 2", "관심사 3"]
   };
 
+  // 임시 포인트 데이터
+  const userPoints = 15000;
+
   const [isLogout, setIsLogout] = useState(false);
   const [isWithdraw, setIsWithdraw] = useState(false);
 
@@ -66,6 +69,35 @@ export const Mypage = () => {
                 {interest}
               </span>
             ))}
+          </div>
+        </div>
+      </div>
+
+      {/* 포인트 섹션 */}
+      <div className="bg-white mt-2">
+        <div className="px-4 py-6">
+          <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-6 border border-blue-100">
+            <div className="flex items-center justify-between">
+              <div className="flex-1">
+                <div className="flex items-center mb-2">
+                  <i className="ri-coin-line text-2xl text-blue-600 mr-2"></i>
+                  <h3 className="text-lg font-semibold text-gray-800">보유 포인트</h3>
+                </div>
+                <div className="flex items-baseline">
+                  <span className="text-3xl font-bold text-blue-600">
+                    {userPoints.toLocaleString()}
+                  </span>
+                  <span className="text-lg text-gray-600 ml-1">P</span>
+                </div>
+              </div>
+              <Link
+                to="/wallet"
+                className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-xl font-medium transition-all duration-300 hover:shadow-lg flex items-center"
+              >
+                <i className="ri-add-circle-line text-lg mr-2"></i>
+                충전하기
+              </Link>
+            </div>
           </div>
         </div>
       </div>

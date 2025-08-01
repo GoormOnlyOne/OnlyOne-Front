@@ -59,6 +59,16 @@ export default function TitleLayout() {
       };
       break;
     
+    case pathname === '/wallet':
+      headerProps = {
+        isBack: true,
+        isTitle: true,
+        titleText: '정산·거래 내역 확인하기',
+        isLike: false,
+        isOut: false,
+      };
+      break;
+    
     case pathname === '/meeting/create':
       headerProps = {
         isBack: true,

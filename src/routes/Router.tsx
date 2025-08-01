@@ -20,6 +20,7 @@ import { Mypage } from '../pages/Mypage/Mypage.tsx';
 import { Interest } from '../pages/Mypage/Interest.tsx';
 import { Profile } from '../pages/Mypage/Profile.tsx';
 import { Settlement } from '../pages/Mypage/Settlement.tsx';
+import { Wallet } from '../pages/Wallet.tsx';
 
 import { ComponentGallery } from '../pages/ComponentGallery/ComponentGallery.tsx';
 
@@ -80,6 +81,10 @@ export const router = createBrowserRouter([
       {
         path: 'mypage/settlement',
         element: <Settlement />,
+      },
+      {
+        path: 'wallet',
+        element: <Wallet />,
       },
       {
         path: 'notice',
