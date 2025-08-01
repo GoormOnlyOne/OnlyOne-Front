@@ -1,7 +1,7 @@
 import React from "react";
 
 
-export type ChatRoomType = 'ALL' | 'SCHEDULE';
+export type ChatRoomType = 'CLUB' | 'SCHEDULE';
 
 export interface ChatRoom {
 	id: number;
