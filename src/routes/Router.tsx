@@ -18,6 +18,7 @@ import { Mypage } from '../pages/Mypage/Mypage.tsx';
 import { Interest } from '../pages/Mypage/Interest.tsx';
 import { Profile } from '../pages/Mypage/Profile.tsx';
 import { Settlement } from '../pages/Mypage/Settlement.tsx';
+import  SettlementHistory from '../pages/Mypage/SettlementHistory.tsx'
 
 import { ComponentGallery } from '../pages/ComponentGallery/ComponentGallery.tsx';
 
@@ -43,6 +44,7 @@ export const router = createBrowserRouter([
 				path: 'meeting/:id',
 				element: <MeetingDetail />
 			},
+     
     ],
   },
 
@@ -83,6 +85,10 @@ export const router = createBrowserRouter([
         path: 'notice',
         element: <Notice />,
       },
+       {
+				path: 'settlementHistory',
+				element: <SettlementHistory />
+			},
     ]
   },
 

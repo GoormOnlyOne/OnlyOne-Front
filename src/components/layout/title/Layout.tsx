@@ -59,6 +59,16 @@ export default function TitleLayout() {
       };
       break;
 
+    case pathname === '/settlementHistory':
+        headerProps = {
+        isBack: true,
+        isTitle: true,
+        titleText: '정산내역 확인하기',
+        isLike: false,
+        isOut: false,
+      };
+      break;
+
     default:
       headerProps = null; // 헤더 표시 안 함
   }
