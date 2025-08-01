@@ -48,33 +48,6 @@ export const ComponentGallery = () => {
 		console.log(address);
 	}
 
-	// 탭바
-	const meetingTabs: TabItem[] = [
-		{
-			id: 'home',
-			label: '홈'
-		},
-		{
-			id: 'board',
-			label: '게시판'
-		},
-		{
-			id: 'chat',
-			label: '채팅'
-		}
-	];
-
-	const categoryTabs: TabItem[] = [
-		{
-			id: 'interest',
-			label: '관심사로 찾아보기'
-		},
-		{
-			id: 'location',
-			label: '지역으로 찾아보기'
-		}
-	];
-
 
 	// 채팅방 더미 데이터
 	const dummyChatRooms: ChatRoom[] = [
@@ -199,20 +172,6 @@ export const ComponentGallery = () => {
 				initialCity="서울"
 				initialDistrict="종로구"
 				className="mb-4"
-			/>
-
-			{/* 탭바 - 모임*/}
-			<TabBar
-				tabs={meetingTabs}
-				defaultTab="home"
-				onTabChange={(tabId) => console.log('모임 탭 변경:', tabId)}
-			/>
-
-			{/* 탭바 - 카테고리*/}
-			<TabBar
-				tabs={categoryTabs}
-				defaultTab="interest"
-				onTabChange={(tabId) => console.log('카테고리 탭 변경:', tabId)}
 			/>
 
 			{/* 채팅방 리스트 */}
