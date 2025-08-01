@@ -58,6 +58,26 @@ export default function TitleLayout() {
         isOut: false,
       };
       break;
+    
+    case pathname === '/meeting/create':
+      headerProps = {
+        isBack: true,
+        isTitle: true,
+        titleText: '모임 만들기',
+        isLike: false,
+        isOut: false,
+      };
+      break;
+
+    case pathname === '/meeting/edit':
+      headerProps = {
+        isBack: true,
+        isTitle: true,
+        titleText: '모임 수정하기',
+        isLike: false,
+        isOut: false,
+      };
+      break;
 
     case pathname === '/settlementHistory':
         headerProps = {

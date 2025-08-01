@@ -1,39 +1,23 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Step1 from '../../components/domain/signup/Step1';
-import Step2 from '../../components/domain/signup/Step2';
-import Step3 from '../../components/domain/signup/Step3';
-import type { AddressData } from '../../components/common/AddressSelector';
+import Step1 from '../components/domain/signup/Step1';
+import Step2 from '../components/domain/signup/Step2';
+import Step3 from '../components/domain/signup/Step3';
+import SignupComplete from '../components/domain/signup/Complete';
+import type { AddressData } from '../components/common/AddressSelector';
 
-// 임시 사용자 데이터
-const mockUserData = {
-  userId: "user123",
-  nickname: "벗킷러버",
-  gender: "female",
-  birth: "1995-08-15",
-  profileImage: "https://img.hankyung.com/photo/202409/01.37085530.1.jpg",
-  categories: ["travel", "finance", "social", "culture"],
-  address: {
-    city: "서울",
-    district: "강남구",
-    isComplete: true
-  },
-  joinDate: "2024-01-15",
-  point: 85000
-};
-
-export const Profile = () => {
+export const Signup = () => {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
-  const [selectedCategories, setSelectedCategories] = useState<string[]>(mockUserData.categories);
-  const [selectedAddress, setSelectedAddress] = useState<AddressData>(mockUserData.address);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [selectedAddress, setSelectedAddress] = useState<AddressData | undefined>();
   const [formData, setFormData] = useState({
-    categories: mockUserData.categories,
-    nickname: mockUserData.nickname,
-    gender: mockUserData.gender,
-    birth: mockUserData.birth,
-    profileImage: mockUserData.profileImage,
-    address: mockUserData.address
+    categories: [] as string[],
+    nickname: '',
+    gender: '',
+    birth: '',
+    profileImage: '',
+    address: {} as AddressData
   });
 
   const totalSteps = 3;
@@ -76,16 +60,15 @@ export const Profile = () => {
       }
       setCurrentStep(prev => prev + 1);
     } else {
-      // 프로필 수정 완료 처리
+      // 회원가입 완료 처리
       const finalData = {
         ...formData,
         categories: selectedCategories,
         address: selectedAddress
       };
-      console.log('프로필 수정 데이터:', finalData);
-      // TODO: API 호출하여 프로필 수정 처리
-      alert('프로필이 수정되었습니다.');
-      navigate('/mypage');
+      console.log('회원가입 데이터:', finalData);
+      // TODO: API 호출하여 회원가입 처리
+      setCurrentStep(4); // 완료 화면
     }
   };
 
@@ -93,13 +76,6 @@ export const Profile = () => {
   const handlePrev = () => {
     if (currentStep > 1) {
       setCurrentStep(prev => prev - 1);
-    }
-  };
-
-  // 취소 버튼
-  const handleCancel = () => {
-    if (window.confirm('수정사항을 저장하지 않고 나가시겠습니까?')) {
-      navigate('/mypage');
     }
   };
 
@@ -124,15 +100,22 @@ export const Profile = () => {
   };
 
   // 프로필 이미지 변경 핸들러
-  const handleProfileImageChange = (imageUrl: string) => {
-    setFormData(prev => ({
-      ...prev,
-      profileImage: imageUrl
-    }));
+  // const handleProfileImageChange = (imageUrl: string) => {
+  //   setFormData(prev => ({
+  //     ...prev,
+  //     profileImage: imageUrl
+  //   }));
+  // };
+
+  // 회원가입 완료 핸들러
+  const handleSignupComplete = () => {
+    navigate('/');
   };
 
   // 상단 스탭 컴포넌트
   const Stepper = () => {
+    if (currentStep === 4) return null; // 완료 화면에서는 표시하지 않음
+    
     return (
       <div className="flex items-center justify-center mb-8">
         {[1, 2, 3].map((step) => (
@@ -164,7 +147,7 @@ export const Profile = () => {
   };
 
   return (
-    <div className="w-full bg-white max-w-md mx-auto p-8">
+    <div className="min-h-screen w-full max-w-md bg-white rounded-2xl p-8">
       <Stepper />
       
       {/* Step별 콘텐츠 */}
@@ -186,49 +169,48 @@ export const Profile = () => {
           <Step3 
             formData={formData}
             onFormChange={handleFormChange}
-            onProfileImageChange={handleProfileImageChange} // ProfileImageUpload의 실제 props 확인 필요
+            // onProfileImageChange={handleProfileImageChange} // ProfileImageUpload의 실제 props 확인 필요
+          />
+        )}
+        {currentStep === 4 && (
+          <SignupComplete 
+            onComplete={handleSignupComplete}
+            welcomePoints={100000}
           />
         )}
       </div>
       
-      {/* 이전/다음/취소 Buttons */}
-      <div className="flex gap-3">
-        {currentStep === 1 && (
+      {/* 이전/다음 Buttons */}
+      {currentStep !== 4 && (
+        <div className="flex gap-3">
+          {currentStep > 1 && (
+            <button
+              onClick={handlePrev}
+              className="flex-1 px-6 py-3 border border-gray-300 rounded-lg font-medium hover:bg-gray-50 transition-colors"
+            >
+              이전
+            </button>
+          )}
+          
           <button
-            onClick={handleCancel}
-            className="flex-1 px-6 py-3 border border-gray-300 rounded-lg font-medium hover:bg-gray-50 transition-colors"
+            onClick={handleNext}
+            disabled={!isStepValid()}
+            className={`
+              flex-1 px-6 py-3 rounded-lg font-medium transition-colors
+              ${currentStep === totalSteps 
+                ? 'bg-blue-600 text-white hover:bg-blue-700' 
+                : 'bg-gray-800 text-white hover:bg-gray-900'
+              }
+              disabled:opacity-50 disabled:cursor-not-allowed
+              ${!isStepValid() ? 'cursor-not-allowed' : ''}
+            `}
           >
-            취소
+            {currentStep === totalSteps ? '가입완료' : '다음'}
           </button>
-        )}
-        
-        {currentStep > 1 && (
-          <button
-            onClick={handlePrev}
-            className="flex-1 px-6 py-3 border border-gray-300 rounded-lg font-medium hover:bg-gray-50 transition-colors"
-          >
-            이전
-          </button>
-        )}
-        
-        <button
-          onClick={handleNext}
-          disabled={!isStepValid()}
-          className={`
-            flex-1 px-6 py-3 rounded-lg font-medium transition-colors
-            ${currentStep === totalSteps 
-              ? 'bg-blue-600 text-white hover:bg-blue-700' 
-              : 'bg-gray-800 text-white hover:bg-gray-900'
-            }
-            disabled:opacity-50 disabled:cursor-not-allowed
-            ${!isStepValid() ? 'cursor-not-allowed' : ''}
-          `}
-        >
-          {currentStep === totalSteps ? '수정완료' : '다음'}
-        </button>
-      </div>
+        </div>
+      )}
     </div>
   );
 };
 
-export { Profile as default } from './Profile';
+export { Signup as default } from './Signup';
