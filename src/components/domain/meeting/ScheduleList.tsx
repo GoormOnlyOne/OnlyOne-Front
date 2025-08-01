@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import Modal from '../../common/Modal';
 
 export interface Schedule {
@@ -103,6 +104,8 @@ const mockScheduleData: Schedule[] = [
 ];
 
 export default function ScheduleList() {
+	const navigate = useNavigate();
+	const { id: meetingId } = useParams();
 	const [schedules] = useState<Schedule[]>(mockScheduleData);
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const [modalTitle, setModalTitle] = useState('');
@@ -154,10 +157,11 @@ export default function ScheduleList() {
 	};
 
 	const handleStatusClick = (schedule: Schedule) => {
-		// 참여 현황 또는 정산 현황 클릭 시 실행될 이벤트
-		console.log('Status clicked:', schedule);
-		// 여기에서 모달을 열거나 페이지 이동 등의 로직을 추가할 수 있습니다
-		// 예: onStatusClick?.(schedule) 같은 콜백 호출
+		const isSettlement = schedule.status === 'ENDED' || schedule.status === 'SETTLING';
+		const type = isSettlement ? 'settlement' : 'participation';
+		
+		// ParticipationStatus 페이지로 이동
+		navigate(`/meeting/${meetingId}/schedule/${schedule.scheduleId}/participation?type=${type}`);
 	};
 
 	const getParticipationStatus = (schedule: Schedule) => {
