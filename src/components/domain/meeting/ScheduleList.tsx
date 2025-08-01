@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import Modal from '../../common/Modal';
 
 export interface Schedule {
 	scheduleId: number;
@@ -11,11 +12,6 @@ export interface Schedule {
 	joined: boolean;
 	leader: boolean;
 	dday: string;
-}
-
-interface ScheduleListResponse {
-	success: boolean;
-	data: Schedule[];
 }
 
 const mockScheduleData: Schedule[] = [
@@ -108,6 +104,8 @@ const mockScheduleData: Schedule[] = [
 
 export default function ScheduleList() {
 	const [schedules] = useState<Schedule[]>(mockScheduleData);
+	const [isModalOpen, setIsModalOpen] = useState(false);
+	const [modalTitle, setModalTitle] = useState('');
 
 	const formatDateTime = (dateTime: string) => {
 		const date = new Date(dateTime);
@@ -155,7 +153,6 @@ export default function ScheduleList() {
 		}
 	};
 
-
 	const handleStatusClick = (schedule: Schedule) => {
 		// 참여 현황 또는 정산 현황 클릭 시 실행될 이벤트
 		console.log('Status clicked:', schedule);
@@ -182,6 +179,27 @@ export default function ScheduleList() {
 
 	const handleActionClick = (action: string, schedule: Schedule) => {
 		console.log(`Action clicked: ${action}`, schedule);
+
+		if (action === '참여하기') {
+			setIsModalOpen(true);
+			setModalTitle(`${schedule.name}에 참여 하시겠습니까?`);
+		} else if (action === '정산하기') {
+			// 정산하기 페이지 이동
+			console.log('정산하기 페이지 이동');
+		} else {
+			setIsModalOpen(true);
+			setModalTitle(`${schedule.name}에 나가시겠습니까?`);
+		}
+	};
+
+	const handleModalCancel = () => {
+		console.log('취소 버튼을 눌렀습니다.');
+		setIsModalOpen(false);
+	};
+
+	const handleModalConfirm = () => {
+		console.log('확인 버튼을 눌렀습니다.');
+		setIsModalOpen(false);
 	};
 
 	const getActionButton = (schedule: Schedule) => {
@@ -191,7 +209,7 @@ export default function ScheduleList() {
 					return (
 						<button
 							onClick={() => handleActionClick('나가기', schedule)}
-							className="bg-blue-500 text-white px-4 py-2 rounded text-sm font-medium hover:bg-blue-600 transition-colors"
+							className="bg-blue-500 text-white px-4 py-2 rounded text-sm font-medium hover:bg-blue-600 transition-colors cursor-pointer"
 						>
 							나가기
 						</button>
@@ -200,7 +218,7 @@ export default function ScheduleList() {
 					return (
 						<button
 							onClick={() => handleActionClick('참여하기', schedule)}
-							className="bg-red-500 text-white px-4 py-2 rounded text-sm font-medium hover:bg-red-600 transition-colors"
+							className="bg-red-500 text-white px-4 py-2 rounded text-sm font-medium hover:bg-red-600 transition-colors cursor-pointer"
 						>
 							참여하기
 						</button>
@@ -212,7 +230,7 @@ export default function ScheduleList() {
 					return (
 						<button
 							onClick={() => handleActionClick('정산하기', schedule)}
-							className="bg-gray-400 text-white px-4 py-2 rounded text-sm font-medium hover:bg-gray-500 transition-colors"
+							className="bg-gray-400 text-white px-4 py-2 rounded text-sm font-medium hover:bg-gray-500 transition-colors cursor-pointer"
 						>
 							정산하기
 						</button>
@@ -225,7 +243,7 @@ export default function ScheduleList() {
 					return (
 						<button
 							onClick={() => handleActionClick('정산하기', schedule)}
-							className="bg-gray-400 text-white px-4 py-2 rounded text-sm font-medium hover:bg-gray-500 transition-colors"
+							className="bg-gray-400 text-white px-4 py-2 rounded text-sm font-medium hover:bg-gray-500 transition-colors cursor-pointer"
 						>
 							정산하기
 						</button>
@@ -242,11 +260,9 @@ export default function ScheduleList() {
 	};
 
 	return (
-		<div className="px-4 pb-20">
-			<h2 className="text-base font-semibold text-gray-800 leading-snug mb-2">
-				참여중인 일정을 확인해보세요.
-			</h2>
+		<>
 			<div className="space-y-4">
+				<h2 className="font-bold">정기 모임</h2>
 				{schedules.map((schedule) => (
 					<div key={schedule.scheduleId} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow">
 						<div className="p-4">
@@ -281,6 +297,13 @@ export default function ScheduleList() {
 					</div>
 				))}
 			</div>
-		</div>
+
+			<Modal
+				isOpen={isModalOpen}
+				onClose={handleModalCancel}
+				onConfirm={handleModalConfirm}
+				title={modalTitle}
+			/>
+		</>
 	);
 }
