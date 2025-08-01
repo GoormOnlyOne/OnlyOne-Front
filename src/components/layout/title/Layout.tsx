@@ -118,7 +118,7 @@ export default function TitleLayout() {
       };
       break;
 
-    case pathname.startsWith('/schedule/') && pathname.endsWith('/participation'):
+    case pathname.includes('/meeting/') && pathname.includes('/schedule/') && pathname.endsWith('/participation'):
       // URL에서 type 파라미터 확인
       const urlParams = new URLSearchParams(window.location.search);
       const type = urlParams.get('type');
