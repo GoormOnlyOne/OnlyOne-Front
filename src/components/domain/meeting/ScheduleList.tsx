@@ -13,11 +13,6 @@ export interface Schedule {
 	dday: string;
 }
 
-interface ScheduleListResponse {
-	success: boolean;
-	data: Schedule[];
-}
-
 const mockScheduleData: Schedule[] = [
 	{
 		scheduleId: 1,
@@ -155,7 +150,6 @@ export default function ScheduleList() {
 		}
 	};
 
-
 	const handleStatusClick = (schedule: Schedule) => {
 		// 참여 현황 또는 정산 현황 클릭 시 실행될 이벤트
 		console.log('Status clicked:', schedule);
@@ -243,9 +237,6 @@ export default function ScheduleList() {
 
 	return (
 		<div className="px-4 pb-20">
-			<h2 className="text-base font-semibold text-gray-800 leading-snug mb-2">
-				참여중인 일정을 확인해보세요.
-			</h2>
 			<div className="space-y-4">
 				{schedules.map((schedule) => (
 					<div key={schedule.scheduleId} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow">
