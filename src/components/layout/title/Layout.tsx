@@ -1,10 +1,41 @@
-import { useLocation, Outlet } from 'react-router-dom';
+import { useLocation, Outlet, useParams } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import Header from './Header';
 import Footer from './Footer';
 
 export default function TitleLayout() {
   const location = useLocation();
   const pathname = location.pathname;
+  const params = useParams();
+  const [ dynamicTitle, setDynamicTitle ] = useState('');
+  
+  useEffect(() => {
+    console.log('params', params);
+    console.log('pathname', pathname);
+    
+    if (params.id && pathname.startsWith('/meeting/') && pathname !== '/meeting/create') {
+
+      // API 호출 예시
+      fetchMeetingTitle(params.id);
+    }
+  }, [params.id, pathname]);
+  
+  const fetchMeetingTitle = async (meetingId: string) => {
+    try {
+      // TODO: 실제 API 호출 코드
+      // const response = await fetch(`/api/meetings/${meetingId}`);
+      // const data = await response.json();
+      // setDynamicTitle(data.title);
+      
+      // 임시 예시
+      setDynamicTitle(`모임 ${meetingId}`);
+    } catch (error) {
+      console.error('Failed to fetch meeting title:', error);
+      setDynamicTitle('모임 상세');
+    }
+  };
+  
+
   let headerProps = null;
 
   // 경로에 따른 props 설정
@@ -56,6 +87,17 @@ export default function TitleLayout() {
         titleText: '정산내역 확인하기',
         isLike: false,
         isOut: false,
+      };
+      break;
+    
+    // 모임 상세 페이지 - 동적 경로 처리
+    case /^\/meeting\/[^/]+$/.test(pathname):
+      headerProps = {
+        isBack: true,
+        isTitle: true,
+        titleText: dynamicTitle || '모임 상세',
+        isLike: true,
+        isOut: true,
       };
       break;
     
