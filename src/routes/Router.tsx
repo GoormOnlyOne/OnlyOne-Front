@@ -95,7 +95,7 @@ export const router = createBrowserRouter([
         element: <MeetingCreate />,
       },
       {
-        path: 'meeting/edit/:id',
+        path: 'meeting/:id/edit',
         element: <MeetingEdit />,
       }
     ]
