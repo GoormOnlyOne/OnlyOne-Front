@@ -87,17 +87,6 @@ export default function TitleLayout() {
       };
       break;
     
-    // 모임 상세 페이지 - 동적 경로 처리
-    case /^\/meeting\/[^/]+$/.test(pathname):
-      headerProps = {
-        isBack: true,
-        isTitle: true,
-        titleText: dynamicTitle || '모임 상세',
-        isLike: true,
-        isOut: true,
-      };
-      break;
-    
     case pathname === '/meeting/create':
       headerProps = {
         isBack: true,
@@ -117,14 +106,36 @@ export default function TitleLayout() {
         isOut: false,
       };
       break;
+    
+    // 모임 상세 페이지 - 동적 경로 처리
+    case /^\/meeting\/(?!create$|edit)([^/]+)$/.test(pathname):
+      headerProps = {
+        isBack: true,
+        isTitle: true,
+        titleText: dynamicTitle || '모임 상세',
+        isLike: true,
+        isOut: true,
+      };
+      break;
+
+    case pathname.includes('/meeting/') && pathname.includes('/schedule/') && pathname.endsWith('/participation'):
+      // URL에서 type 파라미터 확인
+      const urlParams = new URLSearchParams(window.location.search);
+      const type = urlParams.get('type');
+      headerProps = {
+        isBack: true,
+        isTitle: true,
+        titleText: type === 'settlement' ? '정산 현황' : '참여 현황',
+        isLike: false,
+        isOut: false,
+      };
+      break;
 
     case pathname === '/settlementHistory':
-        headerProps = {
+      headerProps = {
         isBack: true,
         isTitle: true,
         titleText: '정산내역 확인하기',
-        isLike: false,
-        isOut: false,
       };
       break;
 

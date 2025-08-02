@@ -15,7 +15,7 @@ interface Meeting {
 }
 
 export const MeetingHome = () => {
-  const meetingId = useParams();
+  const { id: meetingId } = useParams();
   const navigate = useNavigate();
   const [meeting, setMeeting] = useState<Meeting | null>(null);
   const [userRole, setUserRole] = useState<'LEADER' | 'MEMBER' | 'GUEST'>('MEMBER'); // 실제 데이터로 설정 필요

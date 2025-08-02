@@ -10,6 +10,7 @@ import { Home } from '../pages/Home.tsx';
 import { Category } from '../pages/Category/Category.tsx';
 import { Meeting } from '../pages/Meeting/Meeting.tsx';
 import { MeetingDetail } from '../pages/Meeting/MeetingDetail.tsx';
+import { ParticipationStatus } from '../pages/Meeting/ParticipationStatus.tsx';
 import { MeetingCreate } from '../pages/Meeting/MeetingCreate.tsx';
 import { MeetingEdit } from '../pages/Meeting/MeetingEdit.tsx';
 import { Search } from '../pages/Search.tsx';
@@ -86,6 +87,10 @@ export const router = createBrowserRouter([
 				path: 'meeting/:id',
 				element: <MeetingDetail />
 			},
+			{
+        path: 'meeting/:meetingId/schedule/:scheduleId/participation',
+        element: <ParticipationStatus />,
+      },
       {
         path: 'meeting/create',
         element: <MeetingCreate />,

@@ -11,6 +11,7 @@ import TabBar from "../../components/common/TabBar";
 import type { TabItem } from "../../components/common/TabBar";
 import ChatRoomList, { type ChatRoom } from "../../components/domain/chat/ChatRoomList";
 import ScheduleList from "../../components/domain/meeting/ScheduleList";
+import ParticipantInfo from "../../components/domain/meeting/ParticipantInfo";
 
 export const ComponentGallery = () => {
 	// 모달
@@ -47,69 +48,12 @@ export const ComponentGallery = () => {
 		console.log(address);
 	}
 
-	// 탭바
-	const meetingTabs: TabItem[] = [
-		{
-			id: 'home',
-			label: '홈',
-			content: (
-				<div className="p-4 bg-gray-50 rounded">
-					<h3 className="text-lg font-semibold mb-2">모임 홈</h3>
-					<p>모임 정보 및 정기 모임 일정을 확인할 수 있습니다.</p>
-				</div>
-			)
-		},
-		{
-			id: 'board',
-			label: '게시판',
-			content: (
-				<div className="p-4 bg-gray-50 rounded">
-					<h3 className="text-lg font-semibold mb-2">게시판</h3>
-					<p>모임 사진과 후기를 공유해보세요.</p>
-				</div>
-			)
-		},
-		{
-			id: 'chat',
-			label: '채팅',
-			content: (
-				<div className="p-4 bg-gray-50 rounded">
-					<h3 className="text-lg font-semibold mb-2">채팅</h3>
-					<p>모임원들과 실시간으로 소통하세요.</p>
-				</div>
-			)
-		}
-	];
-
-	const categoryTabs: TabItem[] = [
-		{
-			id: 'interest',
-			label: '관심사로 찾아보기',
-			content: (
-				<div className="p-4 bg-blue-50 rounded">
-					<h3 className="text-lg font-semibold mb-2">관심사별 카테고리</h3>
-					<p>운동, 요리, 독서 등 다양한 관심사로 모임을 찾아보세요.</p>
-				</div>
-			)
-		},
-		{
-			id: 'location',
-			label: '지역으로 찾아보기',
-			content: (
-				<div className="p-4 bg-green-50 rounded">
-					<h3 className="text-lg font-semibold mb-2">지역별 카테고리</h3>
-					<p>내 주변 지역의 모임을 찾아보세요.</p>
-				</div>
-			)
-		}
-	];
-
 
 	// 채팅방 더미 데이터
 	const dummyChatRooms: ChatRoom[] = [
 		{
 			id: 1,
-			type: 'ALL',
+			type: 'CLUB',
 			name: '한강 러닝 크루',
 			lastMessage: '오늘 모임 어떠셨나요? 다들 수고하셨습니다!',
 			lastMessageTime: new Date('2024-01-15T14:30:00'),
@@ -127,7 +71,7 @@ export const ComponentGallery = () => {
 		},
 		{
 			id: 3,
-			type: 'ALL',
+			type: 'CLUB',
 			name: '요리 클래스',
 			lastMessage: '다음 주 메뉴 투표 올렸어요!',
 			lastMessageTime: new Date('2024-01-15T10:45:00'),
@@ -230,20 +174,6 @@ export const ComponentGallery = () => {
 				className="mb-4"
 			/>
 
-			{/* 탭바 - 모임*/}
-			<TabBar
-				tabs={meetingTabs}
-				defaultTab="home"
-				onTabChange={(tabId) => console.log('모임 탭 변경:', tabId)}
-			/>
-
-			{/* 탭바 - 카테고리*/}
-			<TabBar
-				tabs={categoryTabs}
-				defaultTab="interest"
-				onTabChange={(tabId) => console.log('카테고리 탭 변경:', tabId)}
-			/>
-
 			{/* 채팅방 리스트 */}
 			<ChatRoomList
 				chatRooms={dummyChatRooms}
@@ -252,6 +182,47 @@ export const ComponentGallery = () => {
 
 			{/* 일정 리스트 */}
 			<ScheduleList />
+
+			{/* 참여 현황 리스트 */}
+			<ParticipantInfo
+				nickname="홍길동"
+				profileImage={DefaultImage}
+			/>
+			<ParticipantInfo
+				nickname="김철수"
+				profileImage={null}
+			/>
+			<ParticipantInfo
+				nickname="이영희"
+				profileImage={DefaultImage}
+			/>
+			<ParticipantInfo
+				nickname="박민수"
+				profileImage={null}
+			/>
+
+			{/* 정산 현황 리스트 */}
+
+			<ParticipantInfo
+				nickname="홍길동"
+				profileImage={DefaultImage}
+				settlementStatus="REQUESTED"
+			/>
+			<ParticipantInfo
+				nickname="김철수"
+				profileImage={null}
+				settlementStatus="COMPLETED"
+			/>
+			<ParticipantInfo
+				nickname="이영희"
+				profileImage={DefaultImage}
+				settlementStatus="FAILED"
+			/>
+			<ParticipantInfo
+				nickname="박민수"
+				profileImage={null}
+				settlementStatus="REQUESTED"
+			/>
 		</div>
 	);
 };
