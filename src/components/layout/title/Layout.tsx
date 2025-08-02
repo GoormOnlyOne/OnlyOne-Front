@@ -119,6 +119,7 @@ export default function TitleLayout() {
       };
       break;
 
+    // 정산 현황, 참여 현황
     case pathname.includes('/meeting/') && pathname.includes('/schedule/') && pathname.endsWith('/participation'):
       // URL에서 type 파라미터 확인
       const urlParams = new URLSearchParams(window.location.search);
@@ -127,6 +128,26 @@ export default function TitleLayout() {
         isBack: true,
         isTitle: true,
         titleText: type === 'settlement' ? '정산 현황' : '참여 현황',
+        isLike: false,
+        isOut: false,
+      };
+      break;
+
+    case /^\/meeting\/\d+\/schedule\/create\/?$/.test(pathname):
+      headerProps = {
+        isBack: true,
+        isTitle: true,
+        titleText: '정모 만들기',
+        isLike: false,
+        isOut: false,
+      };
+      break;
+
+    case /^\/meeting\/\d+\/schedule\/\d+\/edit\/?$/.test(pathname):
+      headerProps = {
+        isBack: true,
+        isTitle: true,
+        titleText: '정모 수정하기',
         isLike: false,
         isOut: false,
       };

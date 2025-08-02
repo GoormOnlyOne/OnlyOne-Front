@@ -13,6 +13,8 @@ import { MeetingDetail } from '../pages/Meeting/MeetingDetail.tsx';
 import { ParticipationStatus } from '../pages/Meeting/ParticipationStatus.tsx';
 import { MeetingCreate } from '../pages/Meeting/MeetingCreate.tsx';
 import { MeetingEdit } from '../pages/Meeting/MeetingEdit.tsx';
+import MeetingScheduleCrate from '../pages/Meeting/MeetingScheduleCrate.tsx';
+import MeetingScheduleEdit from '../pages/Meeting/MeetingScheduleEdit.tsx';
 import { Search } from '../pages/Search.tsx';
 import { Notice } from '../pages/Notice.tsx';
 import { Login } from '../pages/Login.tsx';
@@ -97,7 +99,14 @@ export const router = createBrowserRouter([
       {
         path: 'meeting/:id/edit',
         element: <MeetingEdit />,
-      }
+      },
+      {
+        path: 'meeting/:id/schedule/create',
+        element: <MeetingScheduleCrate />,
+      },{
+        path: 'meeting/:meetingId/schedule/:scheduleId/edit',
+        element: <MeetingScheduleEdit />,
+      },
     ]
   },
 
