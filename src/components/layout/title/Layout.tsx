@@ -97,7 +97,7 @@ export default function TitleLayout() {
       };
       break;
 
-    case pathname.startsWith('/meeting/edit'):
+    case pathname.includes('/meeting/') && pathname.endsWith('/edit'):
       headerProps = {
         isBack: true,
         isTitle: true,
@@ -108,11 +108,12 @@ export default function TitleLayout() {
       break;
     
     // 모임 상세 페이지 - 동적 경로 처리
-    case /^\/meeting\/(?!create$|edit)([^/]+)$/.test(pathname):
+    case /^\/meeting\/\d+\/?$/.test(pathname):
+      const meetingId = pathname.match(/\/meeting\/(\d+)/)?.[1];
       headerProps = {
         isBack: true,
         isTitle: true,
-        titleText: dynamicTitle || '모임 상세',
+        titleText: meetingId || '모임 상세',
         isLike: true,
         isOut: true,
       };
