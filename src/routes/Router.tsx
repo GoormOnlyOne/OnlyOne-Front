@@ -1,34 +1,34 @@
-import { createBrowserRouter } from 'react-router-dom';
+import { createBrowserRouter } from "react-router-dom";
 
 // layout
-import DefaultLayout from '../components/layout/default/Layout.tsx';
-import SearchLayout from '../components/layout/search/Layout.tsx';
-import TitleLayout from '../components/layout/title/Layout.tsx';
+import DefaultLayout from "../components/layout/default/Layout.tsx";
+import SearchLayout from "../components/layout/search/Layout.tsx";
+import TitleLayout from "../components/layout/title/Layout.tsx";
 
 // page
-import { Home } from '../pages/Home.tsx';
-import { Category } from '../pages/Category/Category.tsx';
-import { Meeting } from '../pages/Meeting/Meeting.tsx';
-import { MeetingDetail } from '../pages/Meeting/MeetingDetail.tsx';
-import { ParticipationStatus } from '../pages/Meeting/ParticipationStatus.tsx';
-import { MeetingCreate } from '../pages/Meeting/MeetingCreate.tsx';
-import { MeetingEdit } from '../pages/Meeting/MeetingEdit.tsx';
-import { Search } from '../pages/Search.tsx';
-import { Notice } from '../pages/Notice.tsx';
-import { Login } from '../pages/Login.tsx';
-import { Signup } from '../pages/Signup.tsx';
-import { Mypage } from '../pages/Mypage/Mypage.tsx';
-import { Interest } from '../pages/Mypage/Interest.tsx';
-import { Profile } from '../pages/Mypage/Profile.tsx';
-import { Settlement } from '../pages/Mypage/Settlement.tsx';
-import  SettlementHistory from '../pages/Mypage/SettlementHistory.tsx'
+import { Home } from "../pages/Home.tsx";
+import { Category } from "../pages/Category/Category.tsx";
+import { Meeting } from "../pages/Meeting/Meeting.tsx";
+import { MeetingDetail } from "../pages/Meeting/MeetingDetail.tsx";
+import { ParticipationStatus } from "../pages/Meeting/ParticipationStatus.tsx";
+import { MeetingCreate } from "../pages/Meeting/MeetingCreate.tsx";
+import { MeetingEdit } from "../pages/Meeting/MeetingEdit.tsx";
+import { Search } from "../pages/Search.tsx";
+import { Notice } from "../pages/Notice.tsx";
+import { Login } from "../pages/Login.tsx";
+import { Signup } from "../pages/Signup.tsx";
+import { Mypage } from "../pages/Mypage/Mypage.tsx";
+import { Interest } from "../pages/Mypage/Interest.tsx";
+import { Profile } from "../pages/Mypage/Profile.tsx";
+import { Settlement } from "../pages/Mypage/Wallet.tsx";
+import SettlementHistory from "../pages/Mypage/SettlementHistory.tsx";
 
-import { ComponentGallery } from '../pages/ComponentGallery/ComponentGallery.tsx';
+import { ComponentGallery } from "../pages/ComponentGallery/ComponentGallery.tsx";
 
 export const router = createBrowserRouter([
   // [기본] 레이아웃이 적용되는 라우트들
   {
-    path: '/',
+    path: "/",
     element: <DefaultLayout />,
     children: [
       {
@@ -36,11 +36,11 @@ export const router = createBrowserRouter([
         element: <Home />,
       },
       {
-        path: 'category',
+        path: "category",
         element: <Category />,
       },
       {
-        path: 'meeting',
+        path: "meeting",
         element: <Meeting />,
       },
     ],
@@ -48,76 +48,76 @@ export const router = createBrowserRouter([
 
   // [검색] 레이아웃이 적용되는 라우트들
   {
-    path: '/search',
+    path: "/search",
     element: <SearchLayout />,
     children: [
       {
         index: true,
         element: <Search />,
       },
-    ]
+    ],
   },
 
   // [타이틀] 레이아웃이 적용되는 라우트들
   {
-    path: '/',
+    path: "/",
     element: <TitleLayout />,
     children: [
       {
-        path: 'mypage',
+        path: "mypage",
         element: <Mypage />,
       },
       {
-        path: 'mypage/interest',
+        path: "mypage/interest",
         element: <Interest />,
       },
       {
-        path: 'mypage/profile',
+        path: "mypage/profile",
         element: <Profile />,
       },
       {
-        path: 'mypage/settlement',
+        path: "mypage/settlement",
         element: <Settlement />,
       },
       {
-        path: 'notice',
+        path: "notice",
         element: <Notice />,
       },
       {
-				path: 'meeting/:id',
-				element: <MeetingDetail />
-			},
-			{
-        path: 'meeting/:meetingId/schedule/:scheduleId/participation',
+        path: "meeting/:id",
+        element: <MeetingDetail />,
+      },
+      {
+        path: "meeting/:meetingId/schedule/:scheduleId/participation",
         element: <ParticipationStatus />,
       },
       {
-        path: 'meeting/create',
+        path: "meeting/create",
         element: <MeetingCreate />,
       },
       {
-        path: 'meeting/edit/:id',
+        path: "meeting/edit/:id",
         element: <MeetingEdit />,
       },
       ,
       {
-				path: 'settlementHistory',
-				element: <SettlementHistory />
-			},
-    ]
+        path: "settlementHistory",
+        element: <SettlementHistory />,
+      },
+    ],
   },
 
   // 레이아웃이 적용되지 않는 라우트들
   {
-    path: '/login',
+    path: "/login",
     element: <Login />,
   },
   {
-    path: '/signup',
+    path: "/signup",
     element: <Signup />,
   },
   {
-    path: '/components',
+    path: "/components",
     element: <ComponentGallery />,
   },
 ]);
