@@ -1,7 +1,7 @@
-import type{ Notification } from './NotificationType';
+import type { Notification } from './NotificationType';
 
-export function getNotificationMessage(noti : Notification) : string {
- switch (noti.type) {
+export function getNotificationMessage(noti: Notification): string {
+  switch (noti.type) {
     case 'settlement':
       return `(${noti.groupName}): ${noti.meetingName}에서 정산이 ${noti.amount} 완료되었습니다.`;
 

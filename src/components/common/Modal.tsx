@@ -18,7 +18,7 @@ export const Modal: React.FC<ModalProps> = ({
   title,
   cancelText = '취소',
   confirmText = '확인',
-  variant = 'default'
+  variant = 'default',
 }) => {
   const modalRef = useRef<HTMLDivElement>(null);
   const cancelBtnRef = useRef<HTMLButtonElement>(null);
@@ -43,7 +43,9 @@ export const Modal: React.FC<ModalProps> = ({
 
         const focusableElements = modal.querySelectorAll('button');
         const firstElement = focusableElements[0] as HTMLElement;
-        const lastElement = focusableElements[focusableElements.length - 1] as HTMLElement;
+        const lastElement = focusableElements[
+          focusableElements.length - 1
+        ] as HTMLElement;
 
         if (e.shiftKey && document.activeElement === firstElement) {
           e.preventDefault();
@@ -68,9 +70,7 @@ export const Modal: React.FC<ModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div
-      className="fixed inset-0 flex items-center justify-center z-50 p-4"
-    >
+    <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
       <div
         ref={modalRef}
         className="bg-gray-100 rounded-lg shadow-xl max-w-md w-full mx-4 p-8"
@@ -94,7 +94,7 @@ export const Modal: React.FC<ModalProps> = ({
             className={clsx(
               'px-8 py-3 rounded-lg font-medium text-base whitespace-nowrap min-w-[120px] h-12',
               'bg-amber-900 text-white hover:bg-amber-800 focus:outline-none focus:ring-2 focus:ring-amber-900 focus:ring-offset-2',
-              'transition-colors duration-200'
+              'transition-colors duration-200',
             )}
           >
             {cancelText}
@@ -104,9 +104,9 @@ export const Modal: React.FC<ModalProps> = ({
             className={clsx(
               'px-8 py-3 rounded-lg font-medium text-base whitespace-nowrap min-w-[120px] h-12',
               'transition-colors duration-200',
-              variant === 'danger' 
+              variant === 'danger'
                 ? 'bg-red-500 text-white hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2'
-                : 'bg-yellow-400 text-amber-900 hover:bg-yellow-500 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-offset-2'
+                : 'bg-yellow-400 text-amber-900 hover:bg-yellow-500 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-offset-2',
             )}
           >
             {confirmText}

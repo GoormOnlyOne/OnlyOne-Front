@@ -6,7 +6,11 @@ interface Step1Props {
   maxSelection?: number;
 }
 
-const Step1 = ({ selectedCategories, onCategoryChange, maxSelection = 5 }: Step1Props) => {
+const Step1 = ({
+  selectedCategories,
+  onCategoryChange,
+  maxSelection = 5,
+}: Step1Props) => {
   return (
     <div className="animate-fade-in">
       <h2 className="text-2xl font-bold text-center mb-2">관심사 선택</h2>
@@ -18,8 +22,8 @@ const Step1 = ({ selectedCategories, onCategoryChange, maxSelection = 5 }: Step1
           {selectedCategories.length}개 선택됨
         </p>
       )}
-      <CategorySection 
-        mode="multi-select" 
+      <CategorySection
+        mode="multi-select"
         onCategoryChange={onCategoryChange}
         defaultSelected={selectedCategories}
         maxSelection={maxSelection}

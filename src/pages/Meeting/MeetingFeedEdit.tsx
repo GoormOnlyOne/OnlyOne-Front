@@ -12,8 +12,8 @@ const MeetingFeedEdit = () => {
   };
 
   return (
-    <MeetingFeedForm 
-      mode="edit" 
+    <MeetingFeedForm
+      mode="edit"
       onSubmit={handleSubmit}
       onCancel={handleCancel}
     />

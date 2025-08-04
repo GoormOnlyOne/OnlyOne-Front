@@ -25,4 +25,4 @@ export default function CreateMeetingCard() {
       </button>
     </div>
   );
-};
+}
