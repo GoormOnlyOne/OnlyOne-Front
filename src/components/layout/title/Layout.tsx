@@ -86,6 +86,26 @@ export default function TitleLayout() {
         isOut: false,
       };
       break;
+
+					case /^\/meeting\/\d+\/feed\/create\/?$/.test(pathname):
+      headerProps = {
+        isBack: true,
+        isTitle: true,
+        titleText: '게시글 생성',
+        isLike: false,
+        isOut: false,
+      };
+    	break;
+
+		case /^\/meeting\/\d+\/feed\/\d+\/edit\/?$/.test(pathname):
+      headerProps = {
+        isBack: true,
+        isTitle: true,
+        titleText: '게시글 수정',
+        isLike: false,
+        isOut: false,
+      };
+    	break;
     
     case pathname === '/meeting/create':
       headerProps = {

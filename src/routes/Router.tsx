@@ -25,6 +25,8 @@ import { Profile } from '../pages/Mypage/Profile.tsx';
 import { Settlement } from '../pages/Mypage/Settlement.tsx';
 
 import { ComponentGallery } from '../pages/ComponentGallery/ComponentGallery.tsx';
+import MeetingFeedCreate from '../pages/Meeting/MeetingFeedCreate.tsx';
+import MeetingFeedEdit from '../pages/Meeting/MeetingFeedEdit.tsx';
 
 export const router = createBrowserRouter([
   // [기본] 레이아웃이 적용되는 라우트들
@@ -103,9 +105,18 @@ export const router = createBrowserRouter([
       {
         path: 'meeting/:id/schedule/create',
         element: <MeetingScheduleCrate />,
-      },{
+      },
+			{
         path: 'meeting/:meetingId/schedule/:scheduleId/edit',
         element: <MeetingScheduleEdit />,
+      },
+			{
+        path: 'meeting/:meetingId/feed/create',
+        element: <MeetingFeedCreate />,
+      },
+			{
+        path: 'meeting/:meetingId/feed/:feedId/edit',
+        element: <MeetingFeedEdit />,
       },
     ]
   },
