@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import userProfile from '../../assets/user_profile.jpg';
 
 interface Comment {
@@ -32,6 +32,9 @@ const MeetingFeedDetail = () => {
 	const [feedData, setFeedData] = useState<FeedDetail | null>(null);
 	const [loading, setLoading] = useState(true);
 	const [commentsLoading, setCommentsLoading] = useState(false);
+	const [hasMoreComments, setHasMoreComments] = useState(true);
+	const [currentPage, setCurrentPage] = useState(1);
+	const observerRef = useRef<HTMLDivElement>(null);
 
 	// API 호출 시뮬레이션 (실제로는 useEffect에서 API 호출)
 	useEffect(() => {
@@ -44,7 +47,7 @@ const MeetingFeedDetail = () => {
 				"https://d1c3fg3ti7m8cn.cloudfront.net/user/c29188ec-a9ca-4562-a959-8574b2703b0c"
 			],
 			likeCount: 13,
-			commentCount: 3,
+			commentCount: 12,
 			userId: 1,
 			nickname: "Alice",
 			profileImage: "alice.png",
@@ -70,11 +73,56 @@ const MeetingFeedDetail = () => {
 				},
 				{
 					commentId: 3,
-					userId: 2,
-					nickname: "Jack",
-					profileImage: "jack.png",
-					content: "여기 어디인가요?",
-					createdAt: "2025-08-01T12:43:12.958482",
+					userId: 3,
+					nickname: "Charlie",
+					profileImage: "charlie.png",
+					content: "너무 맛있어 보여요!",
+					createdAt: "2025-08-01T12:44:15.123456",
+					commentMine: false
+				},
+				{
+					commentId: 4,
+					userId: 4,
+					nickname: "Diana",
+					profileImage: "diana.png",
+					content: "다음에 저도 같이 가고 싶어요~",
+					createdAt: "2025-08-01T12:45:30.789012",
+					commentMine: false
+				},
+				{
+					commentId: 5,
+					userId: 1,
+					nickname: "Alice",
+					profileImage: "alice.png",
+					content: "감사합니다! 다음에 꼭 함께 가요 😊",
+					createdAt: "2025-08-01T12:46:45.345678",
+					commentMine: true
+				},
+				{
+					commentId: 6,
+					userId: 5,
+					nickname: "Eve",
+					profileImage: "eve.png",
+					content: "분위기가 정말 좋네요!",
+					createdAt: "2025-08-01T12:47:20.456789",
+					commentMine: false
+				},
+				{
+					commentId: 7,
+					userId: 6,
+					nickname: "Frank",
+					profileImage: "frank.png",
+					content: "사진 정말 잘 찍으셨어요 👍",
+					createdAt: "2025-08-01T12:48:35.567890",
+					commentMine: false
+				},
+				{
+					commentId: 8,
+					userId: 7,
+					nickname: "Grace",
+					profileImage: "grace.png",
+					content: "저도 이런 곳 가보고 싶어요!",
+					createdAt: "2025-08-01T12:49:50.678901",
 					commentMine: false
 				}
 			],
@@ -129,6 +177,76 @@ const MeetingFeedDetail = () => {
 			commentCount: feedData.commentCount - 1
 		});
 	};
+
+	// 더 많은 댓글 불러오기
+	const loadMoreComments = useCallback(async () => {
+		if (commentsLoading || !hasMoreComments || !feedData) return;
+
+		setCommentsLoading(true);
+		try {
+			// 임시 데이터 - 실제로는 API 호출
+			const mockUserNames = ['Henry', 'Ivy', 'Jack', 'Kate', 'Leo', 'Mia', 'Noah', 'Olivia', 'Paul', 'Quinn'];
+			const mockComments = [
+				'정말 재미있어 보이네요!',
+				'저도 참여하고 싶어요',
+				'분위기가 너무 좋아요 ✨',
+				'다음 모임은 언제인가요?',
+				'사진 너무 예뻐요!',
+				'여기 분위기 어떤가요?',
+				'즐거운 시간 보내세요~',
+				'저도 초대해주세요 😄',
+				'정말 맛있어 보여요',
+				'좋은 추억 만드시길!'
+			];
+
+			const newComments: Comment[] = Array.from({ length: Math.min(3, 10 - (currentPage - 1) * 3) }, (_, index) => {
+				const globalIndex = (currentPage - 1) * 3 + index;
+				return {
+					commentId: feedData.comments.length + index + 1,
+					userId: 8 + globalIndex,
+					nickname: mockUserNames[globalIndex % mockUserNames.length],
+					profileImage: `user${globalIndex + 1}.png`,
+					content: mockComments[globalIndex % mockComments.length],
+					createdAt: new Date(Date.now() - (globalIndex * 30000)).toISOString(),
+					commentMine: Math.random() > 0.8 // 20% 확률로 내 댓글
+				};
+			});
+
+			// 5페이지까지만 로드 (총 15개 + 초기 8개 = 23개 댓글)
+			if (currentPage >= 5) {
+				setHasMoreComments(false);
+			}
+
+			setFeedData(prev => prev ? {
+				...prev,
+				comments: [...prev.comments, ...newComments]
+			} : null);
+			
+			setCurrentPage(prev => prev + 1);
+		} catch (error) {
+			console.error('댓글 로딩 실패:', error);
+		} finally {
+			setCommentsLoading(false);
+		}
+	}, [commentsLoading, hasMoreComments, feedData, currentPage]);
+
+	// Intersection Observer 설정
+	useEffect(() => {
+		const observer = new IntersectionObserver(
+			(entries) => {
+				if (entries[0].isIntersecting && hasMoreComments && !commentsLoading) {
+					loadMoreComments();
+				}
+			},
+			{ threshold: 0.1 }
+		);
+
+		if (observerRef.current) {
+			observer.observe(observerRef.current);
+		}
+
+		return () => observer.disconnect();
+	}, [loadMoreComments, hasMoreComments, commentsLoading]);
 
 	if (loading) {
 		return (
@@ -302,6 +420,9 @@ const MeetingFeedDetail = () => {
 					</div>
 				))}
 				
+				{/* 무한 스크롤 트리거 */}
+				<div ref={observerRef} className="h-4" />
+
 				{/* 댓글 로딩 상태 */}
 				{commentsLoading && (
 					<div className="flex justify-center py-4">
