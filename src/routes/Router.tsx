@@ -27,111 +27,116 @@ import { Settlement } from '../pages/Mypage/Settlement.tsx';
 import { ComponentGallery } from '../pages/ComponentGallery/ComponentGallery.tsx';
 import MeetingFeedCreate from '../pages/Meeting/MeetingFeedCreate.tsx';
 import MeetingFeedEdit from '../pages/Meeting/MeetingFeedEdit.tsx';
+import MeetingFeedDetail from '../pages/Meeting/MeetingFeedDetail.tsx';
 
 export const router = createBrowserRouter([
-  // [기본] 레이아웃이 적용되는 라우트들
-  {
-    path: '/',
-    element: <DefaultLayout />,
-    children: [
-      {
-        index: true,
-        element: <Home />,
-      },
-      {
-        path: 'category',
-        element: <Category />,
-      },
-      {
-        path: 'meeting',
-        element: <Meeting />,
-      },
-    ],
-  },
+	// [기본] 레이아웃이 적용되는 라우트들
+	{
+		path: '/',
+		element: <DefaultLayout />,
+		children: [
+			{
+				index: true,
+				element: <Home />,
+			},
+			{
+				path: 'category',
+				element: <Category />,
+			},
+			{
+				path: 'meeting',
+				element: <Meeting />,
+			},
+		],
+	},
 
-  // [검색] 레이아웃이 적용되는 라우트들
-  {
-    path: '/search',
-    element: <SearchLayout />,
-    children: [
-      {
-        index: true,
-        element: <Search />,
-      },
-    ]
-  },
+	// [검색] 레이아웃이 적용되는 라우트들
+	{
+		path: '/search',
+		element: <SearchLayout />,
+		children: [
+			{
+				index: true,
+				element: <Search />,
+			},
+		]
+	},
 
-  // [타이틀] 레이아웃이 적용되는 라우트들
-  {
-    path: '/',
-    element: <TitleLayout />,
-    children: [
-      {
-        path: 'mypage',
-        element: <Mypage />,
-      },
-      {
-        path: 'mypage/interest',
-        element: <Interest />,
-      },
-      {
-        path: 'mypage/profile',
-        element: <Profile />,
-      },
-      {
-        path: 'mypage/settlement',
-        element: <Settlement />,
-      },
-      {
-        path: 'notice',
-        element: <Notice />,
-      },
-      {
+	// [타이틀] 레이아웃이 적용되는 라우트들
+	{
+		path: '/',
+		element: <TitleLayout />,
+		children: [
+			{
+				path: 'mypage',
+				element: <Mypage />,
+			},
+			{
+				path: 'mypage/interest',
+				element: <Interest />,
+			},
+			{
+				path: 'mypage/profile',
+				element: <Profile />,
+			},
+			{
+				path: 'mypage/settlement',
+				element: <Settlement />,
+			},
+			{
+				path: 'notice',
+				element: <Notice />,
+			},
+			{
 				path: 'meeting/:id',
 				element: <MeetingDetail />
 			},
 			{
-        path: 'meeting/:meetingId/schedule/:scheduleId/participation',
-        element: <ParticipationStatus />,
-      },
-      {
-        path: 'meeting/create',
-        element: <MeetingCreate />,
-      },
-      {
-        path: 'meeting/:id/edit',
-        element: <MeetingEdit />,
-      },
-      {
-        path: 'meeting/:id/schedule/create',
-        element: <MeetingScheduleCrate />,
-      },
+				path: 'meeting/:meetingId/schedule/:scheduleId/participation',
+				element: <ParticipationStatus />,
+			},
 			{
-        path: 'meeting/:meetingId/schedule/:scheduleId/edit',
-        element: <MeetingScheduleEdit />,
-      },
+				path: 'meeting/create',
+				element: <MeetingCreate />,
+			},
 			{
-        path: 'meeting/:meetingId/feed/create',
-        element: <MeetingFeedCreate />,
-      },
+				path: 'meeting/:id/edit',
+				element: <MeetingEdit />,
+			},
 			{
-        path: 'meeting/:meetingId/feed/:feedId/edit',
-        element: <MeetingFeedEdit />,
-      },
-    ]
-  },
+				path: 'meeting/:id/schedule/create',
+				element: <MeetingScheduleCrate />,
+			},
+			{
+				path: 'meeting/:meetingId/schedule/:scheduleId/edit',
+				element: <MeetingScheduleEdit />,
+			},
+			{
+				path: 'meeting/:meetingId/feed/create',
+				element: <MeetingFeedCreate />,
+			},
+			{
+				path: 'meeting/:meetingId/feed/:feedId/edit',
+				element: <MeetingFeedEdit />,
+			},
+			{
+				path: 'meeting/:meetingId/feed/:feedId',
+				element: <MeetingFeedDetail />,
+			},
+		]
+	},
 
-  // 레이아웃이 적용되지 않는 라우트들
-  {
-    path: '/login',
-    element: <Login />,
-  },
-  {
-    path: '/signup',
-    element: <Signup />,
-  },
-  {
-    path: '/components',
-    element: <ComponentGallery />,
-  },
+	// 레이아웃이 적용되지 않는 라우트들
+	{
+		path: '/login',
+		element: <Login />,
+	},
+	{
+		path: '/signup',
+		element: <Signup />,
+	},
+	{
+		path: '/components',
+		element: <ComponentGallery />,
+	},
 ]);
