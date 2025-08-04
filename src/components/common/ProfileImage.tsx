@@ -24,46 +24,54 @@ export const ProfileImageUpload: React.FC<ProfileImageUploadProps> = ({
   maxSizeInMB = 5,
   acceptedFormats = ['image/jpeg', 'image/jpg', 'image/png'],
   defaultImage,
-  editable = true
+  editable = true,
 }) => {
   const [selectedImage, setSelectedImage] = useState<ProfileImage | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const validateFile = useCallback((file: File): string | null => {
-    // 파일 형식 검증
-    if (!acceptedFormats.includes(file.type)) {
-      return `지원하지 않는 파일 형식입니다. (${acceptedFormats.map(format => format.split('/')[1]).join(', ')})`;
-    }
+  const validateFile = useCallback(
+    (file: File): string | null => {
+      // 파일 형식 검증
+      if (!acceptedFormats.includes(file.type)) {
+        return `지원하지 않는 파일 형식입니다. (${acceptedFormats.map(format => format.split('/')[1]).join(', ')})`;
+      }
 
-    // 파일 크기 검증
-    const maxSizeInBytes = maxSizeInMB * 1024 * 1024;
-    if (file.size > maxSizeInBytes) {
-      return `파일 크기가 ${maxSizeInMB}MB를 초과합니다.`;
-    }
+      // 파일 크기 검증
+      const maxSizeInBytes = maxSizeInMB * 1024 * 1024;
+      if (file.size > maxSizeInBytes) {
+        return `파일 크기가 ${maxSizeInMB}MB를 초과합니다.`;
+      }
 
-    return null;
-  }, [acceptedFormats, maxSizeInMB]);
+      return null;
+    },
+    [acceptedFormats, maxSizeInMB],
+  );
 
-  const handleFileSelect = useCallback((file: File) => {
-    const validationError = validateFile(file);
-    if (validationError) {
-      alert(validationError); // 에러 메시지를 alert으로 표시
-      return;
-    }
+  const handleFileSelect = useCallback(
+    (file: File) => {
+      const validationError = validateFile(file);
+      if (validationError) {
+        alert(validationError); // 에러 메시지를 alert으로 표시
+        return;
+      }
 
-    const url = URL.createObjectURL(file);
-    const profileImage: ProfileImage = {
-      file,
-      url,
-      name: file.name,
-      size: file.size
-    };
+      const url = URL.createObjectURL(file);
+      const profileImage: ProfileImage = {
+        file,
+        url,
+        name: file.name,
+        size: file.size,
+      };
 
-    setSelectedImage(profileImage);
-    onImageSelect?.(profileImage);
-  }, [validateFile, onImageSelect]);
+      setSelectedImage(profileImage);
+      onImageSelect?.(profileImage);
+    },
+    [validateFile, onImageSelect],
+  );
 
-  const handleFileInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileInputChange = (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
     const file = event.target.files?.[0];
     if (file) {
       handleFileSelect(file);
@@ -72,13 +80,13 @@ export const ProfileImageUpload: React.FC<ProfileImageUploadProps> = ({
 
   const handleRemoveImage = (event: React.MouseEvent) => {
     event.stopPropagation(); // 부모의 클릭 이벤트 방지
-    
+
     if (selectedImage?.url) {
       URL.revokeObjectURL(selectedImage.url);
     }
     setSelectedImage(null);
     onImageRemove?.();
-    
+
     // 파일 입력 초기화
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
@@ -88,9 +96,10 @@ export const ProfileImageUpload: React.FC<ProfileImageUploadProps> = ({
   const handleUploadClick = () => {
     fileInputRef.current?.click();
   };
-  
+
   // 선택된 이미지가 있으면 해당 이미지, 없으면 기본 이미지 사용
-  const displayImage = selectedImage?.url || defaultImage || defaultProfileImage;
+  const displayImage =
+    selectedImage?.url || defaultImage || defaultProfileImage;
   const hasImage = selectedImage !== null || defaultImage !== undefined;
 
   return (
@@ -101,7 +110,7 @@ export const ProfileImageUpload: React.FC<ProfileImageUploadProps> = ({
         className={clsx(
           'w-24 h-24 rounded-full relative mb-4 group',
           editable ? 'cursor-pointer' : '',
-          !hasImage ? 'bg-gray-300 flex items-center justify-center' : ''
+          !hasImage ? 'bg-gray-300 flex items-center justify-center' : '',
         )}
       >
         {/* 이미지 또는 기본 아이콘 */}
@@ -134,13 +143,23 @@ export const ProfileImageUpload: React.FC<ProfileImageUploadProps> = ({
             className="absolute -top-2 -right-2 w-5 h-5 bg-black/70 text-white rounded-full flex items-center justify-center hover:bg-black transition-colors z-10"
             type="button"
           >
-            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+            <svg
+              className="w-3 h-3"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M6 18L18 6M6 6l12 12"
+              />
             </svg>
           </button>
         )}
       </div>
-     
+
       {/* 숨겨진 파일 입력 */}
       <input
         ref={fileInputRef}

@@ -9,13 +9,13 @@ interface TitleHeaderProps {
   onBack?: () => void;
 }
 
-export default function TitleHeader({ 
+export default function TitleHeader({
   isBack = false,
   isTitle = false,
   titleText = '타이틀',
   isLike = false,
   isOut = false,
-  onBack
+  onBack,
 }: TitleHeaderProps) {
   const navigate = useNavigate();
 
@@ -33,7 +33,7 @@ export default function TitleHeader({
         {/* 좌측: 뒤로가기 */}
         <div className="flex items-center gap-2">
           {isBack && (
-            <button 
+            <button
               onClick={handleBack}
               className="cursor-pointer w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
               aria-label="뒤로가기"
@@ -53,7 +53,7 @@ export default function TitleHeader({
         {/* 우측: 아이콘 버튼들 */}
         <div className="flex items-center gap-2">
           {isLike && (
-            <button 
+            <button
               className="cursor-pointer w-10 h-10 flex items-center justify-center rounded-full bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer"
               aria-label="좋아요"
             >
@@ -61,7 +61,7 @@ export default function TitleHeader({
             </button>
           )}
           {isOut && (
-            <button 
+            <button
               className="cursor-pointer w-10 h-10 flex items-center justify-center rounded-full bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer"
               aria-label="나가기"
             >

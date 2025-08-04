@@ -1,6 +1,10 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { ScheduleForm, type ScheduleFormData, type InitialData } from '../../components/domain/meeting/ScheduleForm';
+import {
+  ScheduleForm,
+  type ScheduleFormData,
+  type InitialData,
+} from '../../components/domain/meeting/ScheduleForm';
 
 export const MeetingScheduleEdit = () => {
   const navigate = useNavigate();
@@ -14,7 +18,7 @@ export const MeetingScheduleEdit = () => {
       try {
         // const response = await getMeetingSchedule(id);
         // setInitialData(response.data);
-        
+
         // 임시 데이터
         setInitialData({
           meetingName: '월간 독서 모임',
@@ -41,10 +45,10 @@ export const MeetingScheduleEdit = () => {
       console.log('정모 수정:', data);
       // TODO: API 호출하여 정모 수정
       // const response = await updateMeetingSchedule(id, data);
-      
+
       // 성공 시 상세 페이지로 이동
       // navigate(`/meeting-schedules/${id}`);
-      
+
       alert('정모가 수정되었습니다!');
     } catch (error) {
       console.error('정모 수정 실패:', error);
@@ -57,10 +61,10 @@ export const MeetingScheduleEdit = () => {
       console.log('정모 삭제');
       // TODO: API 호출하여 정모 삭제
       // await deleteMeetingSchedule(id);
-      
+
       // 성공 시 목록 페이지로 이동
       // navigate('/meeting-schedules');
-      
+
       alert('정모가 삭제되었습니다!');
     } catch (error) {
       console.error('정모 삭제 실패:', error);
@@ -87,9 +91,9 @@ export const MeetingScheduleEdit = () => {
   return (
     <div className="min-h-screen bg-gray-100">
       <div className="max-w-2xl mx-auto">
-        <ScheduleForm 
-          mode="edit" 
-          initialData={initialData} 
+        <ScheduleForm
+          mode="edit"
+          initialData={initialData}
           onSubmit={handleSubmit}
           onDelete={handleDelete}
         />

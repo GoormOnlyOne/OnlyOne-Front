@@ -1,5 +1,8 @@
 // import { useNavigate } from 'react-router-dom';
-import { ScheduleForm, type ScheduleFormData } from '../../components/domain/meeting/ScheduleForm';
+import {
+  ScheduleForm,
+  type ScheduleFormData,
+} from '../../components/domain/meeting/ScheduleForm';
 
 export const MeetingScheduleCreate = () => {
   // const navigate = useNavigate();
@@ -9,10 +12,10 @@ export const MeetingScheduleCreate = () => {
       console.log('정모 생성:', data);
       // TODO: API 호출하여 정모 생성
       // const response = await createMeetingSchedule(data);
-      
+
       // 성공 시 목록 페이지로 이동
       // navigate('/meeting-schedules');
-      
+
       alert('정모가 생성되었습니다!');
     } catch (error) {
       console.error('정모 생성 실패:', error);

@@ -1,4 +1,3 @@
-
 import MeetingList from '../../components/domain/meeting/MeetingList';
 import ScrollToTopButton from '../../components/common/ScrollToTopButton';
 
