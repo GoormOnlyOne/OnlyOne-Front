@@ -1,7 +1,8 @@
 import { useState, useRef } from 'react';
+import { uploadImages } from '../../../api/upload';
 
 interface MeetingFeedFormData {
-  feed_images_url: string[];
+  feedUrls: string[];
   content: string;
 }
 
@@ -60,18 +61,32 @@ const MeetingFeedForm = ({
   const handleSubmit = async () => {
     if (!onSubmit) return;
 
-    // 정적 이미지 URL (나중에 presigned URL로 받아온 실제 URL로 대체)
-    const staticImageUrls = selectedImages.map(
-      (_, index) =>
-        `https://d1c3fg3ti7m8cn.cloudfront.net/user/2e18a659-cd67-4f5e-b12a-65c6f34a2541`,
-    );
+    try {
+      // 이미지가 없으면 바로 피드 생성
+      if (selectedImages.length === 0) {
+        const requestData: MeetingFeedFormData = {
+          feedUrls: [],
+          content: content,
+        };
+        console.log('No images - form data before submit:', requestData);
+        onSubmit(requestData);
+        return;
+      }
 
-    const requestData: MeetingFeedFormData = {
-      feed_images_url: staticImageUrls,
-      content: content,
-    };
+      // 이미지가 있으면 업로드 후 피드 생성
+      const imageUrls = await uploadImages(selectedImages, 'feed');
+      console.log('Uploaded image URLs:', imageUrls);
+      const requestData: MeetingFeedFormData = {
+        feedUrls: imageUrls,
+        content: content,
+      };
+      console.log('Form data before submit:', requestData);
+      console.log('onSubmit function:', onSubmit);
 
-    onSubmit(requestData);
+      onSubmit(requestData);
+    } catch (error) {
+      console.error('피드 생성 중 오류:', error);
+    }
   };
 
   return (
@@ -146,7 +161,7 @@ const MeetingFeedForm = ({
         <input
           ref={fileInputRef}
           type="file"
-          accept="image/*"
+          accept="image/jpeg, image/png"
           multiple
           onChange={handleImageSelect}
           className="hidden"
