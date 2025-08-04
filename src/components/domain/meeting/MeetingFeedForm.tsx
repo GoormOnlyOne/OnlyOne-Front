@@ -1,14 +1,20 @@
 import { useState, useRef } from 'react';
 
+interface MeetingFeedFormData {
+  feed_images_url: string[];
+  content: string;
+}
+
 interface MeetingFeedFormProps {
   mode: 'create' | 'edit';
-  onSubmit?: () => void;
+  onSubmit?: (data: MeetingFeedFormData) => void;
   onCancel?: () => void;
 }
 
 const MeetingFeedForm = ({ mode, onSubmit, onCancel }: MeetingFeedFormProps) => {
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+  const [content, setContent] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleImageSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -45,6 +51,22 @@ const MeetingFeedForm = ({ mode, onSubmit, onCancel }: MeetingFeedFormProps) => 
     if (selectedImages.length < 5) {
       fileInputRef.current?.click();
     }
+  };
+
+  const handleSubmit = async () => {
+    if (!onSubmit) return;
+
+    // 정적 이미지 URL (나중에 presigned URL로 받아온 실제 URL로 대체)
+    const staticImageUrls = selectedImages.map((_, index) => 
+      `https://d1c3fg3ti7m8cn.cloudfront.net/user/2e18a659-cd67-4f5e-b12a-65c6f34a2541`
+    );
+
+    const requestData: MeetingFeedFormData = {
+      feed_images_url: staticImageUrls,
+      content: content
+    };
+
+    onSubmit(requestData);
   };
 
   return (
@@ -132,6 +154,8 @@ const MeetingFeedForm = ({ mode, onSubmit, onCancel }: MeetingFeedFormProps) => 
           글 작성
         </label>
         <textarea
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
           className="w-full h-24 p-3 border border-gray-300 rounded-lg resize-none"
           placeholder="모임에 대한 소감이나 사진에 대한 설명을 작성해주세요"
         />
@@ -139,7 +163,7 @@ const MeetingFeedForm = ({ mode, onSubmit, onCancel }: MeetingFeedFormProps) => 
 
       {/* 완료 버튼 */}
       <button
-        onClick={onSubmit}
+        onClick={handleSubmit}
         className="w-full py-3 bg-blue-500 text-white rounded-lg font-medium hover:bg-blue-600"
       >
         완료
