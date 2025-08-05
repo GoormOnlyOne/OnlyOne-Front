@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-export { Settlement as default } from './SettlementHistory'; 
+export { Settlement as default } from './SettlementHistory';
 
 interface Settlement {
   id: number;
@@ -22,7 +22,7 @@ const mockSettlements: Settlement[] = [
     amount: 15000,
     date: '2025-07-31',
     participants: 8,
-    isLeader: false
+    isLeader: false,
   },
   {
     id: 2,
@@ -32,7 +32,7 @@ const mockSettlements: Settlement[] = [
     amount: 12000,
     date: '2025-07-28',
     participants: 12,
-    isLeader: true
+    isLeader: true,
   },
   {
     id: 3,
@@ -42,7 +42,7 @@ const mockSettlements: Settlement[] = [
     amount: 8000,
     date: '2025-07-25',
     participants: 6,
-    isLeader: false
+    isLeader: false,
   },
   {
     id: 4,
@@ -52,8 +52,8 @@ const mockSettlements: Settlement[] = [
     amount: 25000,
     date: '2025-07-30',
     participants: 10,
-    isLeader: false
-  }
+    isLeader: false,
+  },
 ];
 
 export const Settlement = () => {
@@ -66,28 +66,28 @@ export const Settlement = () => {
           text: '정산 대기',
           bgColor: 'bg-orange-100',
           textColor: 'text-orange-700',
-          icon: 'ri-time-line'
+          icon: 'ri-time-line',
         };
       case 'COMPLETED':
         return {
           text: '정산 완료',
           bgColor: 'bg-blue-100',
           textColor: 'text-blue-700',
-          icon: 'ri-check-line'
+          icon: 'ri-check-line',
         };
       case 'CONFIRMED':
         return {
           text: '확인 완료',
           bgColor: 'bg-green-100',
           textColor: 'text-green-700',
-          icon: 'ri-shield-check-line'
+          icon: 'ri-shield-check-line',
         };
       default:
         return {
           text: '알 수 없음',
           bgColor: 'bg-gray-100',
           textColor: 'text-gray-700',
-          icon: 'ri-question-line'
+          icon: 'ri-question-line',
         };
     }
   };
@@ -97,17 +97,12 @@ export const Settlement = () => {
     return date.toLocaleDateString('ko-KR', {
       year: 'numeric',
       month: 'long',
-      day: 'numeric'
+      day: 'numeric',
     });
   };
 
   const formatAmount = (amount: number) => {
     return amount.toLocaleString() + '원';
-  };
-
-  const handleSettlementClick = (settlement: Settlement) => {
-    console.log('정산 내역 클릭:', settlement);
-    // 여기에 상세 정산 내역 보기 로직 추가
   };
 
   return (
@@ -122,13 +117,12 @@ export const Settlement = () => {
 
         {/* 정산 내역 리스트 */}
         <div className="space-y-4">
-          {settlements.map((settlement) => {
+          {settlements.map(settlement => {
             const statusInfo = getStatusInfo(settlement.status);
-            
+
             return (
               <div
                 key={settlement.id}
-                onClick={() => handleSettlementClick(settlement)}
                 className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 cursor-pointer hover:shadow-md transition-shadow"
               >
                 <div className="flex items-start justify-between mb-3">
@@ -144,12 +138,12 @@ export const Settlement = () => {
                         </span>
                       )}
                     </div>
-                    
+
                     {/* 정기 모임 이름 */}
                     <h3 className="text-base font-semibold text-gray-900 mb-2">
                       {settlement.eventName}
                     </h3>
-                    
+
                     {/* 날짜와 참여자 수 */}
                     <div className="flex items-center gap-4 text-sm text-gray-600">
                       <div className="flex items-center gap-1">
@@ -162,11 +156,15 @@ export const Settlement = () => {
                       </div>
                     </div>
                   </div>
-                  
+
                   {/* 상태 뱃지 */}
-                  <div className={`px-3 py-1 rounded-full flex items-center gap-1 ${statusInfo.bgColor} ${statusInfo.textColor}`}>
+                  <div
+                    className={`px-3 py-1 rounded-full flex items-center gap-1 ${statusInfo.bgColor} ${statusInfo.textColor}`}
+                  >
                     <i className={`${statusInfo.icon} text-xs`}></i>
-                    <span className="text-xs font-medium">{statusInfo.text}</span>
+                    <span className="text-xs font-medium">
+                      {statusInfo.text}
+                    </span>
                   </div>
                 </div>
 
@@ -178,11 +176,11 @@ export const Settlement = () => {
                       {formatAmount(settlement.amount)}
                     </span>
                   </div>
-                  
+
                   <div className="flex items-center gap-2">
                     {settlement.status === 'PENDING' && (
                       <button
-                        onClick={(e) => {
+                        onClick={e => {
                           e.stopPropagation();
                           console.log('정산하기 클릭:', settlement.id);
                         }}
@@ -214,4 +212,4 @@ export const Settlement = () => {
       </div>
     </div>
   );
-}
+};

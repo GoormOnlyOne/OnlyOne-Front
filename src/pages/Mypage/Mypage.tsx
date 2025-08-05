@@ -1,9 +1,11 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import ProfileImageUpload from '../../components/common/ProfileImage';
 import Modal from '../../components/common/Modal';
 
 export const Mypage = () => {
+  const navigate = useNavigate();
+
   const userInfo = {
     nickname: '별명',
     gender: '지역(시/도) · 성별/연령 · 성별',
@@ -42,10 +44,10 @@ export const Mypage = () => {
     setIsWithdraw(false);
   };
 
-  // 충전하기 버튼
-  const onClickCharge = () => {
-    console.log('충전하기를 했습니다.');
-  };
+  // // 충전하기 버튼
+  // const onClickCharge = () => {
+  //   console.log('충전하기를 했습니다.');
+  // };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -87,13 +89,13 @@ export const Mypage = () => {
             </div>
 
             {/* 충전하기 버튼 */}
-            <button
+            <Link
+              to="/payment/charge"
               className="bg-blue-500 text-white text-sm px-6 py-2 rounded-full hover:bg-blue-700 cursor-pointer hover:shadow-md transition-shadow flex items-center gap-1"
-              onClick={onClickCharge}
             >
               <i className="ri-coins-line text-lg"></i>
               <span>충전하기</span>
-            </button>
+            </Link>
           </div>
         </div>
       </div>
