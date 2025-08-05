@@ -2,21 +2,30 @@ import axios from 'axios';
 import type { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 
 // API 응답 타입
-interface ApiResponse<T = any> {
+export interface ApiResponse<T = any> {
   data: T;
   status: number;
-  message?: string;
+  success: boolean;
 }
 
 // 에러 응답 타입
-interface ApiError {
-  message: string;
+export interface ApiError {
+  success: false;
+  data: ApiErrorPayload;
   status?: number;
-  code?: string;
 }
+
+export interface ApiErrorPayload {
+  code: string;
+  message: string;
+  validation: any;
+}
+
+type ErrorHandler = (err: ApiError) => void;
 
 class ApiClient {
   private instance: AxiosInstance;
+  private onError?: ErrorHandler;
 
   constructor() {
     this.instance = axios.create({
@@ -30,53 +39,43 @@ class ApiClient {
     // 요청 인터셉터
     this.instance.interceptors.request.use(
       config => {
-        // 토큰이 있다면 헤더에 추가
         const token = localStorage.getItem('accessToken');
         if (token) {
           config.headers.Authorization = `Bearer ${token}`;
         }
         return config;
       },
-      error => {
-        return Promise.reject(error);
-      },
+      error => Promise.reject(error),
     );
 
     // 응답 인터셉터
     this.instance.interceptors.response.use(
-      response => {
-        return response;
-      },
+      response => response,
       async error => {
         const originalRequest = error.config;
-
-        // 401 에러 처리 (토큰 만료 등)
         if (error.response?.status === 401 && !originalRequest._retry) {
           originalRequest._retry = true;
-
           try {
-            // 리프레시 토큰으로 새 액세스 토큰 받기
             const refreshToken = localStorage.getItem('refreshToken');
             if (refreshToken) {
-              const response = await this.post('/auth/refresh', {
-                refreshToken,
-              });
-              const { accessToken } = response.data;
-              localStorage.setItem('accessToken', accessToken);
-
-              // 원래 요청 재시도
-              originalRequest.headers.Authorization = `Bearer ${accessToken}`;
-              return this.instance(originalRequest);
+              const refreshRes = await this.post<{ accessToken: string }>(
+                '/auth/refresh',
+                { refreshToken },
+              );
+              if (refreshRes.success) {
+                const newToken = refreshRes.data.accessToken;
+                localStorage.setItem('accessToken', newToken);
+                originalRequest.headers.Authorization = `Bearer ${newToken}`;
+                return this.instance(originalRequest);
+              }
             }
-          } catch (refreshError) {
-            // 리프레시도 실패하면 로그인 페이지로
+          } catch (e) {
             localStorage.removeItem('accessToken');
             localStorage.removeItem('refreshToken');
             window.location.href = '/login';
-            return Promise.reject(refreshError);
+            return Promise.reject(e);
           }
         }
-
         return Promise.reject(error);
       },
     );
@@ -88,11 +87,10 @@ class ApiClient {
     config?: AxiosRequestConfig,
   ): Promise<ApiResponse<T>> {
     try {
-      const response: AxiosResponse<T> = await this.instance.get(url, config);
-      return {
-        data: response.data,
-        status: response.status,
-      };
+      // AxiosResponse<ApiResponse<T>>
+      const response = await this.instance.get<ApiResponse<T>>(url, config);
+      // response.data 는 ApiResponse<T> 형태
+      return response.data;
     } catch (error) {
       throw this.handleError(error);
     }
@@ -105,15 +103,12 @@ class ApiClient {
     config?: AxiosRequestConfig,
   ): Promise<ApiResponse<T>> {
     try {
-      const response: AxiosResponse<T> = await this.instance.post(
+      const response = await this.instance.post<ApiResponse<T>>(
         url,
         data,
         config,
       );
-      return {
-        data: response.data,
-        status: response.status,
-      };
+      return response.data;
     } catch (error) {
       throw this.handleError(error);
     }
@@ -126,15 +121,12 @@ class ApiClient {
     config?: AxiosRequestConfig,
   ): Promise<ApiResponse<T>> {
     try {
-      const response: AxiosResponse<T> = await this.instance.patch(
+      const response = await this.instance.patch<ApiResponse<T>>(
         url,
         data,
         config,
       );
-      return {
-        data: response.data,
-        status: response.status,
-      };
+      return response.data;
     } catch (error) {
       throw this.handleError(error);
     }
@@ -146,34 +138,37 @@ class ApiClient {
     config?: AxiosRequestConfig,
   ): Promise<ApiResponse<T>> {
     try {
-      const response: AxiosResponse<T> = await this.instance.delete(
-        url,
-        config,
-      );
-      return {
-        data: response.data,
-        status: response.status,
-      };
+      const response = await this.instance.delete<ApiResponse<T>>(url, config);
+      return response.data;
     } catch (error) {
       throw this.handleError(error);
     }
   }
 
   // 에러 처리
+  public setErrorHandler(fn: ErrorHandler) {
+    this.onError = fn;
+  }
+
   private handleError(error: any): ApiError {
-    if (axios.isAxiosError(error)) {
+    if (axios.isAxiosError(error) && error.response?.data) {
+      const payload = error.response.data as {
+        success: boolean;
+        data: ApiErrorPayload;
+      };
       return {
-        message:
-          error.response?.data?.message ||
-          error.message ||
-          '알 수 없는 오류가 발생했습니다.',
-        status: error.response?.status,
-        code: error.code,
+        success: false,
+        data: payload.data,
+        status: error.response.status,
       };
     }
-
     return {
-      message: '알 수 없는 오류가 발생했습니다.',
+      success: false,
+      data: {
+        code: 'UNKNOWN_ERROR',
+        message: '알 수 없는 오류가 발생했습니다.',
+        validation: null,
+      },
     };
   }
 }
