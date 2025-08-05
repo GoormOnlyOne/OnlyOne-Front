@@ -26,7 +26,12 @@ interface ScheduleFormProps {
   onDelete?: () => void;
 }
 
-export const ScheduleForm = ({ mode, initialData, onSubmit, onDelete }: ScheduleFormProps) => {
+export const ScheduleForm = ({
+  mode,
+  initialData,
+  onSubmit,
+  onDelete,
+}: ScheduleFormProps) => {
   const [formData, setFormData] = useState<ScheduleFormData>({
     meetingName: '',
     meetingDate: '',
@@ -40,15 +45,18 @@ export const ScheduleForm = ({ mode, initialData, onSubmit, onDelete }: Schedule
 
   useEffect(() => {
     if (initialData) {
-      setFormData((prev) => ({
+      setFormData(prev => ({
         ...prev,
         ...initialData,
       }));
     }
   }, [initialData]);
 
-  const onFormChange = <K extends keyof ScheduleFormData>(field: K, value: ScheduleFormData[K]) => {
-    setFormData((prev) => ({
+  const onFormChange = <K extends keyof ScheduleFormData>(
+    field: K,
+    value: ScheduleFormData[K],
+  ) => {
+    setFormData(prev => ({
       ...prev,
       [field]: value,
     }));
@@ -85,8 +93,8 @@ export const ScheduleForm = ({ mode, initialData, onSubmit, onDelete }: Schedule
   const handleDateChange = (e: ChangeEvent<HTMLInputElement>) => {
     const selectedDate = e.target.value;
     onFormChange('meetingDate', selectedDate);
-    
-    // 날짜가 변경되었을 때, 선택된 날짜가 오늘이고 
+
+    // 날짜가 변경되었을 때, 선택된 날짜가 오늘이고
     // 기존 선택된 시간이 현재 시간보다 이전이면 시간을 초기화
     if (selectedDate === getTodayDate() && formData.meetingTime) {
       const currentTime = getCurrentTime();
@@ -198,7 +206,7 @@ export const ScheduleForm = ({ mode, initialData, onSubmit, onDelete }: Schedule
               <input
                 type="time"
                 value={formData.meetingTime}
-                onChange={(e) => onFormChange('meetingTime', e.target.value)}
+                onChange={e => onFormChange('meetingTime', e.target.value)}
                 min={getMinTime()}
                 placeholder="정모 시간을 선택해주세요."
                 className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -238,7 +246,11 @@ export const ScheduleForm = ({ mode, initialData, onSubmit, onDelete }: Schedule
               <div className="relative">
                 <input
                   type="text"
-                  value={formData.costPerPerson ? formatNumber(formData.costPerPerson) : 0}
+                  value={
+                    formData.costPerPerson
+                      ? formatNumber(formData.costPerPerson)
+                      : 0
+                  }
                   onChange={handleCostChange}
                   placeholder="정모 예상 비용을 입력해주세요."
                   className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
@@ -283,9 +295,10 @@ export const ScheduleForm = ({ mode, initialData, onSubmit, onDelete }: Schedule
                 disabled={!isFormValid}
                 onClick={handleSubmit}
                 className={`w-full py-3 px-4 rounded-lg font-medium transition-colors focus:ring-2 focus:ring-offset-2 
-                  ${isFormValid
-                    ? 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500'
-                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  ${
+                    isFormValid
+                      ? 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500'
+                      : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                   }`}
               >
                 {mode === 'edit' ? '정모 수정하기' : '정모 만들기'}

@@ -13,7 +13,7 @@ const Step2 = ({ selectedAddress, onAddressChange }: Step2Props) => {
       <p className="text-gray-600 text-center mb-8">
         활동하실 지역을 선택해주세요
       </p>
-      <AddressSelector 
+      <AddressSelector
         initialCity={selectedAddress?.city}
         initialDistrict={selectedAddress?.district}
         onAddressChange={onAddressChange}

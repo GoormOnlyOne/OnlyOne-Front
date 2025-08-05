@@ -12,7 +12,7 @@ export const ParticipantInfo: React.FC<ParticipantInfoProps> = ({
   nickname,
   profileImage,
   settlementStatus,
-  className
+  className,
 }) => {
   const getStatusText = (status?: string) => {
     switch (status) {
@@ -44,7 +44,7 @@ export const ParticipantInfo: React.FC<ParticipantInfoProps> = ({
     <div
       className={clsx(
         'flex items-center justify-between px-4 py-3 border-b border-gray-100 last:border-b-0',
-        className
+        className,
       )}
     >
       <div className="flex items-center gap-3">
@@ -60,16 +60,16 @@ export const ParticipantInfo: React.FC<ParticipantInfoProps> = ({
           )}
         </div>
 
-        <div className="text-base font-medium text-gray-900">
-          {nickname}
-        </div>
+        <div className="text-base font-medium text-gray-900">{nickname}</div>
       </div>
 
       {settlementStatus && (
-        <div className={clsx(
-          'px-2 py-1 rounded-full font-medium text-sm',
-          getStatusColor(settlementStatus)
-        )}>
+        <div
+          className={clsx(
+            'px-2 py-1 rounded-full font-medium text-sm',
+            getStatusColor(settlementStatus),
+          )}
+        >
           {getStatusText(settlementStatus)}
         </div>
       )}
