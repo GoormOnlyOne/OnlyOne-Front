@@ -1,14 +1,14 @@
-import { Link } from "react-router-dom";
-import { useState } from "react";
-import ProfileImageUpload from "../../components/common/ProfileImage";
-import Modal from "../../components/common/Modal";
+import { Link } from 'react-router-dom';
+import { useState } from 'react';
+import ProfileImageUpload from '../../components/common/ProfileImage';
+import Modal from '../../components/common/Modal';
 
 export const Mypage = () => {
   const userInfo = {
-    nickname: "별명",
-    gender: "지역(시/도) · 성별/연령 · 성별",
-    interests: ["관심사 1", "관심사 2", "관심사 3"],
-    balance: "5000",
+    nickname: '별명',
+    gender: '지역(시/도) · 성별/연령 · 성별',
+    interests: ['관심사 1', '관심사 2', '관심사 3'],
+    balance: '5000',
   };
 
   const [isLogout, setIsLogout] = useState(false);
@@ -20,11 +20,11 @@ export const Mypage = () => {
     setIsLogout(true);
   };
   const handleCancelLogout = () => {
-    console.log("로그아웃을 취소했습니다.");
+    console.log('로그아웃을 취소했습니다.');
     setIsLogout(false);
   };
   const handleConfirmLogout = () => {
-    console.log("로그아웃을 했습니다.");
+    console.log('로그아웃을 했습니다.');
     setIsLogout(false);
   };
 
@@ -34,17 +34,17 @@ export const Mypage = () => {
     setIsWithdraw(true);
   };
   const handleCancelWithdraw = () => {
-    console.log("탈퇴하기를 취소했습니다.");
+    console.log('탈퇴하기를 취소했습니다.');
     setIsWithdraw(false);
   };
   const handleConfirmWithdraw = () => {
-    console.log("탈퇴하기를 했습니다.");
+    console.log('탈퇴하기를 했습니다.');
     setIsWithdraw(false);
   };
 
   // 충전하기 버튼
   const onClickCharge = () => {
-    console.log("충전하기를 했습니다.");
+    console.log('충전하기를 했습니다.');
   };
 
   return (
@@ -187,4 +187,4 @@ export const Mypage = () => {
   );
 };
 
-export { Mypage as default } from "./Mypage";
+export { Mypage as default } from './Mypage';

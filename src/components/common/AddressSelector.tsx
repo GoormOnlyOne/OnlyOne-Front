@@ -55,14 +55,18 @@ const AddressSelector: React.FC<AddressSelectorProps> = ({
   initialDistrict = '',
   placeholder = {
     city: '시/도를 선택하세요',
-    district: '시/군/구를 선택하세요'
-  }
+    district: '시/군/구를 선택하세요',
+  },
 }) => {
   const [selectedCity, setSelectedCity] = useState<string>(initialCity);
-  const [selectedDistrict, setSelectedDistrict] = useState<string>(initialDistrict);
+  const [selectedDistrict, setSelectedDistrict] =
+    useState<string>(initialDistrict);
 
   const cities = Object.keys(typedKoreaData.korea_administrative_divisions);
-  const districts = selectedCity ? typedKoreaData.korea_administrative_divisions[selectedCity]?.districts || [] : [];
+  const districts = selectedCity
+    ? typedKoreaData.korea_administrative_divisions[selectedCity]?.districts ||
+      []
+    : [];
 
   // 주소 선택 완료 여부
   const isComplete = useCallback(() => {
@@ -82,7 +86,7 @@ const AddressSelector: React.FC<AddressSelectorProps> = ({
     const addressData: AddressData = {
       city: selectedCity,
       district: selectedDistrict,
-      isComplete: isComplete()
+      isComplete: isComplete(),
     };
     onAddressChange?.(addressData);
   }, [selectedCity, selectedDistrict, isComplete]);
@@ -91,45 +95,54 @@ const AddressSelector: React.FC<AddressSelectorProps> = ({
     return name;
   }, []);
 
-  const handleCityChange = useCallback((city: string) => {
-    setSelectedCity(city);
+  const handleCityChange = useCallback(
+    (city: string) => {
+      setSelectedCity(city);
 
-		// 새로 선택된 시/도의 구/군 목록 가져오기
-		const newDistricts = typedKoreaData.korea_administrative_divisions[city]?.districts || [];
+      // 새로 선택된 시/도의 구/군 목록 가져오기
+      const newDistricts =
+        typedKoreaData.korea_administrative_divisions[city]?.districts || [];
 
-		const firstDistrict = newDistricts.length > 0 ? newDistricts[0] : "";
-    setSelectedDistrict(firstDistrict);
+      const firstDistrict = newDistricts.length > 0 ? newDistricts[0] : '';
+      setSelectedDistrict(firstDistrict);
 
-    // 콜백 호출
-    onCityChange?.(city);
-		if(firstDistrict) {
-			onDistrictChange?.(firstDistrict);
-		}
+      // 콜백 호출
+      onCityChange?.(city);
+      if (firstDistrict) {
+        onDistrictChange?.(firstDistrict);
+      }
+    },
+    [onCityChange, onDistrictChange],
+  );
 
-  }, [onCityChange, onDistrictChange]);
+  const handleDistrictChange = useCallback(
+    (district: string) => {
+      setSelectedDistrict(district);
 
-  const handleDistrictChange = useCallback((district: string) => {
-    setSelectedDistrict(district);
-
-    // 콜백 호출
-    onDistrictChange?.(district);
-  }, [onDistrictChange]);
+      // 콜백 호출
+      onDistrictChange?.(district);
+    },
+    [onDistrictChange],
+  );
 
   return (
-    <div className={`w-full max-w-4xl mx-auto border border-gray-300 ${className}`}>
+    <div
+      className={`w-full max-w-4xl mx-auto border border-gray-300 ${className}`}
+    >
       {/* 모든 화면에서 좌우 분할 */}
       <div className="flex h-40 sm:h-56">
         {/* 좌측: 시/도 선택 */}
         <div className="w-2/5 sm:w-1/3 border-r border-gray-300 bg-gray-50">
           <div className="overflow-y-auto h-full">
-            {cities.map((city) => (
+            {cities.map(city => (
               <button
                 key={city}
                 onClick={() => handleCityChange(city)}
-                className={`w-full text-left px-2 sm:px-3 md:px-4 py-2 md:py-3 hover:bg-gray-100 border-b border-gray-200 transition-colors text-xs sm:text-sm md:text-base ${selectedCity === city
+                className={`w-full text-left px-2 sm:px-3 md:px-4 py-2 md:py-3 hover:bg-gray-100 border-b border-gray-200 transition-colors text-xs sm:text-sm md:text-base ${
+                  selectedCity === city
                     ? 'bg-blue-50 text-blue-700 border-r-2 border-r-blue-500'
                     : 'text-gray-700'
-                  }`}
+                }`}
               >
                 {getSimpleName(city)}
               </button>
@@ -149,14 +162,15 @@ const AddressSelector: React.FC<AddressSelectorProps> = ({
                 {getSimpleName(selectedCity)}는 별도의 구/군 구분이 없습니다
               </div>
             ) : (
-              districts.map((district) => (
+              districts.map(district => (
                 <button
                   key={district}
                   onClick={() => handleDistrictChange(district)}
-                  className={`w-full text-left px-2 sm:px-3 md:px-4 py-2 md:py-3 hover:bg-gray-100 border-b border-gray-200 transition-colors text-xs sm:text-sm md:text-base ${selectedDistrict === district
+                  className={`w-full text-left px-2 sm:px-3 md:px-4 py-2 md:py-3 hover:bg-gray-100 border-b border-gray-200 transition-colors text-xs sm:text-sm md:text-base ${
+                    selectedDistrict === district
                       ? 'bg-blue-50 text-blue-700'
                       : 'text-gray-700'
-                    }`}
+                  }`}
                 >
                   {district}
                 </button>

@@ -10,14 +10,16 @@ export const Signup = () => {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [selectedAddress, setSelectedAddress] = useState<AddressData | undefined>();
+  const [selectedAddress, setSelectedAddress] = useState<
+    AddressData | undefined
+  >();
   const [formData, setFormData] = useState({
     categories: [] as string[],
     nickname: '',
     gender: '',
     birth: '',
     profileImage: '',
-    address: {} as AddressData
+    address: {} as AddressData,
   });
 
   const totalSteps = 3;
@@ -30,7 +32,10 @@ export const Signup = () => {
         return selectedCategories.length >= 1;
       case 2:
         // Step 2: 지역 선택
-        return selectedAddress !== undefined && Object.keys(selectedAddress).length > 0;
+        return (
+          selectedAddress !== undefined &&
+          Object.keys(selectedAddress).length > 0
+        );
       case 3:
         // Step 3: 모든 필드가 채워져야 함
         return (
@@ -50,12 +55,12 @@ export const Signup = () => {
       if (currentStep === 1) {
         setFormData(prev => ({
           ...prev,
-          categories: selectedCategories
+          categories: selectedCategories,
         }));
       } else if (currentStep === 2) {
         setFormData(prev => ({
           ...prev,
-          address: selectedAddress!
+          address: selectedAddress!,
         }));
       }
       setCurrentStep(prev => prev + 1);
@@ -64,7 +69,7 @@ export const Signup = () => {
       const finalData = {
         ...formData,
         categories: selectedCategories,
-        address: selectedAddress
+        address: selectedAddress,
       };
       console.log('회원가입 데이터:', finalData);
       // TODO: API 호출하여 회원가입 처리
@@ -95,7 +100,7 @@ export const Signup = () => {
   const handleFormChange = (field: string, value: string) => {
     setFormData(prev => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }));
   };
 
@@ -115,18 +120,19 @@ export const Signup = () => {
   // 상단 스탭 컴포넌트
   const Stepper = () => {
     if (currentStep === 4) return null; // 완료 화면에서는 표시하지 않음
-    
+
     return (
       <div className="flex items-center justify-center mb-8">
-        {[1, 2, 3].map((step) => (
+        {[1, 2, 3].map(step => (
           <div key={step} className="flex items-center">
             <div
               className={`
                 w-10 h-10 rounded-full flex items-center justify-center font-semibold text-sm
                 transition-all duration-300
-                ${currentStep >= step 
-                  ? 'bg-blue-600 text-white' 
-                  : 'bg-gray-200 text-gray-500'
+                ${
+                  currentStep >= step
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-200 text-gray-500'
                 }
               `}
             >
@@ -149,37 +155,37 @@ export const Signup = () => {
   return (
     <div className="min-h-screen w-full max-w-md bg-white rounded-2xl p-8">
       <Stepper />
-      
+
       {/* Step별 콘텐츠 */}
       <div className="mb-8">
         {currentStep === 1 && (
-          <Step1 
+          <Step1
             selectedCategories={selectedCategories}
             onCategoryChange={handleCategoryChange}
             maxSelection={5}
           />
         )}
         {currentStep === 2 && (
-          <Step2 
+          <Step2
             selectedAddress={selectedAddress}
             onAddressChange={handleAddressChange}
           />
         )}
         {currentStep === 3 && (
-          <Step3 
+          <Step3
             formData={formData}
             onFormChange={handleFormChange}
             // onProfileImageChange={handleProfileImageChange} // ProfileImageUpload의 실제 props 확인 필요
           />
         )}
         {currentStep === 4 && (
-          <SignupComplete 
+          <SignupComplete
             onComplete={handleSignupComplete}
             welcomePoints={100000}
           />
         )}
       </div>
-      
+
       {/* 이전/다음 Buttons */}
       {currentStep !== 4 && (
         <div className="flex gap-3">
@@ -191,15 +197,16 @@ export const Signup = () => {
               이전
             </button>
           )}
-          
+
           <button
             onClick={handleNext}
             disabled={!isStepValid()}
             className={`
               flex-1 px-6 py-3 rounded-lg font-medium transition-colors
-              ${currentStep === totalSteps 
-                ? 'bg-blue-600 text-white hover:bg-blue-700' 
-                : 'bg-gray-800 text-white hover:bg-gray-900'
+              ${
+                currentStep === totalSteps
+                  ? 'bg-blue-600 text-white hover:bg-blue-700'
+                  : 'bg-gray-800 text-white hover:bg-gray-900'
               }
               disabled:opacity-50 disabled:cursor-not-allowed
               ${!isStepValid() ? 'cursor-not-allowed' : ''}

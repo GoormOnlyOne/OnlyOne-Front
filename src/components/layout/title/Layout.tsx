@@ -7,31 +7,33 @@ export default function TitleLayout() {
   const location = useLocation();
   const pathname = location.pathname;
   const params = useParams();
-  const [ dynamicTitle, setDynamicTitle ] = useState('');
-  
-  useEffect(() => {
-    if (params.id && pathname.startsWith('/meeting/') && pathname !== '/meeting/create') {
+  const [dynamicTitle, setDynamicTitle] = useState('');
 
+  useEffect(() => {
+    if (
+      params.id &&
+      pathname.startsWith('/meeting/') &&
+      pathname !== '/meeting/create'
+    ) {
       // API 호출 예시
       fetchMeetingTitle(params.id);
     }
   }, [params.id, pathname]);
-  
+
   const fetchMeetingTitle = async (meetingId: string) => {
     try {
       // TODO: 실제 API 호출 코드
       // const response = await fetch(`/api/meetings/${meetingId}`);
       // const data = await response.json();
       // setDynamicTitle(data.title);
-      
+
       // 임시 예시
       setDynamicTitle(`모임 ${meetingId}`);
     } catch (error) {
       console.error('Failed to fetch meeting title:', error);
-      setDynamicTitle('모임 상세');
+      setDynamicTitle('모임 세');
     }
   };
-  
 
   let headerProps = null;
 
@@ -56,27 +58,27 @@ export default function TitleLayout() {
         isOut: false,
       };
       break;
-      
-      case pathname === '/mypage/interest':
-        headerProps = {
-          isBack: true,
-          isTitle: true,
-          titleText: '관심 모임',
-          isLike: false,
-          isOut: false,
-        };
-        break;
-      
-      case pathname === '/mypage/profile':
-        headerProps = {
-          isBack: true,
-          isTitle: true,
-          titleText: '프로필 수정하기',
-          isLike: false,
-          isOut: false,
-        };
-        break;
-    
+
+    case pathname === '/mypage/interest':
+      headerProps = {
+        isBack: true,
+        isTitle: true,
+        titleText: '관심 모임',
+        isLike: false,
+        isOut: false,
+      };
+      break;
+
+    case pathname === '/mypage/profile':
+      headerProps = {
+        isBack: true,
+        isTitle: true,
+        titleText: '프로필 수정하기',
+        isLike: false,
+        isOut: false,
+      };
+      break;
+
     case pathname === '/mypage/settlement':
       headerProps = {
         isBack: true,
@@ -86,7 +88,37 @@ export default function TitleLayout() {
         isOut: false,
       };
       break;
-    
+
+    case /^\/meeting\/\d+\/feed\/create\/?$/.test(pathname):
+      headerProps = {
+        isBack: true,
+        isTitle: true,
+        titleText: '게시글 생성',
+        isLike: false,
+        isOut: false,
+      };
+      break;
+
+    case /^\/meeting\/\d+\/feed\/\d+\/edit\/?$/.test(pathname):
+      headerProps = {
+        isBack: true,
+        isTitle: true,
+        titleText: '게시글 수정',
+        isLike: false,
+        isOut: false,
+      };
+      break;
+
+    case /^\/meeting\/\d+\/feed\/\d+$/.test(pathname):
+      headerProps = {
+        isBack: true,
+        isTitle: true,
+        titleText: '게시글',
+        isLike: false,
+        isOut: false,
+      };
+      break;
+
     case pathname === '/meeting/create':
       headerProps = {
         isBack: true,
@@ -97,7 +129,7 @@ export default function TitleLayout() {
       };
       break;
 
-    case pathname.startsWith('/meeting/edit'):
+    case pathname.includes('/meeting/') && pathname.endsWith('/edit'):
       headerProps = {
         isBack: true,
         isTitle: true,
@@ -106,19 +138,23 @@ export default function TitleLayout() {
         isOut: false,
       };
       break;
-    
+
     // 모임 상세 페이지 - 동적 경로 처리
-    case /^\/meeting\/(?!create$|edit)([^/]+)$/.test(pathname):
+    case /^\/meeting\/\d+\/?$/.test(pathname):
+      const meetingId = pathname.match(/\/meeting\/(\d+)/)?.[1];
       headerProps = {
         isBack: true,
         isTitle: true,
-        titleText: dynamicTitle || '모임 상세',
+        titleText: meetingId || '모임 상세',
         isLike: true,
         isOut: true,
       };
       break;
 
-    case pathname.includes('/meeting/') && pathname.includes('/schedule/') && pathname.endsWith('/participation'):
+    // 정산 현황, 참여 현황
+    case pathname.includes('/meeting/') &&
+      pathname.includes('/schedule/') &&
+      pathname.endsWith('/participation'):
       // URL에서 type 파라미터 확인
       const urlParams = new URLSearchParams(window.location.search);
       const type = urlParams.get('type');
@@ -131,11 +167,23 @@ export default function TitleLayout() {
       };
       break;
 
-    case pathname === '/settlementHistory':
+    case /^\/meeting\/\d+\/schedule\/create\/?$/.test(pathname):
       headerProps = {
         isBack: true,
         isTitle: true,
-        titleText: '정산내역 확인하기',
+        titleText: '정모 만들기',
+        isLike: false,
+        isOut: false,
+      };
+      break;
+
+    case /^\/meeting\/\d+\/schedule\/\d+\/edit\/?$/.test(pathname):
+      headerProps = {
+        isBack: true,
+        isTitle: true,
+        titleText: '정모 수정하기',
+        isLike: false,
+        isOut: false,
       };
       break;
 
@@ -152,7 +200,7 @@ export default function TitleLayout() {
           <Header {...headerProps} />
         </div>
       )}
-      
+
       {/* 스크롤 가능한 메인 영역 */}
       <main className="flex-1 overflow-y-auto bg-gray-50">
         <Outlet />
