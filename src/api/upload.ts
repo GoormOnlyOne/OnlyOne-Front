@@ -96,13 +96,16 @@ export const uploadImages = async (
   imageFolderType: string,
 ): Promise<string[]> => {
   try {
-    // 1. presigned URL 발급
+    // 1. 파일 타입 검증
+    files.forEach(validateFileType);
+
+    // 2. presigned URL 발급
     const presignedUrls = await getPresignedUrls(files, imageFolderType);
 
-    // 2. S3에 이미지 업로드
+    // 3. S3에 이미지 업로드
     await uploadImagesToS3(files, presignedUrls);
 
-    // 3. 업로드 된 이미지 URL 반환
+    // 4. 업로드 된 이미지 URL 반환
     return presignedUrls.map(item => item.imageUrl);
   } catch (error) {
     console.error('이미지 업로드 실패', error);
