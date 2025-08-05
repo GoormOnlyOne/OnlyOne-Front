@@ -2,9 +2,9 @@ import React from 'react';
 import { useParams } from 'react-router-dom';
 import MeetingFeedGrid from '../../components/domain/meeting/MeetingFeedGrid';
 
-const MeetingFeed: React.FC = () => {
-  const { clubId } = useParams<{ clubId: string }>();
-  if (!clubId) return null;
+export const MeetingFeed: React.FC = () => {
+  const { id } = useParams<{ id: string }>();
+  if (!id) return null;
 
   return (
     <div className="relative">
@@ -15,7 +15,7 @@ const MeetingFeed: React.FC = () => {
       </div>
 
       {/* 그리드 + 무한 스크롤; clubId prop 전달 */}
-      <MeetingFeedGrid clubId={clubId} />
+      <MeetingFeedGrid clubId={id} />
 
       {/* 등록 버튼: 항상 고정, 피드 위에 */}
       <button
@@ -23,10 +23,11 @@ const MeetingFeed: React.FC = () => {
       >
         <span className="text-2xl leading-none">+</span>
         <span className="text-xs mt-1">등록</span>
+        <span className="text-xs mt-1">등록</span>
       </button>
     </div>
   );
 };
 
-export default MeetingFeed;
+export { MeetingFeed as default } from './MeetingFeed';
 
