@@ -2,7 +2,13 @@ import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { loadTossPayments, ANONYMOUS } from '@tosspayments/tosspayments-sdk';
 import type { TossPaymentsWidgets } from '@tosspayments/tosspayments-sdk';
-import { savePayment } from '../../apis/payment';
+import { showApiErrorToast } from '../../components/common/Toast/ToastProvider';
+import apiClient from '../../api/client';
+
+interface SavePaymentRequestDto {
+  orderId: string;
+  amount: number;
+}
 
 interface Amount {
   currency: string;
@@ -14,7 +20,7 @@ const generateRandomString = () =>
 
 const clientKey = 'test_gck_docs_Ovk5rk1EwkEbP0W43n07xlzm';
 
-export function CheckoutPage() {
+export function Checkout() {
   const location = useLocation();
   const amountFromRoute = location.state?.amount;
 
@@ -74,25 +80,28 @@ export function CheckoutPage() {
               const orderId = generateRandomString();
 
               try {
-                await savePayment({
-                  orderId,
-                  amount: amount.value,
-                });
-
-                await widgets?.requestPayment({
-                  orderId,
-                  orderName: `${amount.value.toLocaleString()}P 충전`,
-                  customerName: '김토스',
-                  customerEmail: 'customer123@gmail.com',
-                  successUrl:
-                    window.location.origin +
-                    '/success' +
-                    window.location.search,
-                  failUrl:
-                    window.location.origin + '/fail' + window.location.search,
-                });
-              } catch (error) {
-                console.error('결제 요청 중 에러:', error);
+                const response = await apiClient.post<SavePaymentRequestDto>(
+                  `/payments/save`,
+                  { orderId, amount: amount.value },
+                );
+                console.log('orderId={}, amount={}', orderId, amount);
+                if (response.success) {
+                  await widgets?.requestPayment({
+                    orderId,
+                    orderName: `${amount.value.toLocaleString()}P 충전`,
+                    customerName: '김토스',
+                    customerEmail: 'customer123@gmail.com',
+                    successUrl:
+                      window.location.origin +
+                      '/success' +
+                      window.location.search,
+                    failUrl:
+                      window.location.origin + '/fail' + window.location.search,
+                  });
+                }
+              } catch (err: any) {
+                showApiErrorToast(err);
+                console.error('결제 요청 중 에러:', err);
               }
             }}
           >

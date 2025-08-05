@@ -1,6 +1,6 @@
 // PointChargePage.tsx
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 interface PointOption {
   points: number;
@@ -19,23 +19,23 @@ const pointOptions: PointOption[] = [
   { points: 100000, price: 100000 },
 ];
 
-export function PointChargePage() {
+export function PointCharge() {
   const navigate = useNavigate();
   const [selectedOption, setSelectedOption] = useState<PointOption | null>(
-    null
+    null,
   );
   const [agreed, setAgreed] = useState(false);
 
   const handleSubmit = () => {
     if (!selectedOption || !agreed) {
-      alert("포인트를 선택하고 약관에 동의해주세요.");
+      alert('포인트를 선택하고 약관에 동의해주세요.');
       return;
     }
 
-    navigate("/payment", {
+    navigate('/payment', {
       state: {
         amount: {
-          currency: "KRW",
+          currency: 'KRW',
           value: selectedOption.price,
         },
       },
@@ -54,13 +54,13 @@ export function PointChargePage() {
 
         <div className="p-6">
           <div className="flex flex-col gap-3 mb-6">
-            {pointOptions.map((option) => (
+            {pointOptions.map(option => (
               <label
                 key={option.points}
                 className={`flex items-center justify-between p-4 rounded-xl border-2 cursor-pointer ${
                   selectedOption?.points === option.points
-                    ? "border-blue-500 bg-blue-50"
-                    : "border-gray-200 hover:border-gray-300"
+                    ? 'border-blue-500 bg-blue-50'
+                    : 'border-gray-200 hover:border-gray-300'
                 }`}
               >
                 <input
@@ -86,7 +86,7 @@ export function PointChargePage() {
             <input
               type="checkbox"
               checked={agreed}
-              onChange={(e) => setAgreed(e.target.checked)}
+              onChange={e => setAgreed(e.target.checked)}
               className="mt-1 w-4 h-4 text-blue-600 border-gray-300 rounded"
             />
             <div className="text-sm text-gray-700">
@@ -105,8 +105,8 @@ export function PointChargePage() {
             disabled={!selectedOption || !agreed}
             className={`w-full py-4 rounded-xl font-semibold transition-colors ${
               selectedOption && agreed
-                ? "bg-blue-600 text-white hover:bg-blue-700"
-                : "bg-gray-200 text-gray-500 cursor-not-allowed"
+                ? 'bg-blue-600 text-white hover:bg-blue-700'
+                : 'bg-gray-200 text-gray-500 cursor-not-allowed'
             }`}
           >
             결제하기
@@ -117,4 +117,4 @@ export function PointChargePage() {
   );
 }
 
-export default PointChargePage;
+export default PointCharge;
