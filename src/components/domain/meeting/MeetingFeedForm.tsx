@@ -62,18 +62,16 @@ const MeetingFeedForm = ({
     if (!onSubmit) return;
 
     try {
-      // 이미지가 없으면 바로 피드 생성
+      // 이미지 개수 검증 (1개 이상 5개 이하)
       if (selectedImages.length === 0) {
-        const requestData: MeetingFeedFormData = {
-          feedUrls: [],
-          content: content,
-        };
-        console.log('No images - form data before submit:', requestData);
-        onSubmit(requestData);
-        return;
+        throw new Error('이미지를 최소 1개 이상 등록해주세요.');
       }
 
-      // 이미지가 있으면 업로드 후 피드 생성
+      if (selectedImages.length > 5) {
+        throw new Error('이미지는 최대 5개까지 등록 가능합니다.');
+      }
+
+      // 이미지 업로드 후 피드 생성
       const imageUrls = await uploadImages(selectedImages, 'feed');
       console.log('Uploaded image URLs:', imageUrls);
       const requestData: MeetingFeedFormData = {
@@ -94,7 +92,7 @@ const MeetingFeedForm = ({
       {/* 이미지 등록 영역 */}
       <div className="mb-4">
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          *사진 등록 ({selectedImages.length}/5)
+          *사진 등록 ({selectedImages.length}/5) - 최소 1개 이상 필수
         </label>
 
         {/* 5개 슬롯 그리드 */}
@@ -184,7 +182,12 @@ const MeetingFeedForm = ({
       {/* 완료 버튼 */}
       <button
         onClick={handleSubmit}
-        className="w-full py-3 bg-blue-500 text-white rounded-lg font-medium hover:bg-blue-600"
+        disabled={selectedImages.length === 0}
+        className={`w-full py-3 rounded-lg font-medium ${
+          selectedImages.length === 0
+            ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+            : 'bg-blue-500 text-white hover:bg-blue-600'
+        }`}
       >
         완료
       </button>
