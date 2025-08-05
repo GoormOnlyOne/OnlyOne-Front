@@ -27,7 +27,7 @@ export function showApiErrorToast(error: ApiError) {
 /* 기본 토스트 */
 export function showToast(
   message: string,
-  type: ToastType = 'info',
+  type: ToastType = 'default',
   durationMs: number = 3000,
 ) {
   if (globalShowToast) {
