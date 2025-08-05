@@ -1,36 +1,35 @@
-import { useState } from "react";
-import ScrollToTopButton from "../../components/common/ScrollToTopButton";
-import TabBar, { type TabItem } from "../../components/common/TabBar";
-import WalletHistory from "./WalletHistory";
+import { useState } from 'react';
+import TabBar, { type TabItem } from '../../components/common/TabBar';
+import WalletHistory from './WalletHistory';
 
 export const Settlement = () => {
-  const [activeTab, setActiveTab] = useState<string>("all");
+  const [activeTab, setActiveTab] = useState<string>('all');
 
   const handleTabChange = (tabId: string) => {
     setActiveTab(tabId);
-    console.log("탭 변경:", tabId);
+    console.log('탭 변경:', tabId);
 
     // 탭 변경 시 main 요소 스크롤 맨 위로
-    const mainElement = document.querySelector("main");
+    const mainElement = document.querySelector('main');
     if (mainElement) {
-      mainElement.scrollTo({ top: 0, behavior: "smooth" });
+      mainElement.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
   const walletTabs: TabItem[] = [
     {
-      id: "all",
-      label: "전체",
+      id: 'all',
+      label: '전체',
       content: <WalletHistory type="all" />,
     },
     {
-      id: "charge",
-      label: "충전 내역",
+      id: 'charge',
+      label: '충전 내역',
       content: <WalletHistory type="charge" />,
     },
     {
-      id: "settlement",
-      label: "정산 내역",
+      id: 'settlement',
+      label: '정산 내역',
       content: <WalletHistory type="settlement" />,
     },
   ];
@@ -45,13 +44,8 @@ export const Settlement = () => {
           onTabChange={handleTabChange}
         />
       </div>
-
-      {/* 맨 위로 가기 버튼 */}
-      <main className="flex-1 overflow-auto">
-        <ScrollToTopButton />
-      </main>
     </div>
   );
 };
 
-export { Settlement as default } from "./Wallet";
+export { Settlement as default } from './Wallet';
