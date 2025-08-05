@@ -22,7 +22,8 @@ import { Signup } from '../pages/Signup.tsx';
 import { Mypage } from '../pages/Mypage/Mypage.tsx';
 import { Interest } from '../pages/Mypage/Interest.tsx';
 import { Profile } from '../pages/Mypage/Profile.tsx';
-import { Settlement } from '../pages/Mypage/Settlement.tsx';
+import { Settlement } from '../pages/Mypage/Wallet.tsx';
+import SettlementHistory from '../pages/Mypage/SettlementHistory.tsx';
 
 import { ComponentGallery } from '../pages/ComponentGallery/ComponentGallery.tsx';
 import MeetingFeedCreate from '../pages/Meeting/MeetingFeedCreate.tsx';
@@ -122,6 +123,10 @@ export const router = createBrowserRouter([
       {
         path: 'meeting/:meetingId/feed/:feedId',
         element: <MeetingFeedDetail />,
+      },
+      {
+        path: 'settlementHistory',
+        element: <SettlementHistory />,
       },
     ],
   },
