@@ -2,7 +2,7 @@ import { useState } from 'react';
 import TabBar, { type TabItem } from '../../components/common/TabBar';
 import WalletHistory from './WalletHistory';
 
-export const Settlement = () => {
+export const Wallet = () => {
   const [activeTab, setActiveTab] = useState<string>('all');
 
   const handleTabChange = (tabId: string) => {
@@ -48,4 +48,4 @@ export const Settlement = () => {
   );
 };
 
-export { Settlement as default } from './Wallet';
+export { Wallet as default } from './Wallet';
