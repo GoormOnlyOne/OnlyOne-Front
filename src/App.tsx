@@ -1,7 +1,10 @@
 import { RouterProvider } from 'react-router-dom';
 import { router } from './routes/Router';
-import { ToastProvider, useToast } from './components/common/ToastContext';
-import { setGlobalToastFunction } from './api/errorToast';
+import {
+  ToastProvider,
+  useToast,
+} from './components/common/Toast/ToastContext';
+import { setGlobalToastFunction } from './components/common/Toast/ToastProvider';
 import { useEffect } from 'react';
 
 function AppContent() {
