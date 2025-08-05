@@ -9,7 +9,7 @@ const mockNotifications: Notification[] = [
     groupImageUrl: 'https://via.placeholder.com/40',
     groupName: '우리동네축구단',
     meetingName: '7월 정기 모임',
-    amount: '₩12,000'
+    amount: '₩12,000',
   },
   {
     id: 2,
@@ -17,14 +17,14 @@ const mockNotifications: Notification[] = [
     groupImageUrl: 'https://via.placeholder.com/40',
     actorName: '철수',
     postTitle: '8월 모임 후기',
-    commentText: '좋은 후기 감사합니다!'
+    commentText: '좋은 후기 감사합니다!',
   },
   {
     id: 3,
     type: 'like',
     groupImageUrl: 'https://via.placeholder.com/40',
     actorName: '영희',
-    postTitle: '7월 사진'
+    postTitle: '7월 사진',
   },
   {
     id: 4,
@@ -32,8 +32,8 @@ const mockNotifications: Notification[] = [
     groupImageUrl: 'https://via.placeholder.com/40',
     actorName: '민지',
     chatRoomName: '축구단 채팅방',
-    messageText: '내일 경기 준비됐어?'
-  }
+    messageText: '내일 경기 준비됐어?',
+  },
 ];
 
 export const Notice = () => {

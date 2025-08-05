@@ -1,4 +1,6 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
+
+export { Settlement as default } from './SettlementHistory';
 
 interface Settlement {
   id: number;
@@ -103,11 +105,6 @@ export const Settlement = () => {
     return amount.toLocaleString() + '원';
   };
 
-  const handleSettlementClick = (settlement: Settlement) => {
-    console.log('정산 내역 클릭:', settlement);
-    // 여기에 상세 정산 내역 보기 로직 추가
-  };
-
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="px-4 py-6">
@@ -126,7 +123,6 @@ export const Settlement = () => {
             return (
               <div
                 key={settlement.id}
-                onClick={() => handleSettlementClick(settlement)}
                 className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 cursor-pointer hover:shadow-md transition-shadow"
               >
                 <div className="flex items-start justify-between mb-3">
@@ -217,5 +213,3 @@ export const Settlement = () => {
     </div>
   );
 };
-
-export { Settlement as default } from './Settlement';

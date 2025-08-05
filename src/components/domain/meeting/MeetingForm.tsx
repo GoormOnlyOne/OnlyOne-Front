@@ -1,6 +1,8 @@
 import { useRef, useEffect, useState, type ChangeEvent } from 'react';
 import CategorySection from '../../../components/domain/category/CategorySection';
-import AddressSelector, { type AddressData } from '../../../components/common/AddressSelector';
+import AddressSelector, {
+  type AddressData,
+} from '../../../components/common/AddressSelector';
 import Modal from '../../common/Modal';
 
 export interface FormData {
@@ -27,7 +29,11 @@ interface MeetingFormProps {
   onSubmit: (data: FormData, address: AddressData) => void;
 }
 
-export const MeetingForm = ({ mode, initialData, onSubmit }: MeetingFormProps) => {
+export const MeetingForm = ({
+  mode,
+  initialData,
+  onSubmit,
+}: MeetingFormProps) => {
   const [formData, setFormData] = useState<FormData>({
     meetingName: '',
     introduction: '',
@@ -47,25 +53,33 @@ export const MeetingForm = ({ mode, initialData, onSubmit }: MeetingFormProps) =
 
   useEffect(() => {
     if (initialData) {
-      setFormData((prev) => ({
+      setFormData(prev => ({
         ...prev,
         ...initialData,
         profileImage:
-          typeof initialData.profileImage === 'string' ? null : initialData.profileImage ?? null,
+          typeof initialData.profileImage === 'string'
+            ? null
+            : (initialData.profileImage ?? null),
       }));
 
       if (initialData.address) {
         setSelectedAddress(initialData.address);
       }
 
-      if (initialData.profileImage && typeof initialData.profileImage === 'string') {
+      if (
+        initialData.profileImage &&
+        typeof initialData.profileImage === 'string'
+      ) {
         setImagePreview(initialData.profileImage);
       }
     }
   }, [initialData]);
 
-  const onFormChange = <K extends keyof FormData>(field: K, value: FormData[K]) => {
-    setFormData((prev) => ({
+  const onFormChange = <K extends keyof FormData>(
+    field: K,
+    value: FormData[K],
+  ) => {
+    setFormData(prev => ({
       ...prev,
       [field]: value,
     }));
@@ -77,7 +91,7 @@ export const MeetingForm = ({ mode, initialData, onSubmit }: MeetingFormProps) =
       onFormChange('profileImage', file);
 
       const reader = new FileReader();
-      reader.onload = (event) => {
+      reader.onload = event => {
         if (event.target?.result) {
           setImagePreview(event.target.result as string);
         }
@@ -170,7 +184,8 @@ export const MeetingForm = ({ mode, initialData, onSubmit }: MeetingFormProps) =
                 required
               />
               <p className="text-xs text-gray-500 mt-1">
-                최소 1자 이상 20자 이하, 특수문자 제외 ({formData.meetingName.length}/20)
+                최소 1자 이상 20자 이하, 특수문자 제외 (
+                {formData.meetingName.length}/20)
               </p>
             </div>
 
@@ -189,13 +204,17 @@ export const MeetingForm = ({ mode, initialData, onSubmit }: MeetingFormProps) =
                 required
               />
               <p className="text-xs text-gray-500 mt-1">
-                최소 1자 이상 50자 이하, 특수문자 제외 ({formData.introduction.length}/50)
+                최소 1자 이상 50자 이하, 특수문자 제외 (
+                {formData.introduction.length}/50)
               </p>
             </div>
 
             {/* 대표 사진 */}
             <div>
-              <label htmlFor="profileImage" className="block text-sm font-medium text-gray-700 mb-2">
+              <label
+                htmlFor="profileImage"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
                 <span className="text-red-400 mr-1">*</span>모임 대표 사진
               </label>
               <div className="flex items-start space-x-4">
@@ -236,7 +255,9 @@ export const MeetingForm = ({ mode, initialData, onSubmit }: MeetingFormProps) =
                   className="hidden" // 숨김 처리
                 />
               </div>
-              <p className="text-xs text-gray-500 mt-1">JPG, PNG 파일만 업로드 가능</p>
+              <p className="text-xs text-gray-500 mt-1">
+                JPG, PNG 파일만 업로드 가능
+              </p>
             </div>
 
             {/* 지역 */}
@@ -259,7 +280,7 @@ export const MeetingForm = ({ mode, initialData, onSubmit }: MeetingFormProps) =
               <input
                 type="number"
                 value={formData.capacity}
-                onChange={(e) => {
+                onChange={e => {
                   const value = parseInt(e.target.value) || 1;
                   onFormChange('capacity', Math.min(value, 100));
                 }}
@@ -292,9 +313,10 @@ export const MeetingForm = ({ mode, initialData, onSubmit }: MeetingFormProps) =
                 disabled={!isFormValid}
                 onClick={handleSubmit}
                 className={`w-full py-3 px-4 rounded-lg font-medium transition-colors focus:ring-2 focus:ring-offset-2 
-                  ${isFormValid
-                    ? 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500'
-                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  ${
+                    isFormValid
+                      ? 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500'
+                      : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                   }`}
               >
                 {mode === 'edit' ? '모임 수정하기' : '모임 만들기'}

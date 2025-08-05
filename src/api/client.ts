@@ -29,7 +29,7 @@ class ApiClient {
 
     // 요청 인터셉터
     this.instance.interceptors.request.use(
-      (config) => {
+      config => {
         // 토큰이 있다면 헤더에 추가
         const token = localStorage.getItem('accessToken');
         if (token) {
@@ -37,31 +37,33 @@ class ApiClient {
         }
         return config;
       },
-      (error) => {
+      error => {
         return Promise.reject(error);
-      }
+      },
     );
 
     // 응답 인터셉터
     this.instance.interceptors.response.use(
-      (response) => {
+      response => {
         return response;
       },
-      async (error) => {
+      async error => {
         const originalRequest = error.config;
 
         // 401 에러 처리 (토큰 만료 등)
         if (error.response?.status === 401 && !originalRequest._retry) {
           originalRequest._retry = true;
-          
+
           try {
             // 리프레시 토큰으로 새 액세스 토큰 받기
             const refreshToken = localStorage.getItem('refreshToken');
             if (refreshToken) {
-              const response = await this.post('/auth/refresh', { refreshToken });
+              const response = await this.post('/auth/refresh', {
+                refreshToken,
+              });
               const { accessToken } = response.data;
               localStorage.setItem('accessToken', accessToken);
-              
+
               // 원래 요청 재시도
               originalRequest.headers.Authorization = `Bearer ${accessToken}`;
               return this.instance(originalRequest);
@@ -76,12 +78,15 @@ class ApiClient {
         }
 
         return Promise.reject(error);
-      }
+      },
     );
   }
 
   // GET 요청
-  async get<T = any>(url: string, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
+  async get<T = any>(
+    url: string,
+    config?: AxiosRequestConfig,
+  ): Promise<ApiResponse<T>> {
     try {
       const response: AxiosResponse<T> = await this.instance.get(url, config);
       return {
@@ -94,9 +99,17 @@ class ApiClient {
   }
 
   // POST 요청
-  async post<T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
+  async post<T = any>(
+    url: string,
+    data?: any,
+    config?: AxiosRequestConfig,
+  ): Promise<ApiResponse<T>> {
     try {
-      const response: AxiosResponse<T> = await this.instance.post(url, data, config);
+      const response: AxiosResponse<T> = await this.instance.post(
+        url,
+        data,
+        config,
+      );
       return {
         data: response.data,
         status: response.status,
@@ -107,9 +120,17 @@ class ApiClient {
   }
 
   // PATCH 요청
-  async patch<T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
+  async patch<T = any>(
+    url: string,
+    data?: any,
+    config?: AxiosRequestConfig,
+  ): Promise<ApiResponse<T>> {
     try {
-      const response: AxiosResponse<T> = await this.instance.patch(url, data, config);
+      const response: AxiosResponse<T> = await this.instance.patch(
+        url,
+        data,
+        config,
+      );
       return {
         data: response.data,
         status: response.status,
@@ -120,9 +141,15 @@ class ApiClient {
   }
 
   // DELETE 요청
-  async delete<T = any>(url: string, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
+  async delete<T = any>(
+    url: string,
+    config?: AxiosRequestConfig,
+  ): Promise<ApiResponse<T>> {
     try {
-      const response: AxiosResponse<T> = await this.instance.delete(url, config);
+      const response: AxiosResponse<T> = await this.instance.delete(
+        url,
+        config,
+      );
       return {
         data: response.data,
         status: response.status,
@@ -136,12 +163,15 @@ class ApiClient {
   private handleError(error: any): ApiError {
     if (axios.isAxiosError(error)) {
       return {
-        message: error.response?.data?.message || error.message || '알 수 없는 오류가 발생했습니다.',
+        message:
+          error.response?.data?.message ||
+          error.message ||
+          '알 수 없는 오류가 발생했습니다.',
         status: error.response?.status,
         code: error.code,
       };
     }
-    
+
     return {
       message: '알 수 없는 오류가 발생했습니다.',
     };
