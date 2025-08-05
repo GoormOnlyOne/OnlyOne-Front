@@ -11,6 +11,16 @@ interface PresignedUrlResponse {
   imageUrl: string;
 }
 
+// 허용된 이미지 타입 검증
+const validateFileType = (file: File): void => {
+  const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+  if (!allowedTypes.includes(file.type)) {
+    throw new Error(
+      `지원하지 않는 파일 형식입니다. JPEG 또는 PNG 파일만 업로드 가능합니다. (현재: ${file.type})`,
+    );
+  }
+};
+
 // 파일 타입 변환 (image/jpg -> image/jpeg)
 const normalizeContentType = (fileType: string): string => {
   return fileType === 'image/jpg' ? 'image/jpeg' : fileType;
@@ -21,6 +31,8 @@ export const getPresignedUrl = async (
   file: File,
   imageFolderType: string,
 ): Promise<PresignedUrlResponse> => {
+  validateFileType(file);
+
   const request: PresignedUrlRequest = {
     fileName: file.name,
     contentType: normalizeContentType(file.type),
