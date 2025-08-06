@@ -2,9 +2,11 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import ProfileImageUpload from '../../components/common/ProfileImage';
 import Modal from '../../components/common/Modal';
+import { useAuth } from '../../contexts/AuthContext';
 
 export const Mypage = () => {
   const navigate = useNavigate();
+  const { logout } = useAuth();
 
   const userInfo = {
     nickname: '별명',
@@ -27,7 +29,9 @@ export const Mypage = () => {
   };
   const handleConfirmLogout = () => {
     console.log('로그아웃을 했습니다.');
+    logout(); // AuthContext의 logout 함수 호출
     setIsLogout(false);
+    navigate('/login'); // 로그인 페이지로 리다이렉션
   };
 
   // 탈퇴하기 버튼

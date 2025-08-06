@@ -19,6 +19,7 @@ import { Search } from '../pages/Search.tsx';
 import { Notice } from '../pages/Notice.tsx';
 import { Login } from '../pages/Login.tsx';
 import { Signup } from '../pages/Signup.tsx';
+import KakaoCallback from '../pages/KakaoCallback.tsx';
 import { Mypage } from '../pages/Mypage/Mypage.tsx';
 import { Interest } from '../pages/Mypage/Interest.tsx';
 import { Profile } from '../pages/Mypage/Profile.tsx';
@@ -154,6 +155,10 @@ export const router = createBrowserRouter([
   {
     path: '/signup',
     element: <Signup />,
+  },
+  {
+    path: '/kakao-callback',
+    element: <KakaoCallback />,
   },
   {
     path: '/components',
