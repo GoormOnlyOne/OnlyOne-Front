@@ -1,127 +1,231 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useOutletContext, useNavigate } from 'react-router-dom';
 import EmptyState from '../components/domain/search/EmptyState';
+import apiClient from '../api/client';
+import { FilterBottomSheet } from '../components/domain/search/FilterBottomSheet';
+import { FilterChips } from '../components/domain/search/FilterChips';
 
 interface Meeting {
   club_id: number;
   name: string;
-  introduction: string;
-  interest: string;
+  description: string;
+  category: string;
   district: string;
   member_count: number;
-  image: string;
+  club_image: string;
 }
 
-// 임시 데이터 (실제로는 API에서 가져와야 함)
-const meetingData: Meeting[] = [
-  {
-    club_id: 1,
-    name: '게이트볼',
-    introduction: '게이트볼 모임 입니다.',
-    interest: '운동',
-    district: '강남구',
-    member_count: 10,
-    image:
-      'https://readdy.ai/api/search-image?query=People%20running%20together%20in%20Han%20River%20park%20Seoul%2C%20morning%20exercise%2C%20beautiful%20sunrise%2C%20group%20activity%2C%20healthy%20lifestyle%2C%20outdoor%20sports%2C%20Korean%20cityscape%20in%20background%2C%20vibrant%20and%20energetic%20atmosphere&width=400&height=240&seq=1&orientation=landscape',
-  },
-  {
-    club_id: 2,
-    name: '한강 러닝 크루',
-    introduction: '매주 토요일 아침 한강에서 함께 달려요!',
-    interest: '운동',
-    district: '용산구',
-    member_count: 25,
-    image:
-      'https://readdy.ai/api/search-image?query=Italian%20cooking%20class%2C%20people%20making%20pasta%20together%2C%20modern%20kitchen%20studio%2C%20ingredients%20and%20cooking%20tools%2C%20warm%20lighting%2C%20collaborative%20cooking%20experience%2C%20professional%20chef%20instruction%2C%20cozy%20atmosphere&width=400&height=240&seq=2&orientation=landscape',
-  },
-  {
-    club_id: 3,
-    name: '북클럽 독서모임',
-    introduction: '한 달에 한 권, 함께 읽고 토론해요',
-    interest: '문화',
-    district: '마포구',
-    member_count: 15,
-    image:
-      'https://readdy.ai/api/search-image?query=Cozy%20book%20cafe%20reading%20group%2C%20people%20discussing%20books%2C%20warm%20lighting%2C%20comfortable%20seating%2C%20bookshelves%2C%20coffee%20cups%2C%20intellectual%20atmosphere%2C%20modern%20interior%20design%2C%20peaceful%20ambiance&width=400&height=240&seq=3&orientation=landscape',
-  },
-  {
-    club_id: 4,
-    name: '요가 필라테스',
-    introduction: '몸과 마음의 균형을 찾는 요가 모임',
-    interest: '운동',
-    district: '서초구',
-    member_count: 20,
-    image:
-      'https://readdy.ai/api/search-image?query=Jeju%20Island%20travel%20group%2C%20beautiful%20coastal%20scenery%2C%20travelers%20exploring%20together%2C%20clear%20blue%20sky%2C%20scenic%20landscape%2C%20adventure%20and%20friendship%2C%20Korean%20island%20paradise%2C%20outdoor%20exploration&width=400&height=240&seq=4&orientation=landscape',
-  },
-  {
-    club_id: 5,
-    name: '사진 출사 모임',
-    introduction: '주말마다 서울 곳곳을 누비며 사진 촬영해요',
-    interest: '문화',
-    district: '종로구',
-    member_count: 18,
-    image:
-      'https://readdy.ai/api/search-image?query=Guitar%20playing%20group%20session%2C%20musicians%20jamming%20together%2C%20music%20studio%20setting%2C%20acoustic%20and%20electric%20guitars%2C%20amplifiers%2C%20warm%20studio%20lighting%2C%20creative%20musical%20atmosphere%2C%20collaborative%20performance&width=400&height=240&seq=5&orientation=landscape',
-  },
-  {
-    club_id: 6,
-    name: '맛집 탐방대',
-    introduction: '서울의 숨은 맛집을 찾아다니는 미식 모임',
-    interest: '사교',
-    district: '강남구',
-    member_count: 30,
-    image:
-      'https://readdy.ai/api/search-image?query=Movie%20discussion%20group%2C%20people%20talking%20about%20films%2C%20cinema%20lobby%2C%20movie%20posters%2C%20comfortable%20seating%20area%2C%20enthusiastic%20film%20lovers%2C%20modern%20movie%20theater%20interior%2C%20engaging%20conversation&width=400&height=240&seq=6&orientation=landscape',
-  },
-];
+interface SearchFilters {
+  city: string;
+  district: string;
+  interestId: number | null;
+  sortBy: 'LATEST' | 'MEMBER_COUNT';
+}
+
+interface Interest {
+  interestId: number;
+  category: string;
+}
 
 export const Search = () => {
   const { searchQuery } = useOutletContext<{ searchQuery: string }>();
   const [searchResults, setSearchResults] = useState<Meeting[]>([]);
   const [isSearched, setIsSearched] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [showFilterSheet, setShowFilterSheet] = useState(false);
+  const [filters, setFilters] = useState<SearchFilters>({
+    city: '',
+    district: '',
+    interestId: null,
+    sortBy: 'MEMBER_COUNT'
+  });
   const navigate = useNavigate();
+
+  // 정적 관심사 데이터
+  const interests: Interest[] = [
+    { interestId: 1, category: '문화' },
+    { interestId: 2, category: '운동' },
+    { interestId: 3, category: '여행' },
+    { interestId: 4, category: '음악' },
+    { interestId: 5, category: '공예' },
+    { interestId: 6, category: '사교' },
+    { interestId: 7, category: '외국어' },
+    { interestId: 8, category: '재테크' }
+  ];
+
+  const handleSearch = useCallback(async (query: string, searchFilters = filters) => {
+    setIsLoading(true);
+    setIsSearched(true);
+
+    try {
+      const params = {
+        keyword: query || undefined,
+        city: searchFilters.city || undefined,
+        district: searchFilters.district || undefined,
+        interestId: searchFilters.interestId || undefined,
+        sortBy: searchFilters.sortBy,
+        page: 0,
+        size: 20
+      };
+
+      const response = await apiClient.get<Meeting[]>('/clubs/search', { params });
+      if (response.success) {
+        setSearchResults(response.data);
+      } else {
+        setSearchResults([]);
+      }
+    } catch (error) {
+      console.error('검색 실패:', error);
+      setSearchResults([]);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [filters]);
 
   useEffect(() => {
     if (searchQuery) {
       handleSearch(searchQuery);
     }
-  }, [searchQuery]);
+  }, [searchQuery, handleSearch]);
 
-  const handleSearch = async (query: string) => {
-    setIsLoading(true);
-    setIsSearched(true);
+  const handleApplyFilters = (newFilters: SearchFilters) => {
+    setFilters(newFilters);
+    
+    if (searchQuery || isSearched) {
+      handleSearch(searchQuery, newFilters);
+    }
+  };
 
-    // 검색 시뮬레이션 (실제로는 API 호출)
-    setTimeout(() => {
-      const results = meetingData.filter(
-        meeting =>
-          meeting.name.toLowerCase().includes(query.toLowerCase()) ||
-          meeting.introduction.toLowerCase().includes(query.toLowerCase()) ||
-          meeting.interest.toLowerCase().includes(query.toLowerCase()) ||
-          meeting.district.toLowerCase().includes(query.toLowerCase()),
-      );
+  const handleRemoveFilter = (key: keyof SearchFilters) => {
+    const newFilters = { ...filters };
+    
+    if (key === 'city') {
+      newFilters.city = '';
+      newFilters.district = '';
+    } else if (key === 'interestId') {
+      newFilters.interestId = null;
+    }
+    
+    setFilters(newFilters);
+    
+    if (searchQuery || isSearched) {
+      handleSearch(searchQuery, newFilters);
+    }
+  };
 
-      setSearchResults(results);
-      setIsLoading(false);
-    }, 500);
+  const handleClearAllFilters = () => {
+    const defaultFilters = {
+      city: '',
+      district: '',
+      interestId: null,
+      sortBy: 'MEMBER_COUNT' as const
+    };
+    setFilters(defaultFilters);
+    
+    if (searchQuery || isSearched) {
+      handleSearch(searchQuery, defaultFilters);
+    }
+  };
+
+  const hasActiveFilters = () => {
+    return filters.city || filters.interestId;
   };
 
   const handleJoinMeeting = (clubId: number) => {
-    // 모임 가입 로직
     console.log(`모임 ${clubId}에 가입`);
-    // 실제로는 API 호출 후 성공 메시지 표시
     alert('모임 가입이 완료되었습니다!');
   };
 
   const handleMeetingClick = (clubId: number) => {
-    // 모임 상세 페이지로 이동
     navigate(`/meeting/${clubId}`);
   };
 
   return (
     <div className="h-[calc(100vh-56px)] overflow-y-auto bg-gray-50">
+      {/* 필터 헤더 */}
+      <div className="sticky top-0 bg-white border-b border-gray-100 z-10">
+        {/* 검색 결과 정보 */}
+        {isSearched && (
+          <div className="px-4 py-3 border-b border-gray-50">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-600">
+                  {searchQuery && (
+                    <>
+                      '<span className="font-semibold text-gray-800">{searchQuery}</span>' 
+                    </>
+                  )}
+                  검색 결과
+                </p>
+                <p className="text-xs text-gray-500 mt-0.5">
+                  총 {searchResults.length}개의 모임
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+        
+        {/* 필터 바 */}
+        <div className="px-4 py-3">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setShowFilterSheet(true)}
+              className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                hasActiveFilters()
+                  ? 'bg-blue-600 text-white shadow-md'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              <i className="ri-equalizer-line text-base"></i>
+              필터
+            </button>
+            
+            {/* 빠른 정렬 버튼 */}
+            {isSearched && searchResults.length > 0 && (
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => handleApplyFilters({ ...filters, sortBy: 'MEMBER_COUNT' })}
+                  className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    filters.sortBy === 'MEMBER_COUNT'
+                      ? 'bg-blue-50 text-blue-600 border border-blue-200'
+                      : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'
+                  }`}
+                >
+                  인기순
+                </button>
+                <button
+                  onClick={() => handleApplyFilters({ ...filters, sortBy: 'LATEST' })}
+                  className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    filters.sortBy === 'LATEST'
+                      ? 'bg-blue-50 text-blue-600 border border-blue-200'
+                      : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'
+                  }`}
+                >
+                  최신순
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* 활성화된 필터 칩 */}
+      <FilterChips
+        filters={filters}
+        interests={interests}
+        onRemoveFilter={handleRemoveFilter}
+        onClearAll={handleClearAllFilters}
+      />
+
+      {/* 필터 바텀시트 */}
+      <FilterBottomSheet
+        isOpen={showFilterSheet}
+        onClose={() => setShowFilterSheet(false)}
+        filters={filters}
+        onApplyFilters={handleApplyFilters}
+        interests={interests}
+      />
+
       {/* 검색하기 전 상태 */}
       {!isSearched && (
         <div className="flex flex-col items-center justify-center h-[60vh] px-4">
@@ -148,19 +252,6 @@ export const Search = () => {
         <>
           {searchResults.length > 0 ? (
             <div className="px-4 py-6">
-              <div className="mb-4">
-                <p className="text-sm text-gray-600">
-                  '
-                  <span className="font-semibold text-gray-800">
-                    {searchQuery}
-                  </span>
-                  ' 검색 결과
-                </p>
-                <p className="text-xs text-gray-500 mt-1">
-                  총 {searchResults.length}개의 모임을 찾았어요
-                </p>
-              </div>
-
               <div className="space-y-4">
                 {searchResults.map(meeting => (
                   <div
@@ -170,18 +261,17 @@ export const Search = () => {
                   >
                     <div className="relative">
                       <img
-                        src={meeting.image}
+                        src={meeting.club_image || 'https://via.placeholder.com/400x240'}
                         alt={meeting.name}
                         className="w-full h-48 object-cover"
                       />
                       <span className="absolute top-3 left-3 bg-blue-600 text-white px-3 py-1 rounded-full text-xs font-medium">
-                        {meeting.interest}
+                        {meeting.category}
                       </span>
                       <button
                         className="absolute top-3 right-3 w-8 h-8 flex items-center justify-center bg-white/80 rounded-full hover:bg-white transition-colors"
                         onClick={e => {
                           e.stopPropagation();
-                          // 좋아요 로직
                         }}
                       >
                         <i className="ri-heart-line text-gray-600"></i>
@@ -193,7 +283,7 @@ export const Search = () => {
                         {meeting.name}
                       </h3>
                       <p className="text-sm text-gray-600 mb-3 line-clamp-2">
-                        {meeting.introduction}
+                        {meeting.description}
                       </p>
 
                       <div className="flex items-center justify-between">
@@ -231,22 +321,6 @@ export const Search = () => {
               image="https://readdy.ai/api/search-image?query=Empty%20state%20illustration%2C%20no%20search%20results%2C%20minimalist%20design%2C%20soft%20colors&width=200&height=200"
               showCreateButton={true}
             />
-
-            // 추천 검색어
-            // <div className="mt-8">
-            //   <p className="text-sm font-semibold text-gray-700 mb-3">이런 모임은 어때요?</p>
-            //   <div className="flex flex-wrap gap-2">
-            //     {['러닝', '독서', '요가', '사진', '맛집'].map((keyword) => (
-            //       <button
-            //         key={keyword}
-            //         onClick={() => handleSearch(keyword)}
-            //         className="px-4 py-2 bg-gray-100 text-gray-700 rounded-full text-sm hover:bg-gray-200 transition-colors"
-            //       >
-            //         {keyword}
-            //       </button>
-            //     ))}
-            //   </div>
-            // </div>
           )}
         </>
       )}
