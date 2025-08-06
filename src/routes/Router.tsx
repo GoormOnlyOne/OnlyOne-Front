@@ -34,6 +34,9 @@ import PointCharge from '../pages/Payment/PointCharge.tsx';
 import { Success } from '../pages/Payment/Success.tsx';
 import { Checkout } from '../pages/Payment/Checkout.tsx';
 
+import ChatRoomList from '../pages/Chat/ChatRoomList';
+import ChatRoom from '../pages/Chat/ChatRoom';
+
 export const router = createBrowserRouter([
   // [기본] 레이아웃이 적용되는 라우트들
   {
@@ -144,6 +147,14 @@ export const router = createBrowserRouter([
         path: '/success',
         element: <Success />,
       },
+      {
+        path: '/clubs/:clubId/chat',
+        element: <ChatRoomList />,
+      },
+      {
+        path: '/chat/:chatRoomId/messages',
+        element: <ChatRoom />,
+      }
     ],
   },
 
