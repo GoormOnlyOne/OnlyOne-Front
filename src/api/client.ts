@@ -24,6 +24,7 @@ class ApiClient {
       timeout: 10000,
       headers: {
         'Content-Type': 'application/json',
+        'Accept': 'application/json',
       },
     });
 
@@ -69,16 +70,19 @@ class ApiClient {
               return this.instance(originalRequest);
             }
           } catch (refreshError) {
-            // 리프레시도 실패하면 로그인 페이지로
+            // 리프레시도 실패하면 AuthContext에 알려서 로그아웃 처리
             localStorage.removeItem('accessToken');
             localStorage.removeItem('refreshToken');
-            window.location.href = '/login';
+            
+            // AuthContext에 인증 오류 알림
+            window.dispatchEvent(new CustomEvent('auth-error'));
+            
             return Promise.reject(refreshError);
           }
         }
 
         return Promise.reject(error);
-      },
+      },3
     );
   }
 
