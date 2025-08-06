@@ -79,7 +79,7 @@ export default function TitleLayout() {
       };
       break;
 
-    case pathname === '/mypage/settlement':
+    case pathname === '/mypage/wallet':
       headerProps = {
         isBack: true,
         isTitle: true,
