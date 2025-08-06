@@ -1,5 +1,3 @@
-// src/pages/Chat/ChatRoom.tsx
-
 import React, { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
@@ -10,7 +8,7 @@ import { fetchChatMessages } from '../../api/chat';
 import { useChatSocket } from '../../hooks/useChatSocket';
 import type { ChatMessageDto } from '../../types/chat/chat.types';
 
-const CURRENT_USER_ID = 1; // TODO: 로그인 유저 ID로 대체
+const CURRENT_USER_ID = 1; // TODO: 로그인 유저 ID로 교체
 
 const formatChatTime = (iso: string) => {
   const d = new Date(iso);
@@ -29,7 +27,7 @@ const ChatRoom: React.FC = () => {
   const { messages: liveMessages, sendMessage } = useChatSocket(chatRoomIdNum, CURRENT_USER_ID);
   const bottomRef = useRef<HTMLDivElement>(null);
 
-  // 초기 메시지 로드
+  // ✅ 초기 메시지 로드
   useEffect(() => {
     if (!chatRoomIdNum) return;
 
@@ -37,8 +35,18 @@ const ChatRoom: React.FC = () => {
       try {
         setLoading(true);
         setError(null);
+
         const res = await fetchChatMessages(chatRoomIdNum);
-        setMessages(res.data.data); // ✅ 초기 메시지
+        console.log('✅ 전체 응답:', res);
+
+        const receivedMessages = res.data;
+
+        if (Array.isArray(receivedMessages)) {
+          setMessages(receivedMessages);
+        } else {
+          console.warn("📛 서버 응답이 배열이 아님:", receivedMessages);
+          setMessages([]);
+        }
       } catch (e: any) {
         setError(e?.message ?? '메시지를 불러오지 못했습니다.');
       } finally {
@@ -47,19 +55,19 @@ const ChatRoom: React.FC = () => {
     })();
   }, [chatRoomIdNum]);
 
-  // 실시간 메시지 수신 시 반영
+  // ✅ 실시간 메시지 수신 시 반영
   useEffect(() => {
     if (liveMessages.length === 0) return;
     const latest = liveMessages[liveMessages.length - 1];
     setMessages(prev => [...prev, latest]);
   }, [liveMessages]);
 
-  // 스크롤 아래로
+  // ✅ 스크롤 아래로
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // 메시지 전송
+  // ✅ 메시지 전송
   const handleSend = (e: React.FormEvent) => {
     e.preventDefault();
     const trimmed = text.trim();
@@ -71,12 +79,12 @@ const ChatRoom: React.FC = () => {
 
   return (
     <div className="flex flex-col h-screen bg-gray-50">
-      {/* 헤더 */}
+      {/* 상단 헤더 */}
       <div className="px-4 py-3 bg-white border-b shadow-sm">
         <h2 className="text-lg font-semibold">채팅방 #{chatRoomIdNum || '-'}</h2>
       </div>
 
-      {/* 본문 */}
+      {/* 채팅 메시지 영역 */}
       <div className="flex-1 overflow-y-auto p-4 space-y-2">
         {loading && <div className="text-gray-400 text-sm">불러오는 중...</div>}
         {error && <div className="text-red-500 text-sm">{error}</div>}
