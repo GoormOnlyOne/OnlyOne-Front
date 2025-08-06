@@ -135,7 +135,7 @@ export const Mypage = () => {
             </Link>
 
             <Link
-              to="/mypage/settlement"
+              to="/mypage/wallet"
               className="flex items-center justify-between py-3 hover:bg-gray-50 cursor-pointer"
             >
               <div className="flex items-center">

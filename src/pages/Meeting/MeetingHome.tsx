@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { showApiErrorToast } from '../../components/common/Toast/ToastProvider';
 import ScheduleList from '../../components/domain/meeting/ScheduleList';
 import apiClient from '../../api/client';
 
@@ -67,8 +68,9 @@ export const MeetingHome = () => {
           });
         }
       } catch (err: any) {
+        showApiErrorToast(err);
         console.error('모임 정보 조회 실패:', err);
-        setError(err.message || '모임 정보를 불러오는데 실패했습니다.');
+        navigate('/meeting');
       } finally {
         setLoading(false);
       }

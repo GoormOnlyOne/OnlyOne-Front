@@ -30,6 +30,9 @@ import { ComponentGallery } from '../pages/ComponentGallery/ComponentGallery.tsx
 import MeetingFeedCreate from '../pages/Meeting/MeetingFeedCreate.tsx';
 import MeetingFeedEdit from '../pages/Meeting/MeetingFeedEdit.tsx';
 import MeetingFeedDetail from '../pages/Meeting/MeetingFeedDetail.tsx';
+import PointCharge from '../pages/Payment/PointCharge.tsx';
+import { Success } from '../pages/Payment/Success.tsx';
+import { Checkout } from '../pages/Payment/Checkout.tsx';
 
 export const router = createBrowserRouter([
   // [기본] 레이아웃이 적용되는 라우트들
@@ -128,6 +131,18 @@ export const router = createBrowserRouter([
       {
         path: 'settlementHistory',
         element: <SettlementHistory />,
+      },
+      {
+        path: 'payment',
+        element: <Checkout />,
+      },
+      {
+        path: 'payment/charge',
+        element: <PointCharge />,
+      },
+      {
+        path: '/success',
+        element: <Success />,
       },
     ],
   },
