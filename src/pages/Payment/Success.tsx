@@ -4,7 +4,7 @@ import {
   showApiErrorToast,
   showToast as globalToast,
 } from '../../components/common/Toast/ToastProvider';
-import apiClient from '../../api/client';
+import apiClient, { type ApiError } from '../../api/client';
 
 interface ConfirmPaymentRequestDto {
   paymentKey: string;
@@ -21,7 +21,7 @@ const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 export function Success() {
   const [isConfirmed, setIsConfirmed] = useState(false);
-  const [errorOccurred, setErrorOccurred] = useState<Error | null>(null);
+  const [errorOccurred, setErrorOccurred] = useState<ApiError | null>(null);
 
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -39,7 +39,7 @@ export function Success() {
       });
 
       const maxRetries = 6;
-      let lastError: any = null;
+      let lastError: ApiError | null = null;
 
       for (let attempt = 1; attempt <= maxRetries; attempt++) {
         try {
@@ -55,8 +55,8 @@ export function Success() {
             setIsConfirmed(true);
             return;
           }
-        } catch (err: any) {
-          lastError = err;
+        } catch (err) {
+          lastError = err as ApiError;
           console.warn(`Confirm attempt ${attempt} failed`, err);
           if (attempt < maxRetries) await delay(5000);
         }
