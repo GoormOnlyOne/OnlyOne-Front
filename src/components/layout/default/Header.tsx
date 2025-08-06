@@ -7,7 +7,6 @@ export default function Header() {
         <Link
           to="/"
           className="text-xl font-bold text-blue-600"
-          style={{ fontFamily: 'Pacifico, serif' }}
         >
           logo
         </Link>

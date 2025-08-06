@@ -54,7 +54,7 @@ const KakaoCallback: React.FC = () => {
           
           // AuthContext를 통해 로그인 상태 업데이트
           login(accessToken);
-          
+
           console.log('Access Token:', accessToken);
           console.log('Refresh Token:', refreshToken);
 
@@ -81,53 +81,23 @@ const KakaoCallback: React.FC = () => {
   }, [navigate]);
 
   return (
-    <div style={{ 
-      display: 'flex', 
-      flexDirection: 'column',
-      justifyContent: 'center', 
-      alignItems: 'center', 
-      height: '100vh',
-      padding: '20px'
-    }}>
+    <div className="flex flex-col justify-center items-center h-screen px-5">
       {loading && (
-        <div>
-          <div style={{ marginBottom: '16px' }}>카카오 로그인 처리 중...</div>
-          <div style={{ 
-            width: '40px', 
-            height: '40px', 
-            border: '4px solid #f3f3f3',
-            borderTop: '4px solid #3498db',
-            borderRadius: '50%',
-            animation: 'spin 1s linear infinite',
-            margin: '0 auto'
-          }}></div>
+        <div className="text-center">
+          <div className="mb-4">카카오 로그인 처리 중...</div>
+          <div className="w-10 h-10 border-4 border-gray-200 border-t-blue-500 rounded-full animate-spin mx-auto"></div>
         </div>
       )}
-      
+
       {error && (
-        <div style={{ 
-          color: 'red', 
-          textAlign: 'center',
-          padding: '20px',
-          backgroundColor: '#ffe6e6',
-          border: '1px solid #ffcccc',
-          borderRadius: '8px',
-          maxWidth: '400px'
-        }}>
-          <div style={{ fontWeight: 'bold', marginBottom: '8px' }}>로그인 오류</div>
+        <div className="text-red-600 text-center p-5 bg-red-50 border border-red-200 rounded-lg max-w-md">
+          <div className="font-bold mb-2">로그인 오류</div>
           <div>{error}</div>
-          <div style={{ marginTop: '8px', fontSize: '14px', color: '#666' }}>
+          <div className="mt-2 text-sm text-gray-600">
             잠시 후 로그인 페이지로 이동합니다...
           </div>
         </div>
       )}
-      
-      <style>{`
-        @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
-      `}</style>
     </div>
   );
 };
