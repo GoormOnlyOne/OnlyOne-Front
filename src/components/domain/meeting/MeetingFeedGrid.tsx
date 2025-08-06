@@ -1,9 +1,7 @@
-// src/components/domain/meeting/MeetingFeedGrid.tsx
 import React, { useState, useEffect, useCallback } from 'react';
 import apiClient from '../../../api/client';
 import { Link } from 'react-router-dom';
 
-// 화면에서 사용하는 피드 아이템 타입
 interface FeedItem {
   id: number;
   imageUrl: string;
@@ -11,7 +9,6 @@ interface FeedItem {
   commentCount: number;
 }
 
-// 백엔드에서 내려주는 DTO 스펙
 interface FeedSummaryDto {
   feedId: number;
   thumbnailUrl: string;
@@ -19,13 +16,10 @@ interface FeedSummaryDto {
   commentCount: number;
 }
 
-// 페이징된 응답 구조
 interface PageResponse<T> {
   content: T[];
-  // 기타 메타데이터 생략
 }
 
-// 공통 응답 래퍼
 interface CommonResponse<T> {
   success: boolean;
   data: T;
@@ -73,12 +67,10 @@ const MeetingFeedGrid: React.FC<MeetingFeedGridProps> = ({ clubId }) => {
       .finally(() => setLoading(false));
   }, [clubId, page, loading, hasMore]);
 
-  // 최초 한 번 데이터 로드
   useEffect(() => {
     loadMore();
   }, []);
 
-  // 무한 스크롤 핸들러 (main 요소 내부)
   useEffect(() => {
     const handleScroll = (e: Event) => {
       const target = e.target as HTMLElement;
