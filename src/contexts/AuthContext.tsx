@@ -12,12 +12,10 @@ export interface User {
 // 인증 컨텍스트 타입
 interface AuthContextType {
   isAuthenticated: boolean;
-  user: User | null;
   accessToken: string | null;
   refreshToken: string | null;
-  login: (accessToken: string, user: User) => void;
+  login: (accessToken: string) => void;
   logout: () => void;
-  updateUser: (user: User) => void;
   isLoading: boolean;
 }
 
@@ -27,7 +25,6 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 // AuthProvider 컴포넌트
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
-  const [user, setUser] = useState<User | null>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [refreshToken, setRefreshToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -38,13 +35,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       try {
         const storedAccessToken = localStorage.getItem('accessToken');
         const storedRefreshToken = localStorage.getItem('refreshToken');
-        const storedUser = localStorage.getItem('user');
 
-        if (storedAccessToken && storedUser) {
-          const parsedUser = JSON.parse(storedUser);
+        if (storedAccessToken) {
           setAccessToken(storedAccessToken);
           setRefreshToken(storedRefreshToken);
-          setUser(parsedUser);
           setIsAuthenticated(true);
         }
       } catch (error) {
@@ -52,7 +46,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         // 잘못된 데이터가 있으면 제거
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
-        localStorage.removeItem('user');
       } finally {
         setIsLoading(false);
       }
@@ -62,12 +55,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   // 로그인 함수
-  const login = (newAccessToken: string, newUser: User) => {
+  const login = (newAccessToken: string) => {
     localStorage.setItem('accessToken', newAccessToken);
-    localStorage.setItem('user', JSON.stringify(newUser));
     
     setAccessToken(newAccessToken);
-    setUser(newUser);
     setIsAuthenticated(true);
   };
 
@@ -75,28 +66,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logout = () => {
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
-    localStorage.removeItem('user');
     
     setAccessToken(null);
     setRefreshToken(null);
-    setUser(null);
     setIsAuthenticated(false);
-  };
-
-  // 사용자 정보 업데이트 함수
-  const updateUser = (updatedUser: User) => {
-    localStorage.setItem('user', JSON.stringify(updatedUser));
-    setUser(updatedUser);
   };
 
   const value: AuthContextType = {
     isAuthenticated,
-    user,
     accessToken,
     refreshToken,
     login,
     logout,
-    updateUser,
     isLoading,
   };
 
