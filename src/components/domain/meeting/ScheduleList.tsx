@@ -22,7 +22,11 @@ interface ScheduleListResponse {
   data: Schedule[];
 }
 
-export default function ScheduleList() {
+interface ScheduleListProps {
+  clubRole: 'LEADER' | 'MEMBER' | 'GUEST';
+}
+
+export default function ScheduleList({ clubRole }: ScheduleListProps) {
   const navigate = useNavigate();
   const { id: meetingId } = useParams();
   const [schedules, setSchedules] = useState<Schedule[]>([]);
@@ -45,8 +49,8 @@ export default function ScheduleList() {
           `/clubs/${meetingId}/schedules`,
         );
 
-        if (response.data.success) {
-          setSchedules(response.data.data);
+        if (response.success) {
+          setSchedules(response.data);
         }
       } catch (err: any) {
         console.error('정기모임 목록 조회 실패:', err);
@@ -116,6 +120,7 @@ export default function ScheduleList() {
   };
 
   const getParticipationStatus = (schedule: Schedule) => {
+    const isGuest = clubRole === 'GUEST';
     const isSettlement =
       schedule.status === 'ENDED' || schedule.status === 'SETTLING';
     const buttonText = isSettlement ? '정산 현황' : '참여 현황';
@@ -125,7 +130,11 @@ export default function ScheduleList() {
 
     return (
       <button
-        onClick={() => handleStatusClick(schedule)}
+        onClick={() => {
+          if (!isGuest) {
+            handleStatusClick(schedule);
+          }
+        }}
         className={buttonClass}
       >
         {buttonText} ({schedule.userCount}/
