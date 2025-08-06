@@ -40,12 +40,12 @@ const KakaoCallback: React.FC = () => {
         console.log('카카오 인증 코드:', code);
 
         // 백엔드로 인증 코드 전송
-        const response = await apiClient.get<KakaoLoginResponse>(`/auth/kakao/callback?code=${code}`);
-        
+        const response = await apiClient.post<KakaoLoginResponse>(`/auth/kakao/callback?code=${code}`);
+
         console.log('백엔드 응답:', response.data);
 
         // 로그인 성공 처리
-        if (response.data.success && response.data.accessToken) {
+        if (response.success && response.data.accessToken) {
           const { accessToken, refreshToken, user } = response.data;
           
           // 토큰들을 localStorage에 저장
@@ -60,7 +60,7 @@ const KakaoCallback: React.FC = () => {
           console.log('Refresh Token:', refreshToken);
 
           // 신규 사용자인 경우 회원가입 페이지로, 아니면 홈으로
-          if (user.isNewUser) {
+          if (response.data.isNewUser) { // backend에서 isNewUser 필드가 true인 경우
             navigate('/signup');
           } else {
             navigate('/');
