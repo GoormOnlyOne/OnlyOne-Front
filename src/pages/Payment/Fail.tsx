@@ -40,7 +40,7 @@ export function FailPage() {
           </a>
           <div className="flex" style={{ gap: "16px" }}>
             <a
-              className="btn w-100"
+              className="flex-1 text-center bg-gray-100 py-2 px-4 rounded hover:bg-gray-200 transition"
               href="https://docs.tosspayments.com/reference/error-codes"
               target="_blank"
               rel="noreferrer noopener"
