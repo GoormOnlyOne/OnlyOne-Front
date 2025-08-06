@@ -8,13 +8,7 @@ interface KakaoLoginResponse {
   success: boolean;
   accessToken: string;
   refreshToken: string;
-  user: {
-    id: number;
-    kakaoId: number;
-    nickname: string | null;
-    profileImage: string | null;
-    isNewUser: boolean;
-  };
+  isNewUser: boolean;
   error?: string;
 }
 
