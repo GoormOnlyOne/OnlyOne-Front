@@ -19,12 +19,20 @@ import { Search } from '../pages/Search.tsx';
 import { Notice } from '../pages/Notice.tsx';
 import { Login } from '../pages/Login.tsx';
 import { Signup } from '../pages/Signup.tsx';
+import KakaoCallback from '../pages/KakaoCallback.tsx';
 import { Mypage } from '../pages/Mypage/Mypage.tsx';
 import { Interest } from '../pages/Mypage/Interest.tsx';
 import { Profile } from '../pages/Mypage/Profile.tsx';
-import { Settlement } from '../pages/Mypage/Settlement.tsx';
+import { Wallet } from '../pages/Mypage/Wallet.tsx';
+import SettlementHistory from '../pages/Mypage/SettlementHistory.tsx';
 
 import { ComponentGallery } from '../pages/ComponentGallery/ComponentGallery.tsx';
+import MeetingFeedCreate from '../pages/Meeting/MeetingFeedCreate.tsx';
+import MeetingFeedEdit from '../pages/Meeting/MeetingFeedEdit.tsx';
+import MeetingFeedDetail from '../pages/Meeting/MeetingFeedDetail.tsx';
+import PointCharge from '../pages/Payment/PointCharge.tsx';
+import { Success } from '../pages/Payment/Success.tsx';
+import { Checkout } from '../pages/Payment/Checkout.tsx';
 
 export const router = createBrowserRouter([
   // [기본] 레이아웃이 적용되는 라우트들
@@ -56,7 +64,7 @@ export const router = createBrowserRouter([
         index: true,
         element: <Search />,
       },
-    ]
+    ],
   },
 
   // [타이틀] 레이아웃이 적용되는 라우트들
@@ -77,18 +85,18 @@ export const router = createBrowserRouter([
         element: <Profile />,
       },
       {
-        path: 'mypage/settlement',
-        element: <Settlement />,
+        path: 'mypage/wallet',
+        element: <Wallet />,
       },
       {
         path: 'notice',
         element: <Notice />,
       },
       {
-				path: 'meeting/:id',
-				element: <MeetingDetail />
-			},
-			{
+        path: 'meeting/:id',
+        element: <MeetingDetail />,
+      },
+      {
         path: 'meeting/:meetingId/schedule/:scheduleId/participation',
         element: <ParticipationStatus />,
       },
@@ -103,11 +111,40 @@ export const router = createBrowserRouter([
       {
         path: 'meeting/:id/schedule/create',
         element: <MeetingScheduleCrate />,
-      },{
+      },
+      {
         path: 'meeting/:meetingId/schedule/:scheduleId/edit',
         element: <MeetingScheduleEdit />,
       },
-    ]
+      {
+        path: 'meeting/:meetingId/feed/create',
+        element: <MeetingFeedCreate />,
+      },
+      {
+        path: 'meeting/:meetingId/feed/:feedId/edit',
+        element: <MeetingFeedEdit />,
+      },
+      {
+        path: 'meeting/:meetingId/feed/:feedId',
+        element: <MeetingFeedDetail />,
+      },
+      {
+        path: 'settlementHistory',
+        element: <SettlementHistory />,
+      },
+      {
+        path: 'payment',
+        element: <Checkout />,
+      },
+      {
+        path: 'payment/charge',
+        element: <PointCharge />,
+      },
+      {
+        path: '/success',
+        element: <Success />,
+      },
+    ],
   },
 
   // 레이아웃이 적용되지 않는 라우트들
@@ -118,6 +155,10 @@ export const router = createBrowserRouter([
   {
     path: '/signup',
     element: <Signup />,
+  },
+  {
+    path: '/kakao-callback',
+    element: <KakaoCallback />,
   },
   {
     path: '/components',

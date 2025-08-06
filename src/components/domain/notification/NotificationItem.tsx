@@ -1,14 +1,14 @@
-import React from 'react'
-import type { Notification } from './NotificationType'
-import { getNotificationMessage } from './getNotificationMessage'
+import React from 'react';
+import type { Notification } from './NotificationType';
+import { getNotificationMessage } from './getNotificationMessage';
 
 interface Props {
-  notification: Notification
-  onClick?: (noti: Notification) => void
+  notification: Notification;
+  onClick?: (noti: Notification) => void;
 }
 
 const NotificationItem: React.FC<Props> = ({ notification, onClick }) => {
-  const message = getNotificationMessage(notification)
+  const message = getNotificationMessage(notification);
 
   return (
     <div
@@ -29,11 +29,9 @@ const NotificationItem: React.FC<Props> = ({ notification, onClick }) => {
         />
         <span className="text-xs text-gray-600 mt-1">알림</span>
       </div>
-      <div className="text-sm text-gray-800 leading-6">
-        {message}
-      </div>
+      <div className="text-sm text-gray-800 leading-6">{message}</div>
     </div>
-  )
-}
+  );
+};
 
-export default NotificationItem
+export default NotificationItem;

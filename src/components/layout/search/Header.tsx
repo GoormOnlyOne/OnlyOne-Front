@@ -8,11 +8,11 @@ interface SearchHeaderProps {
   onBack?: () => void;
 }
 
-export default function SearchHeader({ 
-  placeholder = "검색어를 입력하세요", 
-  defaultValue = "",
+export default function SearchHeader({
+  placeholder = '검색어를 입력하세요',
+  defaultValue = '',
   onSearch,
-  onBack 
+  onBack,
 }: SearchHeaderProps) {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState(defaultValue);
@@ -46,25 +46,25 @@ export default function SearchHeader({
     <header className="h-full bg-white border-b border-gray-100">
       <div className="h-full flex items-center px-2 gap-2">
         {/* 뒤로가기 버튼 */}
-        <button 
+        <button
           onClick={handleBack}
           className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
           aria-label="뒤로가기"
         >
           <i className="ri-arrow-left-line text-gray-700 text-xl"></i>
         </button>
-        
+
         {/* 검색 입력 폼 */}
         <div className="flex-1 relative">
           <input
             type="text"
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={e => setSearchTerm(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder={placeholder}
             className="w-full h-10 pl-4 pr-10 bg-gray-100 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all"
           />
-          
+
           {/* 입력 내용 지우기 버튼 */}
           {searchTerm && (
             <button
@@ -76,9 +76,9 @@ export default function SearchHeader({
             </button>
           )}
         </div>
-        
+
         {/* 검색 버튼 */}
-        <button 
+        <button
           onClick={handleSearch}
           className="w-10 h-10 flex items-center justify-center rounded-full bg-blue-500 hover:bg-blue-600 transition-colors"
           aria-label="검색"

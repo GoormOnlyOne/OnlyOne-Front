@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { kakaoLogin } from '../utils/kakaoAuth';
 
 export const Login = () => {
-  const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
 
@@ -13,18 +12,23 @@ export const Login = () => {
 
   const handleKakaoLogin = () => {
     setIsLoading(true);
-    // TODO: 카카오 로그인 로직
-    
-    // 현재는 누르면 회원가입 페이지로 이동하게 처리함
-    navigate('/signup');
+    try {
+      // 카카오 OAuth 로그인 시작
+      kakaoLogin();
+    } catch (error) {
+      console.error('카카오 로그인 실행 중 오류:', error);
+      setIsLoading(false);
+    }
   };
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-blue-50 to-white px-4 overflow-hidden">
       {/* 로고 영역 */}
-      <div className={`flex-1 flex items-center justify-center transition-all duration-700 ${
-        isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
-      }`}>
+      <div
+        className={`flex-1 flex items-center justify-center transition-all duration-700 ${
+          isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+        }`}
+      >
         <div className="text-center">
           {/* 아이콘 + 텍스트 조합 */}
           <div className="mb-4">
@@ -32,20 +36,18 @@ export const Login = () => {
               <i className="ri-group-fill text-white text-5xl"></i>
             </div>
           </div>
-          
-          <h1 className="text-4xl font-bold text-gray-800 mb-2">
-            벗킷
-          </h1>
-          <p className="text-gray-600 text-sm">
-            함께하는 즐거움, 새로운 만남
-          </p>
+
+          <h1 className="text-4xl font-bold text-gray-800 mb-2">벗킷</h1>
+          <p className="text-gray-600 text-sm">함께하는 즐거움, 새로운 만남</p>
         </div>
       </div>
 
       {/* 로그인 버튼 영역 */}
-      <div className={`w-full max-w-sm pb-16 transition-all duration-700 delay-300 ${
-        isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
-      }`}>
+      <div
+        className={`w-full max-w-sm pb-16 transition-all duration-700 delay-300 ${
+          isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+        }`}
+      >
         <button
           onClick={handleKakaoLogin}
           disabled={isLoading}
@@ -56,7 +58,7 @@ export const Login = () => {
           ) : (
             <>
               <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 3C6.477 3 2 6.477 2 10.5c0 2.612 1.85 4.893 4.625 6.163-.203.72-.73 2.6-.835 3-.131.502.184.52.388.378.16-.11 2.55-1.697 3.57-2.385.397.056.815.094 1.252.094 5.523 0 10-3.477 10-7.75S17.523 3 12 3z"/>
+                <path d="M12 3C6.477 3 2 6.477 2 10.5c0 2.612 1.85 4.893 4.625 6.163-.203.72-.73 2.6-.835 3-.131.502.184.52.388.378.16-.11 2.55-1.697 3.57-2.385.397.056.815.094 1.252.094 5.523 0 10-3.477 10-7.75S17.523 3 12 3z" />
               </svg>
               <span>카카오 로그인</span>
             </>

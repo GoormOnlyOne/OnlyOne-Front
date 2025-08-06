@@ -4,7 +4,7 @@ import { clsx } from 'clsx';
 export interface TabItem {
   id: string;
   label: string;
-	content?: React.ReactNode;
+  content?: React.ReactNode;
 }
 
 interface TabBarProps {
@@ -13,28 +13,27 @@ interface TabBarProps {
   onTabChange?: (tabId: string) => void;
 }
 
-const TabBar: React.FC<TabBarProps> = ({
-  tabs,
-  defaultTab,
-  onTabChange
-}) => {
+const TabBar: React.FC<TabBarProps> = ({ tabs, defaultTab, onTabChange }) => {
   const [activeTab, setActiveTab] = useState<string>(
-    defaultTab || tabs[0]?.id || ''
+    defaultTab || tabs[0]?.id || '',
   );
 
-  const handleTabClick = useCallback((tabId: string) => {
-    if (tabId === activeTab) return;
-    
-    setActiveTab(tabId);
-    onTabChange?.(tabId);
-  }, [activeTab, onTabChange]);
+  const handleTabClick = useCallback(
+    (tabId: string) => {
+      if (tabId === activeTab) return;
+
+      setActiveTab(tabId);
+      onTabChange?.(tabId);
+    },
+    [activeTab, onTabChange],
+  );
 
   const getTabStyles = (isActive: boolean) => {
     return clsx(
       'py-3 px-4 text-base font-medium transition-all duration-200 cursor-pointer flex-1 text-center',
-      isActive 
-        ? 'text-blue-600 border-b-2 border-blue-600' 
-        : 'text-gray-600 hover:text-blue-600 border-b-2 border-transparent hover:border-gray-300'
+      isActive
+        ? 'text-blue-600 border-b-2 border-blue-600'
+        : 'text-gray-600 hover:text-blue-600 border-b-2 border-transparent hover:border-gray-300',
     );
   };
 
@@ -43,7 +42,7 @@ const TabBar: React.FC<TabBarProps> = ({
   return (
     <>
       <div className="flex border-b border-gray-200">
-        {tabs.map((tab) => {
+        {tabs.map(tab => {
           const isActive = activeTab === tab.id;
           return (
             <button
@@ -57,9 +56,7 @@ const TabBar: React.FC<TabBarProps> = ({
         })}
       </div>
       {activeTabContent && (
-        <div className="tab-content">
-          {activeTabContent}
-        </div>
+        <div className="tab-content">{activeTabContent}</div>
       )}
     </>
   );

@@ -30,7 +30,7 @@ export default function ScrollToTopButton() {
     if (mainElement) {
       mainElement.scrollTo({
         top: 0,
-        behavior: 'smooth'
+        behavior: 'smooth',
       });
     }
   };
@@ -38,22 +38,24 @@ export default function ScrollToTopButton() {
   return (
     <div className="fixed bottom-20 right-4 z-50">
       {/* 툴팁 */}
-      <div 
+      <div
         className={`
           absolute bottom-full right-0 mb-2 
           bg-gray-800 text-white text-xs 
           px-3 py-1.5 rounded-md
           whitespace-nowrap
           transition-all duration-200
-          ${showTooltip && isVisible
-            ? 'opacity-100 translate-y-0' 
-            : 'opacity-0 translate-y-1 pointer-events-none'
+          ${
+            showTooltip && isVisible
+              ? 'opacity-100 translate-y-0'
+              : 'opacity-0 translate-y-1 pointer-events-none'
           }
         `}
       >
         맨 위로 가기
         {/* 툴팁 화살표 */}
-        <div className="absolute top-full right-4 w-0 h-0 
+        <div
+          className="absolute top-full right-4 w-0 h-0 
           border-l-4 border-r-4 border-t-4
           border-l-transparent border-r-transparent border-t-gray-800"
         />
@@ -74,9 +76,10 @@ export default function ScrollToTopButton() {
           transition-all duration-300 transform
           hover:scale-110
           cursor-pointer
-          ${isVisible 
-            ? 'opacity-100 translate-y-0' 
-            : 'opacity-0 translate-y-10 pointer-events-none'
+          ${
+            isVisible
+              ? 'opacity-100 translate-y-0'
+              : 'opacity-0 translate-y-10 pointer-events-none'
           }
         `}
         aria-label="맨 위로 가기"
