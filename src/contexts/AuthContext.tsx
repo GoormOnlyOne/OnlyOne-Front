@@ -1,0 +1,100 @@
+import React, { createContext, useContext, useEffect, useState } from 'react';
+
+// 사용자 타입 정의
+export interface User {
+  id: number;
+  kakaoId: number;
+  nickname: string | null;
+  profileImage: string | null;
+  isNewUser: boolean;
+}
+
+// 인증 컨텍스트 타입
+interface AuthContextType {
+  isAuthenticated: boolean;
+  accessToken: string | null;
+  refreshToken: string | null;
+  login: (accessToken: string) => void;
+  logout: () => void;
+  isLoading: boolean;
+}
+
+// 컨텍스트 생성
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+// AuthProvider 컴포넌트
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [accessToken, setAccessToken] = useState<string | null>(null);
+  const [refreshToken, setRefreshToken] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  // 초기화: localStorage에서 토큰과 사용자 정보 로드
+  useEffect(() => {
+    const initializeAuth = () => {
+      try {
+        const storedAccessToken = localStorage.getItem('accessToken');
+        const storedRefreshToken = localStorage.getItem('refreshToken');
+
+        if (storedAccessToken) {
+          setAccessToken(storedAccessToken);
+          setRefreshToken(storedRefreshToken);
+          setIsAuthenticated(true);
+        }
+      } catch (error) {
+        console.error('인증 정보 로드 실패:', error);
+        // 잘못된 데이터가 있으면 제거
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    initializeAuth();
+  }, []);
+
+  // 로그인 함수
+  const login = (newAccessToken: string) => {
+    localStorage.setItem('accessToken', newAccessToken);
+    
+    setAccessToken(newAccessToken);
+    setIsAuthenticated(true);
+  };
+
+  // 로그아웃 함수
+  const logout = () => {
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+    
+    setAccessToken(null);
+    setRefreshToken(null);
+    setIsAuthenticated(false);
+  };
+
+  const value: AuthContextType = {
+    isAuthenticated,
+    accessToken,
+    refreshToken,
+    login,
+    logout,
+    isLoading,
+  };
+
+  return (
+    <AuthContext.Provider value={value}>
+      {children}
+    </AuthContext.Provider>
+  );
+};
+
+// useAuth 훅
+export const useAuth = (): AuthContextType => {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+};
+
+export default AuthContext;

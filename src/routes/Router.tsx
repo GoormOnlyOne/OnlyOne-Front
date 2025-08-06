@@ -19,6 +19,7 @@ import { Search } from '../pages/Search.tsx';
 import { Notice } from '../pages/Notice.tsx';
 import { Login } from '../pages/Login.tsx';
 import { Signup } from '../pages/Signup.tsx';
+import KakaoCallback from '../pages/KakaoCallback.tsx';
 import { Mypage } from '../pages/Mypage/Mypage.tsx';
 import { Interest } from '../pages/Mypage/Interest.tsx';
 import { Profile } from '../pages/Mypage/Profile.tsx';
@@ -29,6 +30,9 @@ import { ComponentGallery } from '../pages/ComponentGallery/ComponentGallery.tsx
 import MeetingFeedCreate from '../pages/Meeting/MeetingFeedCreate.tsx';
 import MeetingFeedEdit from '../pages/Meeting/MeetingFeedEdit.tsx';
 import MeetingFeedDetail from '../pages/Meeting/MeetingFeedDetail.tsx';
+import PointCharge from '../pages/Payment/PointCharge.tsx';
+import { Success } from '../pages/Payment/Success.tsx';
+import { Checkout } from '../pages/Payment/Checkout.tsx';
 
 export const router = createBrowserRouter([
   // [기본] 레이아웃이 적용되는 라우트들
@@ -81,7 +85,7 @@ export const router = createBrowserRouter([
         element: <Profile />,
       },
       {
-        path: "mypage/settlement",
+        path: 'mypage/wallet',
         element: <Wallet />,
       },
       {
@@ -129,7 +133,23 @@ export const router = createBrowserRouter([
       {
         path: 'settlementHistory',
         element: <SettlementHistory />,
+<<<<<<< HEAD
       }
+=======
+      },
+      {
+        path: 'payment',
+        element: <Checkout />,
+      },
+      {
+        path: 'payment/charge',
+        element: <PointCharge />,
+      },
+      {
+        path: '/success',
+        element: <Success />,
+      },
+>>>>>>> 96ee3d7946c01cc47bf8f7b43daf96be7c7ec6ad
     ],
   },
 
@@ -143,7 +163,15 @@ export const router = createBrowserRouter([
     element: <Signup />,
   },
   {
+<<<<<<< HEAD
     path: "/components",
+=======
+    path: '/kakao-callback',
+    element: <KakaoCallback />,
+  },
+  {
+    path: '/components',
+>>>>>>> 96ee3d7946c01cc47bf8f7b43daf96be7c7ec6ad
     element: <ComponentGallery />,
   },
 ]);
