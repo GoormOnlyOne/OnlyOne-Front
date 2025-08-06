@@ -46,16 +46,15 @@ const KakaoCallback: React.FC = () => {
 
         // 로그인 성공 처리
         if (response.success && response.data.accessToken) {
-          const { accessToken, refreshToken, user } = response.data;
+          const { accessToken, refreshToken } = response.data;
           
           // 토큰들을 localStorage에 저장
           localStorage.setItem('accessToken', accessToken);
           localStorage.setItem('refreshToken', refreshToken);
           
           // AuthContext를 통해 로그인 상태 업데이트
-          login(accessToken, user);
+          login(accessToken);
           
-          console.log('로그인 성공! 사용자:', user);
           console.log('Access Token:', accessToken);
           console.log('Refresh Token:', refreshToken);
 
