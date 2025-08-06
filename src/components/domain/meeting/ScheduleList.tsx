@@ -6,7 +6,7 @@ import apiClient from '../../../api/client';
 export interface Schedule {
   scheduleId: number;
   name: string;
-  status: string;
+  scheduleStatus: string;
   scheduleTime: string;
   cost: number;
   userLimit: number;
@@ -49,6 +49,8 @@ export default function ScheduleList({ clubRole }: ScheduleListProps) {
           `/clubs/${meetingId}/schedules`,
         );
 
+        console.log(response);
+
         if (response.success) {
           setSchedules(response.data);
         }
@@ -79,8 +81,8 @@ export default function ScheduleList({ clubRole }: ScheduleListProps) {
     return 'bg-gray-500 text-white';
   };
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
+  const getStatusBadge = (scheduleStatus: string) => {
+    switch (scheduleStatus) {
       case 'READY':
         return 'bg-green-100 text-green-800';
       case 'ENDED':
@@ -94,8 +96,8 @@ export default function ScheduleList({ clubRole }: ScheduleListProps) {
     }
   };
 
-  const getStatusText = (status: string) => {
-    switch (status) {
+  const getStatusText = (scheduleStatus: string) => {
+    switch (scheduleStatus) {
       case 'READY':
         return '모집중';
       case 'ENDED':
@@ -105,13 +107,14 @@ export default function ScheduleList({ clubRole }: ScheduleListProps) {
       case 'CLOSED':
         return '정산완료';
       default:
-        return status;
+        return scheduleStatus;
     }
   };
 
   const handleStatusClick = (schedule: Schedule) => {
     const isSettlement =
-      schedule.status === 'ENDED' || schedule.status === 'SETTLING';
+      schedule.scheduleStatus === 'ENDED' ||
+      schedule.scheduleStatus === 'SETTLING';
     const type = isSettlement ? 'settlement' : 'participation';
 
     navigate(
@@ -122,7 +125,8 @@ export default function ScheduleList({ clubRole }: ScheduleListProps) {
   const getParticipationStatus = (schedule: Schedule) => {
     const isGuest = clubRole === 'GUEST';
     const isSettlement =
-      schedule.status === 'ENDED' || schedule.status === 'SETTLING';
+      schedule.scheduleStatus === 'ENDED' ||
+      schedule.scheduleStatus === 'SETTLING';
     const buttonText = isSettlement ? '정산 현황' : '참여 현황';
     const buttonClass = isSettlement
       ? 'bg-blue-100 text-blue-700 px-3 py-1 rounded text-sm font-medium hover:bg-blue-200 transition-colors cursor-pointer'
@@ -218,7 +222,7 @@ export default function ScheduleList({ clubRole }: ScheduleListProps) {
   };
 
   const getActionButton = (schedule: Schedule) => {
-    switch (schedule.status) {
+    switch (schedule.scheduleStatus) {
       case 'READY':
         if (schedule.joined) {
           return (
@@ -316,9 +320,9 @@ export default function ScheduleList({ clubRole }: ScheduleListProps) {
                       {schedule.dday}
                     </span>
                     <span
-                      className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusBadge(schedule.status)}`}
+                      className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusBadge(schedule.scheduleStatus)}`}
                     >
-                      {getStatusText(schedule.status)}
+                      {getStatusText(schedule.scheduleStatus)}
                     </span>
                   </div>
                 </div>
