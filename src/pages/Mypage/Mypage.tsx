@@ -1,13 +1,18 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import ProfileImageUpload from '../../components/common/ProfileImage';
 import Modal from '../../components/common/Modal';
+import { useAuth } from '../../contexts/AuthContext';
 
 export const Mypage = () => {
+  const navigate = useNavigate();
+  const { logout } = useAuth();
+
   const userInfo = {
     nickname: '별명',
     gender: '지역(시/도) · 성별/연령 · 성별',
     interests: ['관심사 1', '관심사 2', '관심사 3'],
+    balance: '5000',
   };
 
   const [isLogout, setIsLogout] = useState(false);
@@ -24,7 +29,9 @@ export const Mypage = () => {
   };
   const handleConfirmLogout = () => {
     console.log('로그아웃을 했습니다.');
+    logout(); // AuthContext의 logout 함수 호출
     setIsLogout(false);
+    navigate('/login'); // 로그인 페이지로 리다이렉션
   };
 
   // 탈퇴하기 버튼
@@ -41,10 +48,15 @@ export const Mypage = () => {
     setIsWithdraw(false);
   };
 
+  // // 충전하기 버튼
+  // const onClickCharge = () => {
+  //   console.log('충전하기를 했습니다.');
+  // };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* 프로필 섹션 */}
-      <div className="px-4 bg-white">
+      <div className="px-4 bg-white pb-4">
         <div className="flex flex-col items-center py-8">
           {/* 프로필 이미지 */}
           <ProfileImageUpload maxSizeInMB={5} editable={false} />
@@ -65,6 +77,29 @@ export const Mypage = () => {
                 {interest}
               </span>
             ))}
+          </div>
+        </div>
+
+        {/* 포인트 섹션 */}
+        <div className="mb-4 mx-4 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden transition-shadow hover:shadow-md">
+          <div className="py-6 px-6 flex items-center justify-between">
+            <div className="flex flex-col">
+              <h3 className="text-base font-semibold text-gray-800 leading-snug">
+                보유 포인트
+              </h3>
+              <h3 className="text-base font-semibold text-gray-800 leading-snug">
+                {userInfo.balance} P
+              </h3>
+            </div>
+
+            {/* 충전하기 버튼 */}
+            <Link
+              to="/payment/charge"
+              className="bg-blue-500 text-white text-sm px-6 py-2 rounded-full hover:bg-blue-700 cursor-pointer hover:shadow-md transition-shadow flex items-center gap-1"
+            >
+              <i className="ri-coins-line text-lg"></i>
+              <span>충전하기</span>
+            </Link>
           </div>
         </div>
       </div>
@@ -100,7 +135,7 @@ export const Mypage = () => {
             </Link>
 
             <Link
-              to="/mypage/settlement"
+              to="/mypage/wallet"
               className="flex items-center justify-between py-3 hover:bg-gray-50 cursor-pointer"
             >
               <div className="flex items-center">
