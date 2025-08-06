@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { kakaoLogin } from '../utils/kakaoAuth';
 
 export const Login = () => {
-  const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
 
@@ -13,10 +12,13 @@ export const Login = () => {
 
   const handleKakaoLogin = () => {
     setIsLoading(true);
-    // TODO: 카카오 로그인 로직
-
-    // 현재는 누르면 회원가입 페이지로 이동하게 처리함
-    navigate('/signup');
+    try {
+      // 카카오 OAuth 로그인 시작
+      kakaoLogin();
+    } catch (error) {
+      console.error('카카오 로그인 실행 중 오류:', error);
+      setIsLoading(false);
+    }
   };
 
   return (
