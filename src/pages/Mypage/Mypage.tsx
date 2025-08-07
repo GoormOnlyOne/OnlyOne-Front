@@ -147,6 +147,21 @@ export const Mypage = () => {
               <i className="ri-arrow-right-s-line text-xl text-gray-400"></i>
             </Link>
 
+                 {/* 여기서 내 모임 보기 버튼 추가 */}
+             <Link
+                to="/mypage/my-meetings"
+        className="flex items-center justify-between py-3 hover:bg-gray-50 cursor-pointer"
+            >
+        <div className="flex items-center">
+          {/* 아이콘은 리액트 아이콘 또는 리믹스아이콘 등 원하는 것으로 교체하세요 */}
+          <i className="ri-group-line text-xl text-gray-700 mr-3"></i>
+          <span className="text-base text-gray-900 font-medium">
+            내 모임 보기
+          </span>
+        </div>
+        <i className="ri-arrow-right-s-line text-xl text-gray-400"></i>
+      </Link>
+
             <button
               onClick={onClickLogout}
               className="w-full flex items-center justify-between py-3 hover:bg-gray-50 cursor-pointer"

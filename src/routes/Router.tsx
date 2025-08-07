@@ -30,6 +30,7 @@ import { ComponentGallery } from '../pages/ComponentGallery/ComponentGallery.tsx
 import MeetingFeedCreate from '../pages/Meeting/MeetingFeedCreate.tsx';
 import MeetingFeedEdit from '../pages/Meeting/MeetingFeedEdit.tsx';
 import MeetingFeedDetail from '../pages/Meeting/MeetingFeedDetail.tsx';
+import MyMeeting from '../pages/Meeting/MyMeeting.tsx';
 import PointCharge from '../pages/Payment/PointCharge.tsx';
 import { Success } from '../pages/Payment/Success.tsx';
 import { Checkout } from '../pages/Payment/Checkout.tsx';
@@ -149,7 +150,14 @@ export const router = createBrowserRouter([
         path: '/success',
         element: <Success />,
       },
+<<<<<<< HEAD
 >>>>>>> 96ee3d7946c01cc47bf8f7b43daf96be7c7ec6ad
+=======
+        {
+        path: 'mypage/my-meetings',
+        element: <MyMeeting />,
+      }
+>>>>>>> 7850e808ca3bf8ffeccf02bb747c6c33e50c0406
     ],
   },
 
