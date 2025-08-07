@@ -91,7 +91,8 @@ export default function CategorySection({
       case 'single-select':
         // 단일 선택 모드
         setSelectedCategory(categoryId);
-        onCategoryChange?.(categoryId);
+        // 다음 렌더 사이클에서 부모 컴포넌트 상태 업데이트
+        setTimeout(() => onCategoryChange?.(categoryId), 0);
         break;
 
       case 'multi-select':
@@ -114,7 +115,8 @@ export default function CategorySection({
             }
           }
 
-          onCategoryChange?.(newSelection);
+          // 다음 렌더 사이클에서 부모 컴포넌트 상태 업데이트
+          setTimeout(() => onCategoryChange?.(newSelection), 0);
           return newSelection;
         });
         break;

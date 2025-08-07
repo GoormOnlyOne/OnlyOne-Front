@@ -51,7 +51,7 @@ export const Login = () => {
         <button
           onClick={handleKakaoLogin}
           disabled={isLoading}
-          className="w-full bg-[#FEE500] hover:bg-[#FDD835] active:bg-[#F9D71C] text-black font-medium py-4 px-6 rounded-xl flex items-center justify-center space-x-3 transition-all shadow-md hover:shadow-lg disabled:opacity-70"
+          className="w-full bg-[#FEE500] hover:bg-[#FDD835] active:bg-[#F9D71C] text-black font-medium py-4 px-6 rounded-xl flex items-center justify-center space-x-3 transition-all shadow-md hover:shadow-lg disabled:opacity-70 cursor-pointer disabled:cursor-not-allowed"
         >
           {isLoading ? (
             <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin" />
