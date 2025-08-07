@@ -169,7 +169,7 @@ export default function ScheduleList({ clubRole }: ScheduleListProps) {
       setSelectedSchedule(schedule);
       setModalAction('settlement');
       setIsModalOpen(true);
-      setModalTitle(`${schedule.name} 정산을 요청하시겠습니까?`);
+      setModalTitle(`${schedule.name} 정산하시겠습니까?`);
     } else {
       setSelectedSchedule(schedule);
       setModalAction('leave');
@@ -207,22 +207,24 @@ export default function ScheduleList({ clubRole }: ScheduleListProps) {
         );
         globalToast('정기 모임을 나갔습니다.', 'success', 2000);
       } else if (modalAction === 'settlement') {
-        // 정산하기 API 호출 (리더/멤버, 상태별로 분기)
         if (
           clubRole === 'LEADER' &&
-          selectedSchedule.scheduleStatus === 'SETTLING'
+          selectedSchedule.scheduleStatus === 'ENDED'
         ) {
-          // 리더가 SETTLING 상태에서 정산하기: 새로운 API
-          await apiClient.post(
-            `/clubs/${meetingId}/schedules/${selectedSchedule.scheduleId}/settlements/user`,
-          );
-          globalToast('정산 요청을 보냈습니다.', 'success', 2000);
-        } else {
-          // 그 외(ENDED 등): 기존 API
+          // 리더가 ENDED 상태에서 정산 요청 API 호출
           await apiClient.post(
             `/clubs/${meetingId}/schedules/${selectedSchedule.scheduleId}/settlements`,
           );
           globalToast('정산 요청을 보냈습니다.', 'success', 2000);
+        } else if (
+          clubRole === 'MEMBER' &&
+          selectedSchedule.scheduleStatus === 'SETTLING'
+        ) {
+          // 멤버가 SETTLING 상태에서 정산 API 호출
+          await apiClient.post(
+            `/clubs/${meetingId}/schedules/${selectedSchedule.scheduleId}/settlements/user`,
+          );
+          globalToast('정산 완료했습니다.', 'success', 2000);
         }
       }
     } catch (err: unknown) {
@@ -278,10 +280,10 @@ export default function ScheduleList({ clubRole }: ScheduleListProps) {
         );
       }
       if (schedule.scheduleStatus === 'SETTLING') {
-        // 리더 && SETTLING: 정산하기(회색, 활성화)
+        // 리더 && SETTLING: 정산하기(회색, 비활성화)
         return (
           <button
-            onClick={() => handleActionClick('정산하기', schedule)}
+            disabled
             className="bg-gray-400 text-white px-4 py-2 rounded text-sm font-medium hover:bg-gray-500 transition-colors cursor-pointer"
           >
             정산하기
@@ -322,10 +324,20 @@ export default function ScheduleList({ clubRole }: ScheduleListProps) {
             </button>
           );
         }
+      } else if (schedule.scheduleStatus === 'SETTLING') {
+        if (schedule.joined) {
+          return (
+            <button
+              onClick={() => handleActionClick('정산하기', schedule)}
+              className="bg-gray-400 text-white px-4 py-2 rounded text-sm font-medium cursor-not-allowed"
+            >
+              정산하기
+            </button>
+          );
+        }
       }
       if (
         schedule.scheduleStatus === 'ENDED' ||
-        schedule.scheduleStatus === 'SETTLING' ||
         schedule.scheduleStatus === 'CLOSED'
       ) {
         // 멤버 && ENDED/SETTLING/CLOSED: 정산하기(회색, 비활성화)
