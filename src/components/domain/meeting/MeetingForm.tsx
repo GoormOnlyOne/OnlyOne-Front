@@ -4,6 +4,10 @@ import AddressSelector, {
   type AddressData,
 } from '../../../components/common/AddressSelector';
 import Modal from '../../common/Modal';
+import {
+  showToast as globalToast,
+  showToast,
+} from '../../common/Toast/ToastProvider';
 
 export type Category =
   | 'CULTURE'
@@ -91,7 +95,6 @@ export const MeetingForm = ({
     }
   }, [initialData]);
 
-  // 폼 데이터 변경 헬퍼 (로그 포함)
   const onFormChange = <K extends keyof FormData>(
     field: K,
     value: FormData[K],
@@ -116,8 +119,10 @@ export const MeetingForm = ({
       // 파일 타입 검증
       const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
       if (!allowedTypes.includes(file.type)) {
-        alert(
+        globalToast(
           '지원하지 않는 파일 형식입니다. JPEG 또는 PNG 파일만 업로드 가능합니다.',
+          'error',
+          3000,
         );
         if (fileInputRef.current) {
           fileInputRef.current.value = '';
@@ -128,7 +133,11 @@ export const MeetingForm = ({
       // 파일 크기 검증 (5MB 제한)
       const maxSize = 5 * 1024 * 1024; // 5MB
       if (file.size > maxSize) {
-        alert('파일 크기가 너무 큽니다. 5MB 이하의 파일만 업로드 가능합니다.');
+        globalToast(
+          '파일 크기가 너무 큽니다. 5MB 이하의 파일만 업로드 가능합니다.',
+          'error',
+          3000,
+        );
         if (fileInputRef.current) {
           fileInputRef.current.value = '';
         }
