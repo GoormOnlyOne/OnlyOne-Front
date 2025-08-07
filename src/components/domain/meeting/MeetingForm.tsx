@@ -13,8 +13,7 @@ export type Category =
   | 'CRAFT'
   | 'SOCIAL'
   | 'LANGUAGE'
-  | 'FINANCE'
-  | 'ASDF';
+  | 'FINANCE';
 
 export interface SubmittedData extends FormData {
   profileImageUrl?: string;
@@ -37,10 +36,6 @@ export interface InitialData {
   userLimit?: number;
   accountNumber?: string;
   address?: AddressData;
-}
-
-export interface SubmittedData extends FormData {
-  profileImageUrl?: string;
 }
 
 interface MeetingFormProps {
@@ -195,7 +190,7 @@ export const MeetingForm = ({
     formData.category.trim().length > 0 &&
     formData.meetingName.trim().length >= 1 &&
     formData.introduction.trim().length >= 1 &&
-    formData.profileImage !== null &&
+    (formData.profileImage !== null || imagePreview !== null) &&
     formData.userLimit >= 1 &&
     selectedAddress.isComplete;
 
@@ -353,7 +348,7 @@ export const MeetingForm = ({
                 <button
                   type="button"
                   onClick={onClickMeetingDelete}
-                  className="w-full mt-4 py-3 px-4 rounded-lg font-medium transition-colors focus:ring-2 focus:ring-offset-2 bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500"
+                  className="w-full mt-4 py-3 px-4 rounded-lg font-medium transition-colors focus:ring-2 focus:ring-offset-2 bg-red-600 text-white hover:bg-red-700 focus:ring-red-500"
                 >
                   모임 삭제하기
                 </button>
