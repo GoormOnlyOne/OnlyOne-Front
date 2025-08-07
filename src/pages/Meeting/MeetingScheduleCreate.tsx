@@ -25,8 +25,6 @@ export const MeetingScheduleCreate = () => {
         ).toISOString(),
       };
 
-      console.log('정모 생성 페이로드:', payload);
-
       const response = await apiClient.post<{
         success: boolean;
         data: { scheduleId: number };

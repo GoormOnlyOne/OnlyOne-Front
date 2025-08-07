@@ -24,7 +24,6 @@ export const MeetingEdit = () => {
 
         if (response.success) {
           const data = response.data;
-          console.log('data={}', data);
 
           setInitialData({
             category: (data.category as Category) ?? 'CULTURE',

@@ -64,8 +64,6 @@ export const MeetingScheduleEdit = () => {
         ).toISOString(),
       };
 
-      console.log('정모 수정 페이로드:', payload);
-
       const response = await apiClient.patch<{
         success: boolean;
         data: { scheduleId: number };

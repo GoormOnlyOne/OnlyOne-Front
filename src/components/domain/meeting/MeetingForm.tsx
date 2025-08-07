@@ -74,7 +74,6 @@ export const MeetingForm = ({
 
   useEffect(() => {
     if (!initialData) return;
-    console.log('🔄 초기 데이터 적용:', initialData);
     setFormData(prev => ({
       category: initialData.category ?? prev.category,
       meetingName: initialData.meetingName ?? prev.meetingName,
@@ -102,7 +101,6 @@ export const MeetingForm = ({
     field: K,
     value: FormData[K],
   ) => {
-    console.log(`✏️ onFormChange: field="${String(field)}"`, value);
     setFormData(prev => ({
       ...prev,
       [field]: value,
@@ -113,7 +111,6 @@ export const MeetingForm = ({
   const handleCategoryChange = (selected: Category | Category[]) => {
     // single-select 모드이므로 Category 타입만 처리
     if (typeof selected === 'string') {
-      console.log('📂 handleCategoryChange:', selected);
       onFormChange('category', selected);
     }
   };
@@ -180,13 +177,9 @@ export const MeetingForm = ({
     }
   };
 
-  // capacity 변경 (로그 포함)
   const handleUserLimitChange = (e: ChangeEvent<HTMLInputElement>) => {
-    console.log('🔢 capacity raw:', e.target.value);
     const parsed = parseInt(e.target.value) || 1;
-    console.log('🔢 parsed:', parsed);
     const bounded = Math.min(parsed, 100);
-    console.log('🔢 bounded <=100:', bounded);
     onFormChange('userLimit', bounded);
   };
 
@@ -205,37 +198,6 @@ export const MeetingForm = ({
     formData.profileImage !== null &&
     formData.userLimit >= 1 &&
     selectedAddress.isComplete;
-
-  // 종합 디버그 로그
-  useEffect(() => {
-    console.groupCollapsed('🛠️ Form Validation 상태');
-    console.log(
-      'categoryValid →',
-      formData.category,
-      formData.category.trim().length > 0,
-    );
-    console.log(
-      'meetingNameValid →',
-      formData.meetingName,
-      formData.meetingName.trim().length >= 1,
-    );
-    console.log(
-      'introductionValid →',
-      formData.introduction,
-      formData.introduction.trim().length >= 1,
-    );
-    console.log('capacityValid →', formData.userLimit, formData.userLimit >= 1);
-    console.log('addressValid →', selectedAddress.isComplete, selectedAddress);
-    console.log('▶︎ isFormValid →', isFormValid);
-    console.groupEnd();
-  }, [
-    formData.category,
-    formData.meetingName,
-    formData.introduction,
-    formData.userLimit,
-    selectedAddress.isComplete,
-    isFormValid,
-  ]);
 
   return (
     <>

@@ -57,8 +57,6 @@ export default function ScheduleList({ clubRole }: ScheduleListProps) {
           `/clubs/${meetingId}/schedules`,
         );
 
-        console.log(response);
-
         if (response.success) {
           setSchedules(response.data); // response.data만 전달
         }
@@ -158,8 +156,6 @@ export default function ScheduleList({ clubRole }: ScheduleListProps) {
   };
 
   const handleActionClick = (action: string, schedule: Schedule) => {
-    console.log(`Action clicked: ${action}`, schedule);
-
     if (action === '참여하기') {
       setSelectedSchedule(schedule);
       setModalAction('join');
