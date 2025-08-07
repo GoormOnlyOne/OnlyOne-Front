@@ -36,7 +36,7 @@ export const getPresignedUrl = async (
   const request: PresignedUrlRequest = {
     fileName: file.name,
     contentType: normalizeContentType(file.type),
-    imageSize: file.size,
+    imageSize: Number(file.size), // Long 타입으로 명시적 변환
   };
 
   const response = await apiClient.post<{
@@ -45,7 +45,7 @@ export const getPresignedUrl = async (
   }>(`/${imageFolderType}/presigned-url`, request);
 
   console.log('Presigned URL Response:', response.data);
-  return response.data.data;
+  return response.data;
 };
 
 // presigned URL 발급 (다중 이미지)
