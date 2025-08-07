@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import apiClient from '../api/client';
 import { useAuth } from '../contexts/AuthContext';
@@ -17,9 +17,15 @@ const KakaoCallback: React.FC = () => {
   const { login } = useAuth();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const isProcessing = useRef(false);
 
   useEffect(() => {
     const handleKakaoCallback = async () => {
+      // 이미 요청이 진행 중이면 중단
+      if (isProcessing.current) {
+        return;
+      }
+      isProcessing.current = true;
       try {
         // URL에서 인증 코드 추출
         const urlParams = new URLSearchParams(window.location.search);
@@ -36,7 +42,7 @@ const KakaoCallback: React.FC = () => {
         // 백엔드로 인증 코드 전송
         const response = await apiClient.post<KakaoLoginResponse>(`/auth/kakao/callback?code=${code}`);
 
-        console.log('백엔드 응답:', response.data);
+        console.log('백엔드 응답:', response);
 
         // 로그인 성공 처리
         if (response.success && response.data.accessToken) {
@@ -72,7 +78,7 @@ const KakaoCallback: React.FC = () => {
     };
 
     handleKakaoCallback();
-  }, [navigate]);
+  }, [navigate, login]);
 
   return (
     <div className="flex flex-col justify-center items-center h-screen px-5">
