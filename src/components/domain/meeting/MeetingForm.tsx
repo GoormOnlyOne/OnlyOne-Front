@@ -5,28 +5,48 @@ import AddressSelector, {
 } from '../../../components/common/AddressSelector';
 import Modal from '../../common/Modal';
 
+export type Category =
+  | 'CULTURE'
+  | 'EXERCISE'
+  | 'TRAVEL'
+  | 'MUSIC'
+  | 'CRAFT'
+  | 'SOCIAL'
+  | 'LANGUAGE'
+  | 'FINANCE'
+  | 'ASDF';
+
+export interface SubmittedData extends FormData {
+  profileImageUrl?: string;
+}
+
 export interface FormData {
+  category: Category;
   meetingName: string;
   introduction: string;
   profileImage: File | null;
-  capacity: number;
+  userLimit: number;
   accountNumber: string;
-  address?: AddressData;
 }
 
 export interface InitialData {
+  category?: Category;
   meetingName?: string;
   introduction?: string;
   profileImage?: string | File | null;
-  capacity?: number;
+  userLimit?: number;
   accountNumber?: string;
   address?: AddressData;
+}
+
+export interface SubmittedData extends FormData {
+  profileImageUrl?: string;
 }
 
 interface MeetingFormProps {
   mode: 'create' | 'edit';
   initialData?: InitialData;
-  onSubmit: (data: FormData, address: AddressData) => void;
+  onSubmit: (data: SubmittedData, address: AddressData) => void;
 }
 
 export const MeetingForm = ({
@@ -35,10 +55,11 @@ export const MeetingForm = ({
   onSubmit,
 }: MeetingFormProps) => {
   const [formData, setFormData] = useState<FormData>({
+    category: 'CULTURE',
     meetingName: '',
     introduction: '',
     profileImage: null,
-    capacity: 1,
+    userLimit: 0,
     accountNumber: '',
   });
 
@@ -52,42 +73,76 @@ export const MeetingForm = ({
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
-    if (initialData) {
-      setFormData(prev => ({
-        ...prev,
-        ...initialData,
-        profileImage:
-          typeof initialData.profileImage === 'string'
-            ? null
-            : (initialData.profileImage ?? null),
-      }));
-
-      if (initialData.address) {
-        setSelectedAddress(initialData.address);
-      }
-
-      if (
-        initialData.profileImage &&
+    if (!initialData) return;
+    console.log('🔄 초기 데이터 적용:', initialData);
+    setFormData(prev => ({
+      category: initialData.category ?? prev.category,
+      meetingName: initialData.meetingName ?? prev.meetingName,
+      introduction: initialData.introduction ?? prev.introduction,
+      profileImage:
         typeof initialData.profileImage === 'string'
-      ) {
-        setImagePreview(initialData.profileImage);
-      }
+          ? null
+          : (initialData.profileImage ?? prev.profileImage),
+      userLimit: initialData.userLimit ?? prev.userLimit,
+      accountNumber: initialData.accountNumber ?? prev.accountNumber,
+    }));
+    if (initialData.address) {
+      setSelectedAddress(initialData.address);
+    }
+    if (
+      initialData.profileImage &&
+      typeof initialData.profileImage === 'string'
+    ) {
+      setImagePreview(initialData.profileImage);
     }
   }, [initialData]);
 
+  // 폼 데이터 변경 헬퍼 (로그 포함)
   const onFormChange = <K extends keyof FormData>(
     field: K,
     value: FormData[K],
   ) => {
+    console.log(`✏️ onFormChange: field="${String(field)}"`, value);
     setFormData(prev => ({
       ...prev,
       [field]: value,
     }));
   };
 
+  // 관심사 변경
+  const handleCategoryChange = (selected: Category | Category[]) => {
+    // single-select 모드이므로 Category 타입만 처리
+    if (typeof selected === 'string') {
+      console.log('📂 handleCategoryChange:', selected);
+      onFormChange('category', selected);
+    }
+  };
+
   const handleImageUpload = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      // 파일 타입 검증
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+      if (!allowedTypes.includes(file.type)) {
+        alert(
+          '지원하지 않는 파일 형식입니다. JPEG 또는 PNG 파일만 업로드 가능합니다.',
+        );
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
+        return;
+      }
+
+      // 파일 크기 검증 (5MB 제한)
+      const maxSize = 5 * 1024 * 1024; // 5MB
+      if (file.size > maxSize) {
+        alert('파일 크기가 너무 큽니다. 5MB 이하의 파일만 업로드 가능합니다.');
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
+        return;
+      }
+
       onFormChange('profileImage', file);
 
       const reader = new FileReader();
@@ -103,58 +158,84 @@ export const MeetingForm = ({
   const handleImageRemove = () => {
     onFormChange('profileImage', null);
     setImagePreview(null);
-
-    // input 초기화
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
   };
 
-  const handleAccountNumberChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.replace(/[^0-9]/g, '');
-    onFormChange('accountNumber', value);
-  };
-
-  const removeSpecialCharacters = (value: string) => {
-    return value.replace(/[^\w\sㄱ-ㅎ가-힣]/g, '');
-  };
+  const removeSpecialCharacters = (value: string) =>
+    value.replace(/[^\w\sㄱ-ㅎ가-힣]/g, '');
 
   const handleMeetingNameChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const cleanValue = removeSpecialCharacters(e.target.value);
-    if (cleanValue.length <= 20) {
-      onFormChange('meetingName', cleanValue);
+    const clean = removeSpecialCharacters(e.target.value);
+    if (clean.length <= 20) {
+      onFormChange('meetingName', clean);
     }
   };
 
   const handleIntroductionChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const cleanValue = removeSpecialCharacters(e.target.value);
-    if (cleanValue.length <= 50) {
-      onFormChange('introduction', cleanValue);
+    const clean = removeSpecialCharacters(e.target.value);
+    if (clean.length <= 50) {
+      onFormChange('introduction', clean);
     }
+  };
+
+  // capacity 변경 (로그 포함)
+  const handleUserLimitChange = (e: ChangeEvent<HTMLInputElement>) => {
+    console.log('🔢 capacity raw:', e.target.value);
+    const parsed = parseInt(e.target.value) || 1;
+    console.log('🔢 parsed:', parsed);
+    const bounded = Math.min(parsed, 100);
+    console.log('🔢 bounded <=100:', bounded);
+    onFormChange('userLimit', bounded);
   };
 
   const handleSubmit = () => {
     onSubmit(formData, selectedAddress);
   };
+  const onClickMeetingDelete = () => setIsModalOpen(true);
+  const handleMeetingDelete = () => setIsModalOpen(false);
+  const handleModalClose = () => setIsModalOpen(false);
 
-  const onClickMeetingDelete = () => {
-    setIsModalOpen(true);
-  };
-  const handleMeetingDelete = () => {
-    // TODO: 삭제 로직 + 페이지 이동
-    setIsModalOpen(false);
-  };
-
-  const handleModalClose = () => {
-    setIsModalOpen(false);
-  };
-
+  // 폼 유효성
   const isFormValid =
+    formData.category.trim().length > 0 &&
     formData.meetingName.trim().length >= 1 &&
     formData.introduction.trim().length >= 1 &&
     formData.profileImage !== null &&
-    formData.capacity >= 1 &&
+    formData.userLimit >= 1 &&
     selectedAddress.isComplete;
+
+  // 종합 디버그 로그
+  useEffect(() => {
+    console.groupCollapsed('🛠️ Form Validation 상태');
+    console.log(
+      'categoryValid →',
+      formData.category,
+      formData.category.trim().length > 0,
+    );
+    console.log(
+      'meetingNameValid →',
+      formData.meetingName,
+      formData.meetingName.trim().length >= 1,
+    );
+    console.log(
+      'introductionValid →',
+      formData.introduction,
+      formData.introduction.trim().length >= 1,
+    );
+    console.log('capacityValid →', formData.userLimit, formData.userLimit >= 1);
+    console.log('addressValid →', selectedAddress.isComplete, selectedAddress);
+    console.log('▶︎ isFormValid →', isFormValid);
+    console.groupEnd();
+  }, [
+    formData.category,
+    formData.meetingName,
+    formData.introduction,
+    formData.userLimit,
+    selectedAddress.isComplete,
+    isFormValid,
+  ]);
 
   return (
     <>
@@ -166,7 +247,12 @@ export const MeetingForm = ({
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 <span className="text-red-400 mr-1">*</span>모임의 관심사
               </label>
-              <CategorySection mode="single-select" />
+              <CategorySection
+                mode="single-select"
+                // 4) initialValue 도 Category 타입
+                initialValue={initialData?.category ?? formData.category}
+                onCategoryChange={handleCategoryChange}
+              />
             </div>
 
             {/* 모임 이름 */}
@@ -224,7 +310,7 @@ export const MeetingForm = ({
                       src={imagePreview}
                       alt="미리보기"
                       className="w-full h-full object-cover rounded border border-gray-300 cursor-pointer"
-                      onClick={() => fileInputRef.current?.click()} // 클릭 시 input 열기
+                      onClick={() => fileInputRef.current?.click()}
                     />
                     <button
                       type="button"
@@ -235,7 +321,6 @@ export const MeetingForm = ({
                     </button>
                   </div>
                 ) : (
-                  // 파일이 없을 경우에만 버튼/박스 노출
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
@@ -245,14 +330,13 @@ export const MeetingForm = ({
                   </button>
                 )}
 
-                {/* 실제 파일 input은 숨김 */}
                 <input
                   type="file"
                   id="profileImage"
                   accept="image/*"
                   onChange={handleImageUpload}
                   ref={fileInputRef}
-                  className="hidden" // 숨김 처리
+                  className="hidden"
                 />
               </div>
               <p className="text-xs text-gray-500 mt-1">
@@ -267,7 +351,7 @@ export const MeetingForm = ({
               </label>
               <AddressSelector
                 initialCity={selectedAddress.city}
-                initialDistrict={selectedAddress.district}
+                initialDistrict={selectedAddress.district ?? ''}
                 onAddressChange={setSelectedAddress}
               />
             </div>
@@ -279,30 +363,12 @@ export const MeetingForm = ({
               </label>
               <input
                 type="number"
-                value={formData.capacity}
-                onChange={e => {
-                  const value = parseInt(e.target.value) || 1;
-                  onFormChange('capacity', Math.min(value, 100));
-                }}
+                value={formData.userLimit}
+                onChange={handleUserLimitChange}
                 className="w-full px-4 py-3 border rounded-lg"
                 min={1}
                 max={100}
                 required
-              />
-            </div>
-
-            {/* 계좌번호 */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                모임 계좌번호 (선택)
-              </label>
-              <input
-                type="text"
-                value={formData.accountNumber}
-                onChange={handleAccountNumberChange}
-                maxLength={14}
-                placeholder="숫자만 입력"
-                className="w-full px-4 py-3 border rounded-lg"
               />
             </div>
 
@@ -312,12 +378,11 @@ export const MeetingForm = ({
                 type="button"
                 disabled={!isFormValid}
                 onClick={handleSubmit}
-                className={`w-full py-3 px-4 rounded-lg font-medium transition-colors focus:ring-2 focus:ring-offset-2 
-                  ${
-                    isFormValid
-                      ? 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500'
-                      : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                  }`}
+                className={`w-full py-3 px-4 rounded-lg font-medium transition-colors focus:ring-2 focus:ring-offset-2 ${
+                  isFormValid
+                    ? 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500'
+                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                }`}
               >
                 {mode === 'edit' ? '모임 수정하기' : '모임 만들기'}
               </button>
@@ -326,7 +391,7 @@ export const MeetingForm = ({
                 <button
                   type="button"
                   onClick={onClickMeetingDelete}
-                  className="w-full mt-4 py-3 px-4 rounded-lg font-medium transition-colors focus:ring-2 focus:ring-offset-2 bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500 cursor-pointer"
+                  className="w-full mt-4 py-3 px-4 rounded-lg font-medium transition-colors focus:ring-2 focus:ring-offset-2 bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500"
                 >
                   모임 삭제하기
                 </button>
