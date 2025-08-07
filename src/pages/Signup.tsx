@@ -153,7 +153,7 @@ export const Signup = () => {
   };
 
   return (
-    <div className="min-h-screen w-full max-w-md bg-white rounded-2xl p-8">
+    <div className="min-h-screen w-full bg-white px-4 py-8 sm:px-6 md:px-8 lg:max-w-2xl lg:mx-auto">
       <Stepper />
 
       {/* Step별 콘텐츠 */}
