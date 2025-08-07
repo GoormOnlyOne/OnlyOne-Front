@@ -101,6 +101,7 @@ export const ProfileImageUpload: React.FC<ProfileImageUploadProps> = ({
   const displayImage =
     selectedImage?.url || defaultImage || defaultProfileImage;
   const hasImage = selectedImage !== null || defaultImage !== undefined;
+  const hasCustomImage = selectedImage !== null; // 사용자가 직접 업로드한 이미지만 체크
 
   return (
     <div className="flex justify-center w-full max-w-md mx-auto">
@@ -136,11 +137,11 @@ export const ProfileImageUpload: React.FC<ProfileImageUploadProps> = ({
           </div>
         )}
 
-        {/* X 버튼 (사용자 이미지가 있을 때 + 수정 가능할 때) */}
-        {hasImage && editable && (
+        {/* X 버튼 (사용자가 직접 업로드한 이미지가 있을 때 + 수정 가능할 때) */}
+        {hasCustomImage && editable && (
           <button
             onClick={handleRemoveImage}
-            className="absolute -top-2 -right-2 w-5 h-5 bg-black/70 text-white rounded-full flex items-center justify-center hover:bg-black transition-colors z-10"
+            className="absolute -top-2 -right-2 w-5 h-5 bg-black/70 text-white rounded-full flex items-center justify-center hover:bg-black transition-colors z-10 cursor-pointer"
             type="button"
           >
             <svg

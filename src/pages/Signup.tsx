@@ -192,7 +192,7 @@ export const Signup = () => {
           {currentStep > 1 && (
             <button
               onClick={handlePrev}
-              className="flex-1 px-6 py-3 border border-gray-300 rounded-lg font-medium hover:bg-gray-50 transition-colors"
+              className="flex-1 px-6 py-3 border border-gray-300 rounded-lg font-medium hover:bg-gray-50 transition-colors cursor-pointer"
             >
               이전
             </button>
@@ -209,7 +209,7 @@ export const Signup = () => {
                   : 'bg-gray-800 text-white hover:bg-gray-900'
               }
               disabled:opacity-50 disabled:cursor-not-allowed
-              ${!isStepValid() ? 'cursor-not-allowed' : ''}
+              ${!isStepValid() ? 'cursor-not-allowed' : 'cursor-pointer'}
             `}
           >
             {currentStep === totalSteps ? '가입완료' : '다음'}
