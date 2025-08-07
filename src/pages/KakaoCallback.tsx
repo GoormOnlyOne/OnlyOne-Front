@@ -8,7 +8,7 @@ interface KakaoLoginResponse {
   success: boolean;
   accessToken: string;
   refreshToken: string;
-  isNewUser: boolean;
+  newUser: boolean;
   error?: string;
 }
 
@@ -59,7 +59,7 @@ const KakaoCallback: React.FC = () => {
           console.log('Refresh Token:', refreshToken);
 
           // 신규 사용자인 경우 회원가입 페이지로, 아니면 홈으로
-          if (response.data.isNewUser) { // backend에서 isNewUser 필드가 true인 경우
+          if (response.data.newUser) { // backend에서 newUser 필드가 true인 경우
             navigate('/signup');
           } else {
             navigate('/');
