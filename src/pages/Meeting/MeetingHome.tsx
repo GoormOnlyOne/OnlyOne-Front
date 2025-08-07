@@ -54,14 +54,13 @@ const MeetingHome: React.FC = () => {
 
         if (response.success) {
           const data = response.data;
+          // 현재 코드를 다음과 같이 수정:
           setMeeting({
             id: data.clubId,
             title: data.name,
             location: data.district,
             participantCount: data.userCount,
-            image:
-              data.clubImage ||
-              `https://readdy.ai/api/search-image?...&seq=${meetingId}`,
+            image: data.clubImage || '',
             category: data.category,
             description: data.description,
             role: data.clubRole,
