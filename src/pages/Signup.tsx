@@ -10,9 +10,7 @@ export const Signup = () => {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [selectedAddress, setSelectedAddress] = useState<
-    AddressData | undefined
-  >();
+  const [selectedAddress, setSelectedAddress] = useState<AddressData | undefined>();
   const [formData, setFormData] = useState({
     categories: [] as string[],
     nickname: '',
@@ -72,8 +70,9 @@ export const Signup = () => {
         address: selectedAddress,
       };
       console.log('회원가입 데이터:', finalData);
+
       // TODO: API 호출하여 회원가입 처리
-      setCurrentStep(4); // 완료 화면
+      // setCurrentStep(4); // 완료 화면
     }
   };
 
@@ -105,12 +104,12 @@ export const Signup = () => {
   };
 
   // 프로필 이미지 변경 핸들러
-  // const handleProfileImageChange = (imageUrl: string) => {
-  //   setFormData(prev => ({
-  //     ...prev,
-  //     profileImage: imageUrl
-  //   }));
-  // };
+  const handleProfileImageChange = (imageUrl: string) => {
+    setFormData(prev => ({
+      ...prev,
+      profileImage: imageUrl
+    }));
+  };
 
   // 회원가입 완료 핸들러
   const handleSignupComplete = () => {
@@ -175,7 +174,7 @@ export const Signup = () => {
           <Step3
             formData={formData}
             onFormChange={handleFormChange}
-            // onProfileImageChange={handleProfileImageChange} // ProfileImageUpload의 실제 props 확인 필요
+            onProfileImageChange={handleProfileImageChange}
           />
         )}
         {currentStep === 4 && (

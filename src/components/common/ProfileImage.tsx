@@ -98,10 +98,10 @@ export const ProfileImageUpload: React.FC<ProfileImageUploadProps> = ({
   };
 
   // 선택된 이미지가 있으면 해당 이미지, 없으면 기본 이미지 사용
-  const displayImage =
-    selectedImage?.url || defaultImage || defaultProfileImage;
+  const displayImage = selectedImage?.url || defaultImage || defaultProfileImage;
   const hasImage = selectedImage !== null || defaultImage !== undefined;
-  const hasCustomImage = selectedImage !== null; // 사용자가 직접 업로드한 이미지만 체크
+  // 사용자가 직접 업로드한 이미지 또는 defaultImage로 전달받은 사용자 이미지 체크
+  const hasCustomImage = selectedImage !== null || (defaultImage && defaultImage !== defaultProfileImage);
 
   return (
     <div className="flex justify-center w-full max-w-md mx-auto">
