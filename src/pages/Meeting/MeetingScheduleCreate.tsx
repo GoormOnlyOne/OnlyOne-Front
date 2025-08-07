@@ -19,7 +19,7 @@ export const MeetingScheduleCreate = () => {
         name: data.meetingName,
         location: data.location,
         cost: data.costPerPerson,
-        userLimit: data.capacity,
+        userLimit: data.userLimit,
         scheduleTime: new Date(
           `${data.meetingDate}T${data.meetingTime}`,
         ).toISOString(),

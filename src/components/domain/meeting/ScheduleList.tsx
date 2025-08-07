@@ -1,7 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { MoreVertical } from 'lucide-react';
 import Modal from '../../common/Modal';
 import apiClient from '../../../api/client';
+import {
+  showApiErrorToast,
+  showToast as globalToast,
+} from '../../common/Toast/ToastProvider';
 
 export interface Schedule {
   scheduleId: number;
@@ -37,7 +42,10 @@ export default function ScheduleList({ clubRole }: ScheduleListProps) {
   const [selectedSchedule, setSelectedSchedule] = useState<Schedule | null>(
     null,
   );
-  const [modalAction, setModalAction] = useState<'join' | 'leave' | ''>('');
+  const [modalAction, setModalAction] = useState<
+    'join' | 'leave' | 'settlement' | ''
+  >('');
+  const [openMenuId, setOpenMenuId] = useState<number | null>(null);
 
   useEffect(() => {
     const fetchSchedules = async () => {
@@ -52,11 +60,13 @@ export default function ScheduleList({ clubRole }: ScheduleListProps) {
         console.log(response);
 
         if (response.success) {
-          setSchedules(response.data);
+          setSchedules(response.data); // response.data만 전달
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error('정기모임 목록 조회 실패:', err);
-        setError(err.message || '정기모임 목록을 불러오는데 실패했습니다.');
+        setError(
+          (err as Error).message || '정기모임 목록을 불러오는데 실패했습니다.',
+        );
       } finally {
         setLoading(false);
       }
@@ -156,10 +166,10 @@ export default function ScheduleList({ clubRole }: ScheduleListProps) {
       setIsModalOpen(true);
       setModalTitle(`${schedule.name}에 참여 하시겠습니까?`);
     } else if (action === '정산하기') {
-      // 정산하기 페이지 이동
-      navigate(
-        `/meeting/${meetingId}/schedule/${schedule.scheduleId}/settlement`,
-      );
+      setSelectedSchedule(schedule);
+      setModalAction('settlement');
+      setIsModalOpen(true);
+      setModalTitle(`${schedule.name} 정산을 요청하시겠습니까?`);
     } else {
       setSelectedSchedule(schedule);
       setModalAction('leave');
@@ -186,35 +196,43 @@ export default function ScheduleList({ clubRole }: ScheduleListProps) {
     try {
       if (modalAction === 'join') {
         // 참여 API 호출
-        await apiClient.post(
-          `/clubs/${meetingId}/schedules/${selectedSchedule.scheduleId}/join`,
+        await apiClient.patch(
+          `/clubs/${meetingId}/schedules/${selectedSchedule.scheduleId}/users`,
         );
-
-        // 성공 시 목록 새로고침
-        const response = await apiClient.get<ScheduleListResponse>(
-          `/clubs/${meetingId}/schedules`,
-        );
-        if (response.data.success) {
-          setSchedules(response.data.data);
-        }
+        globalToast('정기 모임에 참여하였습니다.', 'success', 2000);
       } else if (modalAction === 'leave') {
         // 나가기 API 호출
         await apiClient.delete(
-          `/clubs/${meetingId}/schedules/${selectedSchedule.scheduleId}/leave`,
+          `/clubs/${meetingId}/schedules/${selectedSchedule.scheduleId}/users`,
         );
-
-        // 성공 시 목록 새로고침
-        const response = await apiClient.get<ScheduleListResponse>(
-          `/clubs/${meetingId}/schedules`,
-        );
-        if (response.data.success) {
-          setSchedules(response.data.data);
+        globalToast('정기 모임을 나갔습니다.', 'success', 2000);
+      } else if (modalAction === 'settlement') {
+        // 정산하기 API 호출 (리더/멤버, 상태별로 분기)
+        if (
+          clubRole === 'LEADER' &&
+          selectedSchedule.scheduleStatus === 'SETTLING'
+        ) {
+          // 리더가 SETTLING 상태에서 정산하기: 새로운 API
+          await apiClient.post(
+            `/clubs/${meetingId}/schedules/${selectedSchedule.scheduleId}/settlements/user`,
+          );
+          globalToast('정산 요청을 보냈습니다.', 'success', 2000);
+        } else {
+          // 그 외(ENDED 등): 기존 API
+          await apiClient.post(
+            `/clubs/${meetingId}/schedules/${selectedSchedule.scheduleId}/settlements`,
+          );
+          globalToast('정산 요청을 보냈습니다.', 'success', 2000);
         }
       }
-    } catch (err: any) {
-      console.error('정기모임 참여/나가기 실패:', err);
-      alert(err.message || '요청 처리에 실패했습니다.');
+    } catch (err: unknown) {
+      console.error('정기모임 참여/나가기/정산 실패:', err);
+      showApiErrorToast(err);
     } finally {
+      const response = await apiClient.get<ScheduleListResponse>(
+        `/clubs/${meetingId}/schedules`,
+      );
+      setSchedules(response.data); // response.data만 전달
       setIsModalOpen(false);
       setSelectedSchedule(null);
       setModalAction('');
@@ -222,8 +240,12 @@ export default function ScheduleList({ clubRole }: ScheduleListProps) {
   };
 
   const getActionButton = (schedule: Schedule) => {
-    switch (schedule.scheduleStatus) {
-      case 'READY':
+    // 게스트는 버튼 없음
+    if (clubRole === 'GUEST') return null;
+
+    // 리더
+    if (clubRole === 'LEADER') {
+      if (schedule.scheduleStatus === 'READY') {
         if (schedule.joined) {
           return (
             <button
@@ -243,27 +265,92 @@ export default function ScheduleList({ clubRole }: ScheduleListProps) {
             </button>
           );
         }
-
-      case 'ENDED':
-      case 'SETTLING':
+      }
+      if (schedule.scheduleStatus === 'ENDED') {
+        // 리더 && ENDED: 정산하기(빨간색, 활성화)
+        return (
+          <button
+            onClick={() => handleActionClick('정산하기', schedule)}
+            className="bg-red-500 text-white px-4 py-2 rounded text-sm font-medium hover:bg-red-600 transition-colors cursor-pointer"
+          >
+            정산하기
+          </button>
+        );
+      }
+      if (schedule.scheduleStatus === 'SETTLING') {
+        // 리더 && SETTLING: 정산하기(회색, 활성화)
+        return (
+          <button
+            onClick={() => handleActionClick('정산하기', schedule)}
+            className="bg-gray-400 text-white px-4 py-2 rounded text-sm font-medium hover:bg-gray-500 transition-colors cursor-pointer"
+          >
+            정산하기
+          </button>
+        );
+      }
+      if (schedule.scheduleStatus === 'CLOSED') {
+        // 리더 && CLOSED: 정산하기(회색, 비활성화)
+        return (
+          <button
+            disabled
+            className="bg-gray-400 text-white px-4 py-2 rounded text-sm font-medium cursor-not-allowed"
+          >
+            정산하기
+          </button>
+        );
+      }
+    }
+    // 멤버
+    if (clubRole === 'MEMBER') {
+      if (schedule.scheduleStatus === 'READY') {
         if (schedule.joined) {
           return (
             <button
-              onClick={() => handleActionClick('정산하기', schedule)}
-              className="bg-gray-400 text-white px-4 py-2 rounded text-sm font-medium hover:bg-gray-500 transition-colors cursor-pointer"
+              onClick={() => handleActionClick('나가기', schedule)}
+              className="bg-blue-500 text-white px-4 py-2 rounded text-sm font-medium hover:bg-blue-600 transition-colors cursor-pointer"
             >
-              정산하기
+              나가기
+            </button>
+          );
+        } else {
+          return (
+            <button
+              onClick={() => handleActionClick('참여하기', schedule)}
+              className="bg-red-500 text-white px-4 py-2 rounded text-sm font-medium hover:bg-red-600 transition-colors cursor-pointer"
+            >
+              참여하기
             </button>
           );
         }
-        return null;
-
-      case 'CLOSED':
-        return null;
-
-      default:
-        return null;
+      }
+      if (
+        schedule.scheduleStatus === 'ENDED' ||
+        schedule.scheduleStatus === 'SETTLING' ||
+        schedule.scheduleStatus === 'CLOSED'
+      ) {
+        // 멤버 && ENDED/SETTLING/CLOSED: 정산하기(회색, 비활성화)
+        return (
+          <button
+            disabled
+            className="bg-gray-400 text-white px-4 py-2 rounded text-sm font-medium cursor-not-allowed"
+          >
+            정산하기
+          </button>
+        );
+      }
     }
+    return null;
+  };
+
+  const handleScheduleEdit = (scheduleId: number) => {
+    if (!meetingId) return;
+    navigate(`/meeting/${meetingId}/schedule/${scheduleId}/edit`);
+  };
+
+  // handleScheduleDelete 임시 구현 추가
+  const handleScheduleDelete = (scheduleId: number) => {
+    // TODO: 실제 삭제 로직 구현 필요
+    globalToast('삭제 기능은 아직 구현되지 않았습니다.', 'info', 2000);
   };
 
   if (loading) {
@@ -303,6 +390,7 @@ export default function ScheduleList({ clubRole }: ScheduleListProps) {
               <div className="p-4">
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex-1">
+                    {/* 스케줄 정보 */}
                     <h3 className="font-semibold text-gray-800 mb-1">
                       {schedule.name}
                     </h3>
@@ -313,7 +401,8 @@ export default function ScheduleList({ clubRole }: ScheduleListProps) {
                       <span>{`인당 비용 | ${schedule.cost === 0 ? '무료' : `${schedule.cost.toLocaleString()}₩`}`}</span>
                     </div>
                   </div>
-                  <div className="flex flex-col items-end gap-2">
+                  <div className="flex items-center gap-2">
+                    {/* 디데이와 상태 뱃지를 왼쪽으로 배치 */}
                     <span
                       className={`px-2 py-1 rounded-full text-xs font-medium ${getDdayColor(schedule.dday)}`}
                     >
@@ -324,6 +413,49 @@ export default function ScheduleList({ clubRole }: ScheduleListProps) {
                     >
                       {getStatusText(schedule.scheduleStatus)}
                     </span>
+
+                    {/* 리더에게만 보이는 더보기 아이콘 */}
+                    {clubRole === 'LEADER' && (
+                      <div className="relative">
+                        <button
+                          onClick={() =>
+                            setOpenMenuId(
+                              openMenuId === schedule.scheduleId
+                                ? null
+                                : schedule.scheduleId,
+                            )
+                          }
+                          className="p-1 rounded hover:bg-gray-100"
+                        >
+                          <MoreVertical className="w-5 h-5 text-gray-500" />
+                        </button>
+
+                        {/* 드롭다운 메뉴*/}
+                        {openMenuId === schedule.scheduleId && (
+                          <div
+                            className="absolute right-0 mt-2 w-32 bg-white border border-gray-200 rounded shadow-lg z-50"
+                            onMouseLeave={() => setOpenMenuId(null)}
+                          >
+                            <button
+                              onClick={() =>
+                                handleScheduleEdit(schedule.scheduleId)
+                              }
+                              className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
+                            >
+                              수정
+                            </button>
+                            <button
+                              onClick={() =>
+                                handleScheduleDelete(schedule.scheduleId)
+                              }
+                              className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                            >
+                              삭제
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
 
