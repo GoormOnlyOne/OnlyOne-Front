@@ -59,7 +59,7 @@ const confirmLeave = async () => {
 
   // 경로에 따른 props 설정
   switch (true) {
-    case pathname === '/notice':
+    case pathname === '/notification':
       headerProps = {
         isBack: true,
         isTitle: true,
