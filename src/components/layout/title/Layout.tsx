@@ -55,27 +55,7 @@ const confirmLeave = async () => {
   }
 };
 
-  // const handleLeave = async () => {
-  //   if (leaving) return;
-  //   const meetingId = params.id;
-  //   if (!meetingId) return;
-
-  //   const ok = window.confirm('정말 이 모임에서 나가시겠습니까?');
-  //   globalToast('모임에서 탈퇴하였습니다.', 'success', 2000);
-  //   if (!ok) return;
-
-  //   try {
-  //     setLeaving(true);
-  //     await apiClient.delete(`/clubs/${meetingId}/leave`);
-  //   } catch (e) {
-  //     console.error('모임 탈퇴 실패:', e);
-  //     alert('모임 탈퇴에 실패했습니다. 잠시 후 다시 시도해주세요.');
-  //   } finally {
-  //     setLeaving(false);
-  //   }
-  // };
-
-  let headerProps = null; //let headerProps: any = null;
+  let headerProps = null;
 
   // 경로에 따른 props 설정
   switch (true) {
