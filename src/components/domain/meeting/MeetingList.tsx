@@ -131,9 +131,12 @@ export default function MeetingList({ mode = 'home', apiEndpoint, showHomeSpecia
 					<>
 						{/* 맞춤 추천 모임 섹션 */}
 						<div>
-							<h2 className="text-base font-semibold text-gray-800 leading-snug mb-4">
-								내게 딱 맞는 모임을 찾아보세요!
-							</h2>
+							<div className="flex items-center gap-2 mb-4">
+								<div className="w-1 h-6 bg-gradient-to-b from-blue-500 to-blue-600 rounded-full"></div>
+								<h2 className="text-xl font-bold text-gray-900">
+									내게 딱 맞는 모임을 찾아보세요!
+								</h2>
+							</div>
 							<div className="space-y-4">
 								{meetings.map(meeting => (
 									<MeetingCard key={meeting.clubId} meeting={meeting} />
@@ -151,11 +154,17 @@ export default function MeetingList({ mode = 'home', apiEndpoint, showHomeSpecia
 							</div>
 						</div>
 
+						{/* 섹션 구분선 */}
+						<div className="my-8 border-t border-gray-100"></div>
+
 						{/* 함께하는 사람들의 모임 섹션 */}
 						<div className="mb-8">
-							<h2 className="text-base font-semibold text-gray-800 leading-snug mb-4">
-								모임 친구들은 이런 활동도 해요!
-							</h2>
+							<div className="flex items-center gap-2 mb-4">
+								<div className="w-1 h-6 bg-gradient-to-b from-purple-500 to-purple-600 rounded-full"></div>
+								<h2 className="text-xl font-bold text-gray-900">
+									모임 친구들은 이런 활동도 해요!
+								</h2>
+							</div>
 
 							<div className="space-y-4">
 								{partnerMeetings.map(meeting => (
