@@ -1,9 +1,9 @@
-import { createBrowserRouter } from 'react-router-dom';
+import { createBrowserRouter } from "react-router-dom";
 
 // layout
-import DefaultLayout from '../components/layout/default/Layout.tsx';
-import SearchLayout from '../components/layout/search/Layout.tsx';
-import TitleLayout from '../components/layout/title/Layout.tsx';
+import DefaultLayout from "../components/layout/default/Layout.tsx";
+import SearchLayout from "../components/layout/search/Layout.tsx";
+import TitleLayout from "../components/layout/title/Layout.tsx";
 
 // page
 import { Home } from '../pages/Home.tsx';
@@ -30,6 +30,7 @@ import { ComponentGallery } from '../pages/ComponentGallery/ComponentGallery.tsx
 import MeetingFeedCreate from '../pages/Meeting/MeetingFeedCreate.tsx';
 import MeetingFeedEdit from '../pages/Meeting/MeetingFeedEdit.tsx';
 import MeetingFeedDetail from '../pages/Meeting/MeetingFeedDetail.tsx';
+import MyMeeting from '../pages/Meeting/MyMeeting.tsx';
 import PointCharge from '../pages/Payment/PointCharge.tsx';
 import { Success } from '../pages/Payment/Success.tsx';
 import { Checkout } from '../pages/Payment/Checkout.tsx';
@@ -37,7 +38,7 @@ import { Checkout } from '../pages/Payment/Checkout.tsx';
 export const router = createBrowserRouter([
   // [기본] 레이아웃이 적용되는 라우트들
   {
-    path: '/',
+    path: "/",
     element: <DefaultLayout />,
     children: [
       {
@@ -45,11 +46,11 @@ export const router = createBrowserRouter([
         element: <Home />,
       },
       {
-        path: 'category',
+        path: "category",
         element: <Category />,
       },
       {
-        path: 'meeting',
+        path: "meeting",
         element: <Meeting />,
       },
     ],
@@ -57,7 +58,7 @@ export const router = createBrowserRouter([
 
   // [검색] 레이아웃이 적용되는 라우트들
   {
-    path: '/search',
+    path: "/search",
     element: <SearchLayout />,
     children: [
       {
@@ -69,19 +70,19 @@ export const router = createBrowserRouter([
 
   // [타이틀] 레이아웃이 적용되는 라우트들
   {
-    path: '/',
+    path: "/",
     element: <TitleLayout />,
     children: [
       {
-        path: 'mypage',
+        path: "mypage",
         element: <Mypage />,
       },
       {
-        path: 'mypage/interest',
+        path: "mypage/interest",
         element: <Interest />,
       },
       {
-        path: 'mypage/profile',
+        path: "mypage/profile",
         element: <Profile />,
       },
       {
@@ -89,27 +90,29 @@ export const router = createBrowserRouter([
         element: <Wallet />,
       },
       {
-        path: 'notice',
+        path: "notice",
         element: <Notice />,
       },
       {
+
         path: 'meeting/:id',
         element: <MeetingDetail />,
       },
       {
         path: 'meeting/:meetingId/schedule/:scheduleId/participation',
+
         element: <ParticipationStatus />,
       },
       {
-        path: 'meeting/create',
+        path: "meeting/create",
         element: <MeetingCreate />,
       },
       {
-        path: 'meeting/:id/edit',
+        path: "meeting/:id/edit",
         element: <MeetingEdit />,
       },
       {
-        path: 'meeting/:id/schedule/create',
+        path: "meeting/:id/schedule/create",
         element: <MeetingScheduleCrate />,
       },
       {
@@ -144,16 +147,20 @@ export const router = createBrowserRouter([
         path: '/success',
         element: <Success />,
       },
+        {
+        path: 'mypage/my-meetings',
+        element: <MyMeeting />,
+      }
     ],
   },
 
   // 레이아웃이 적용되지 않는 라우트들
   {
-    path: '/login',
+    path: "/login",
     element: <Login />,
   },
   {
-    path: '/signup',
+    path: "/signup",
     element: <Signup />,
   },
   {

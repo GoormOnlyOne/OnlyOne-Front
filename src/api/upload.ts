@@ -36,7 +36,7 @@ export const getPresignedUrl = async (
   const request: PresignedUrlRequest = {
     fileName: file.name,
     contentType: normalizeContentType(file.type),
-    imageSize: file.size,
+    imageSize: Number(file.size), // Long 타입으로 명시적 변환
   };
 
   const response = await apiClient.post<{

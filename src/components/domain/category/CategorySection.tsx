@@ -81,16 +81,13 @@ export default function CategorySection({
 }: CategorySectionProps) {
   const navigate = useNavigate();
 
-  // 단일 선택 모드 상태
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(
     typeof initialValue === 'string' ? initialValue : null,
   );
-  // 다중 선택 모드 상태
   const [selectedCategories, setSelectedCategories] = useState<Category[]>(
     Array.isArray(initialValue) ? initialValue : [],
   );
 
-  // 수정 모드 등 initialValue 변경 시 state 동기화
   useEffect(() => {
     if (mode === 'single-select' && typeof initialValue === 'string') {
       setSelectedCategory(initialValue);
@@ -108,7 +105,7 @@ export default function CategorySection({
 
       case 'single-select':
         setSelectedCategory(cat);
-        onCategoryChange?.(cat);
+        setTimeout(() => onCategoryChange?.(cat), 0);
         break;
 
       case 'multi-select':
@@ -122,7 +119,8 @@ export default function CategorySection({
             alert(`최대 ${maxSelection}개까지만 선택할 수 있습니다.`);
             return prev;
           }
-          onCategoryChange?.(next);
+
+          setTimeout(() => onCategoryChange?.(next), 0);
           return next;
         });
         break;
@@ -193,14 +191,13 @@ export default function CategorySection({
           );
         })}
       </div>
-      {mode === 'multi-select' &&
-        selectedCategories.length === maxSelection && (
-          <div className="mt-4 text-center">
-            <p className="text-sm text-orange-600 font-medium animate-fade-in">
-              최대 {maxSelection}개까지 선택 가능합니다.
-            </p>
-          </div>
-        )}
+      {mode === 'multi-select' && selectedCategories.length === maxSelection && (
+        <div className="mt-4 text-center">
+          <p className="text-sm text-orange-600 font-medium animate-fade-in">
+            최대 {maxSelection}개까지 선택 가능합니다.
+          </p>
+        </div>
+      )}
     </div>
   );
 }
