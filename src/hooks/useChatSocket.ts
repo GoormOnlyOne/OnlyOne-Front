@@ -26,8 +26,11 @@ export const useChatSocket = (chatRoomId: number, currentUserId: number) => {
       setIsConnected(true);
       client.subscribe(`/sub/chat/${chatRoomId}/messages`, (message) => {
         const body = JSON.parse(message.body);
+        console.log('📨 수신 메시지:', body); // ← 여기에 imageUrl이 있는지 확인
         setMessages((prev) => [...prev, body]);
       });
+
+
     });
 
     return () => {

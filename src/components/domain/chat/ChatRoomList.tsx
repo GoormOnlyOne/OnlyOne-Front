@@ -82,23 +82,6 @@ const ChatRoomList: React.FC<ChatRoomListProps> = ({
                   {chatRoom.lastMessage}
                 </p>
               </div>
-
-              <div className="flex items-center space-x-2 flex-shrink-0 ml-2">
-                {/* 멤버 수 */}
-                <div className="flex items-center text-xs text-gray-400">
-                  <i className="ri-group-line mr-1"></i>
-                  <span>{chatRoom.memberCount}</span>
-                </div>
-
-                {/* 안읽은 메시지 수 */}
-                {chatRoom.unreadCount > 0 && (
-                  <div className="bg-red-500 text-white text-xs rounded-full min-w-[20px] h-5 flex items-center justify-center px-1.5">
-                    <span className="font-medium">
-                      {chatRoom.unreadCount > 99 ? '99+' : chatRoom.unreadCount}
-                    </span>
-                  </div>
-                )}
-              </div>
             </div>
           </div>
         </div>

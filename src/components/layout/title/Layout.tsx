@@ -2,23 +2,45 @@ import { useLocation, Outlet, useParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import Header from './Header';
 import Footer from './Footer';
+import { fetchChatMessages } from '../../../api/chat';
 
 export default function TitleLayout() {
   const location = useLocation();
   const pathname = location.pathname;
   const params = useParams();
   const [dynamicTitle, setDynamicTitle] = useState('');
+  const fetchChatRoomTitle = async (chatRoomId: string) => {
+  try {
+    const res = await fetchChatMessages(Number(chatRoomId));
+    const name = res?.data?.chatRoomName ?? null;
+    setDynamicTitle(name || `채팅방 #${chatRoomId}`);
+  } catch (error) {
+      console.error('채팅방 제목 불러오기 실패:', error);
+      setDynamicTitle(`채팅방`);
+    }
+  };
 
   useEffect(() => {
+    const chatRoomId = params.chatRoomId;
+    const meetingId = params.id;
+
+    // ✅ 채팅방 이름 동적 로딩
+    if (
+      chatRoomId &&
+      pathname.startsWith('/chat/') &&
+      pathname.endsWith('/messages')
+    ) {
+      fetchChatRoomTitle(chatRoomId);
+    }
+
     if (
       params.id &&
       pathname.startsWith('/meeting/') &&
       pathname !== '/meeting/create'
     ) {
-      // API 호출 예시
       fetchMeetingTitle(params.id);
     }
-  }, [params.id, pathname]);
+  }, [params.chatRoomId, params.id, pathname]);
 
   const fetchMeetingTitle = async (meetingId: string) => {
     try {
@@ -186,6 +208,18 @@ export default function TitleLayout() {
         isOut: false,
       };
       break;
+
+    case /^\/chat\/\d+\/messages\/?$/.test(pathname):
+      headerProps = {
+        isBack: true,
+        isTitle: true,
+        titleText: dynamicTitle || '채팅방',
+        isLike: false,
+        isOut: false,
+      };
+      break;
+
+
 
     default:
       headerProps = null; // 헤더 표시 안 함

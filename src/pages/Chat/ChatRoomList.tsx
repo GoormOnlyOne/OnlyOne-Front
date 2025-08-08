@@ -1,15 +1,12 @@
-
 // src/pages/Chat/ChatRoomList.tsx
-
-// src/pages/Chat/ChatRoomList.tsx
-
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { fetchChatRoomList } from '../../api/chat';
 import type { ChatRoomSummary } from '../../types/chat/chat.types';
 
-const ChatRoomList: React.FC = () => {
-  const { clubId } = useParams<{ clubId: string }>();
+const ChatRoomList = () => {
+  const { id } = useParams<{ id: string }>();
+  const clubId = Number(id);
   const [rooms, setRooms] = useState<ChatRoomSummary[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -19,9 +16,9 @@ const ChatRoomList: React.FC = () => {
       return;
     }
 
-    fetchChatRoomList(Number(clubId))
+    fetchChatRoomList(clubId)
       .then(res => {
-        const roomList = res?.data; // ✅ 여기!
+        const roomList = res?.data;
         if (Array.isArray(roomList)) {
           setRooms(roomList);
         } else {
@@ -29,10 +26,9 @@ const ChatRoomList: React.FC = () => {
           setRooms([]);
         }
       })
-
       .catch(err => {
         console.error("❌ API 에러:", err);
-        setRooms([]); // 에러 시에도 rooms는 빈 배열로
+        setRooms([]);
       })
       .finally(() => setLoading(false));
   }, [clubId]);
