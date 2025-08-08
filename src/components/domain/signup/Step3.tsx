@@ -69,8 +69,8 @@ const Step3 = ({
               <input
                 type="radio"
                 name="gender"
-                value="male"
-                checked={formData.gender === 'male'}
+                value="MALE"
+                checked={formData.gender === 'MALE'}
                 onChange={e => onFormChange('gender', e.target.value)}
                 className="sr-only"
               />
@@ -78,7 +78,7 @@ const Step3 = ({
                 className={`
                 w-full py-3 px-4 border rounded-lg text-center cursor-pointer transition-all
                 ${
-                  formData.gender === 'male'
+                  formData.gender === 'MALE'
                     ? 'bg-blue-600 text-white border-blue-600'
                     : 'bg-white text-gray-700 border-gray-300 hover:border-blue-300'
                 }
@@ -91,8 +91,8 @@ const Step3 = ({
               <input
                 type="radio"
                 name="gender"
-                value="female"
-                checked={formData.gender === 'female'}
+                value="FEMALE"
+                checked={formData.gender === 'FEMALE'}
                 onChange={e => onFormChange('gender', e.target.value)}
                 className="sr-only"
               />
@@ -100,7 +100,7 @@ const Step3 = ({
                 className={`
                 w-full py-3 px-4 border rounded-lg text-center cursor-pointer transition-all
                 ${
-                  formData.gender === 'female'
+                  formData.gender === 'FEMALE'
                     ? 'bg-blue-600 text-white border-blue-600'
                     : 'bg-white text-gray-700 border-gray-300 hover:border-blue-300'
                 }

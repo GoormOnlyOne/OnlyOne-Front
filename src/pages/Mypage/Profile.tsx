@@ -9,10 +9,10 @@ import type { AddressData } from '../../components/common/AddressSelector';
 const mockUserData = {
   userId: 'user123',
   nickname: '벗킷러버',
-  gender: 'female',
+  gender: 'FEMALE',
   birth: '1995-08-15',
   profileImage: 'https://img.hankyung.com/photo/202409/01.37085530.1.jpg',
-  categories: ['travel', 'finance', 'social', 'culture'],
+  categories: ['TRAVEL', 'FINANCE', 'SOCIAL', 'CULTURE'],
   address: {
     city: '서울',
     district: '강남구',

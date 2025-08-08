@@ -14,49 +14,49 @@ interface CategorySectionProps {
 
 const categories = [
   {
-    id: 'culture',
+    id: 'CULTURE',
     label: '문화',
     icon: 'ri-palette-line',
     activeIcon: 'ri-palette-fill',
   },
   {
-    id: 'sports',
+    id: 'EXERCISE',
     label: '운동',
     icon: 'ri-run-line',
     activeIcon: 'ri-run-fill',
   },
   {
-    id: 'travel',
+    id: 'TRAVEL',
     label: '여행',
     icon: 'ri-plane-line',
     activeIcon: 'ri-plane-fill',
   },
   {
-    id: 'music',
+    id: 'MUSIC',
     label: '음악',
     icon: 'ri-music-2-line',
     activeIcon: 'ri-music-2-fill',
   },
   {
-    id: 'craft',
+    id: 'CRAFT',
     label: '공예',
     icon: 'ri-scissors-cut-line',
     activeIcon: 'ri-scissors-cut-fill',
   },
   {
-    id: 'social',
+    id: 'SOCIAL',
     label: '사교',
     icon: 'ri-team-line',
     activeIcon: 'ri-team-fill',
   },
   {
-    id: 'language',
+    id: 'LANGUAGE',
     label: '외국어',
     icon: 'ri-translate-2',
     activeIcon: 'ri-translate',
   },
   {
-    id: 'finance',
+    id: 'FINANCE',
     label: '재테크',
     icon: 'ri-money-dollar-circle-line',
     activeIcon: 'ri-money-dollar-circle-fill',
