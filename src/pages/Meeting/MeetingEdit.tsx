@@ -3,7 +3,9 @@ import { useNavigate, useParams } from 'react-router-dom';
 import MeetingForm, {
   type InitialData,
   type Category,
+  type SubmittedData,
 } from '../../components/domain/meeting/MeetingForm';
+import { type AddressData } from '../../components/common/AddressSelector';
 import apiClient from '../../api/client';
 import { uploadImage } from '../../api/upload';
 import {
@@ -50,7 +52,7 @@ export const MeetingEdit = () => {
     fetchMeetingData();
   }, [id, navigate]);
 
-  const handleSubmit = async (data: any, address: any) => {
+  const handleSubmit = async (data: SubmittedData, address: AddressData) => {
     try {
       let clubImageUrl = '';
 
@@ -78,8 +80,6 @@ export const MeetingEdit = () => {
         city: address.city,
         district: address.district,
       };
-
-      console.log('모임 수정 페이로드:', payload);
 
       const response = await apiClient.patch(`/clubs/${id}`, payload);
 
