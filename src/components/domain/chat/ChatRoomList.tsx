@@ -6,10 +6,10 @@ export interface ChatRoom {
   id: number;
   type: ChatRoomType;
   name: string;
-  lastMessage: string;
-  lastMessageTime: Date;
-  memberCount: number;
-  unreadCount: number;
+  lastMessage?: string;
+  lastMessageTime?: Date;
+  memberCount?: number;
+  unreadCount?: number;
 }
 
 interface ChatRoomListProps {
@@ -67,10 +67,12 @@ const ChatRoomList: React.FC<ChatRoomListProps> = ({
               </div>
               <div className="flex-shrink-0 ml-2">
                 <span className="text-xs text-gray-400">
-                  {chatRoom.lastMessageTime.toLocaleTimeString('ko-KR', {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                  })}
+                  {chatRoom.lastMessageTime
+                    ? new Date(chatRoom.lastMessageTime).toLocaleTimeString('ko-KR', {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })
+                    : ''}
                 </span>
               </div>
             </div>
