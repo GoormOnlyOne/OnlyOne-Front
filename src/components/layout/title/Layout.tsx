@@ -210,6 +210,26 @@ const confirmLeave = async () => {
       };
       break;
 
+    case pathname === '/recommended-meetings':
+      headerProps = {
+        isBack: true,
+        isTitle: true,
+        titleText: '맞춤 모임',
+        isLike: false,
+        isOut: false,
+      };
+      break;
+
+    case pathname === '/partner-meetings':
+      headerProps = {
+        isBack: true,
+        isTitle: true,
+        titleText: '동료들의 모임',
+        isLike: false,
+        isOut: false,
+      };
+      break;
+
     default:
       headerProps = null; // 헤더 표시 안 함
   }
