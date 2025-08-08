@@ -25,7 +25,7 @@ const Step1 = ({
       <CategorySection
         mode="multi-select"
         onCategoryChange={onCategoryChange}
-        defaultSelected={selectedCategories}
+        initialValue={selectedCategories as any}
         maxSelection={maxSelection}
       />
     </div>
