@@ -81,6 +81,8 @@ export default function MeetingList({ mode = 'home', apiEndpoint, showHomeSpecia
 	// 초기 데이터 로드
 	useEffect(() => {
 		loadMeetings(0, true);
+		setPage(0);
+		setHasMore(true);
 		if (showHomeSpecialSections) {
 			loadPartnerMeetings();
 		}
