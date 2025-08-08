@@ -10,9 +10,7 @@ export const Signup = () => {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [selectedAddress, setSelectedAddress] = useState<
-    AddressData | undefined
-  >();
+  const [selectedAddress, setSelectedAddress] = useState<AddressData | undefined>();
   const [formData, setFormData] = useState({
     categories: [] as string[],
     nickname: '',
@@ -72,8 +70,9 @@ export const Signup = () => {
         address: selectedAddress,
       };
       console.log('회원가입 데이터:', finalData);
+
       // TODO: API 호출하여 회원가입 처리
-      setCurrentStep(4); // 완료 화면
+      // setCurrentStep(4); // 완료 화면
     }
   };
 
@@ -105,12 +104,12 @@ export const Signup = () => {
   };
 
   // 프로필 이미지 변경 핸들러
-  // const handleProfileImageChange = (imageUrl: string) => {
-  //   setFormData(prev => ({
-  //     ...prev,
-  //     profileImage: imageUrl
-  //   }));
-  // };
+  const handleProfileImageChange = (imageUrl: string) => {
+    setFormData(prev => ({
+      ...prev,
+      profileImage: imageUrl
+    }));
+  };
 
   // 회원가입 완료 핸들러
   const handleSignupComplete = () => {
@@ -153,7 +152,7 @@ export const Signup = () => {
   };
 
   return (
-    <div className="min-h-screen w-full max-w-md bg-white rounded-2xl p-8">
+    <div className="min-h-screen w-full bg-white px-4 py-8 sm:px-6 md:px-8 lg:max-w-2xl lg:mx-auto">
       <Stepper />
 
       {/* Step별 콘텐츠 */}
@@ -175,7 +174,7 @@ export const Signup = () => {
           <Step3
             formData={formData}
             onFormChange={handleFormChange}
-            // onProfileImageChange={handleProfileImageChange} // ProfileImageUpload의 실제 props 확인 필요
+            onProfileImageChange={handleProfileImageChange}
           />
         )}
         {currentStep === 4 && (
@@ -192,7 +191,7 @@ export const Signup = () => {
           {currentStep > 1 && (
             <button
               onClick={handlePrev}
-              className="flex-1 px-6 py-3 border border-gray-300 rounded-lg font-medium hover:bg-gray-50 transition-colors"
+              className="flex-1 px-6 py-3 border border-gray-300 rounded-lg font-medium hover:bg-gray-50 transition-colors cursor-pointer"
             >
               이전
             </button>
@@ -209,7 +208,7 @@ export const Signup = () => {
                   : 'bg-gray-800 text-white hover:bg-gray-900'
               }
               disabled:opacity-50 disabled:cursor-not-allowed
-              ${!isStepValid() ? 'cursor-not-allowed' : ''}
+              ${!isStepValid() ? 'cursor-not-allowed' : 'cursor-pointer'}
             `}
           >
             {currentStep === totalSteps ? '가입완료' : '다음'}

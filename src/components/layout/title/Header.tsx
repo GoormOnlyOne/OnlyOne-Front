@@ -7,6 +7,9 @@ interface TitleHeaderProps {
   isLike?: boolean;
   isOut?: boolean;
   onBack?: () => void;
+
+  onOut?: () => void;
+  outDisabled?: boolean;
 }
 
 export default function TitleHeader({
@@ -15,7 +18,7 @@ export default function TitleHeader({
   titleText = '타이틀',
   isLike = false,
   isOut = false,
-  onBack,
+  onBack, onOut, outDisabled
 }: TitleHeaderProps) {
   const navigate = useNavigate();
 
@@ -62,8 +65,11 @@ export default function TitleHeader({
           )}
           {isOut && (
             <button
+              onClick={onOut}
+              disabled={outDisabled}
               className="cursor-pointer w-10 h-10 flex items-center justify-center rounded-full bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer"
               aria-label="나가기"
+              title={outDisabled ? '처리 중...' : '모임 나가기'}
             >
               <i className="ri-logout-box-line text-gray-600 text-lg"></i>
             </button>

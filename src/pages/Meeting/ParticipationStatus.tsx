@@ -1,67 +1,126 @@
-import { useSearchParams } from 'react-router';
+import { useState, useEffect } from 'react';
+import { useSearchParams, useParams } from 'react-router-dom';
 import ParticipantInfo from '../../components/domain/meeting/ParticipantInfo';
+import apiClient from '../../api/client';
 
-export const ParticipationStatus = () => {
+interface ParticipatorResponse {
+  userId: number;
+  nickname: string;
+  profileImage: string | null;
+}
+
+interface SettlementResponse {
+  userId: number;
+  nickname: string;
+  profileImage: string | null;
+  settlementStatus: 'REQUESTED' | 'COMPLETED' | 'FAILED';
+}
+
+interface Participator {
+  userId: number;
+  nickname: string;
+  profileImage: string | null;
+}
+
+interface Settlement {
+  userId: number;
+  nickname: string;
+  profileImage: string | null;
+  settlementStatus: 'REQUESTED' | 'COMPLETED' | 'FAILED';
+}
+
+export const ParticipationStatus: React.FC = () => {
   const [searchParams] = useSearchParams();
-  const type = searchParams.get('type') || 'participation';
+  const type =
+    (searchParams.get('type') as 'participation' | 'settlement') ??
+    'participation';
+  const { meetingId, scheduleId } = useParams<{
+    meetingId: string;
+    scheduleId: string;
+  }>();
 
-  // 더미 데이터 - 참여 현황
-  const participationList = [
-    { nickname: '홍길동', profileImage: null },
-    { nickname: '김철수', profileImage: null },
-    { nickname: '이영희', profileImage: null },
-    { nickname: '박민수', profileImage: null },
-  ];
+  const [participants, setParticipants] = useState<Participator[]>([]);
+  const [settlements, setSettlements] = useState<Settlement[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // 더미 데이터 - 정산 현황
-  const settlementList = [
-    {
-      nickname: '홍길동',
-      profileImage: null,
-      settlementStatus: 'REQUESTED' as const,
-    },
-    {
-      nickname: '김철수',
-      profileImage: null,
-      settlementStatus: 'COMPLETED' as const,
-    },
-    {
-      nickname: '이영희',
-      profileImage: null,
-      settlementStatus: 'FAILED' as const,
-    },
-    {
-      nickname: '박민수',
-      profileImage: null,
-      settlementStatus: 'REQUESTED' as const,
-    },
-  ];
+  useEffect(() => {
+    if (!meetingId || !scheduleId) return;
+
+    const fetchData = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        if (type === 'settlement') {
+          // 정산 리스트 조회
+          const res = await apiClient.get<SettlementResponse[]>(
+            `/clubs/${meetingId}/schedules/${scheduleId}/settlements`,
+          );
+          const data = res.data.userSettlementList;
+          const transformed: Settlement[] = data.map(
+            ({ userId, nickname, profileImage, settlementStatus }) => ({
+              userId,
+              nickname,
+              profileImage,
+              settlementStatus,
+            }),
+          );
+          setSettlements(transformed);
+        } else {
+          // 참여자 리스트 조회
+          const res = await apiClient.get<ParticipatorResponse[]>(
+            `/clubs/${meetingId}/schedules/${scheduleId}/users`,
+          );
+          const data = res.data;
+          const transformed: Participator[] = data.map(
+            ({ userId, nickname, profileImage }) => ({
+              userId,
+              nickname,
+              profileImage,
+            }),
+          );
+          setParticipants(transformed);
+        }
+      } catch (err: any) {
+        console.error(err);
+        setError(err.message || '데이터를 불러오는 중 오류가 발생했습니다.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [meetingId, scheduleId, type]);
+
+  if (loading) {
+    return <div className="p-4">로딩 중...</div>;
+  }
+
+  if (error) {
+    return <div className="p-4 text-red-500">오류: {error}</div>;
+  }
 
   return (
-    <>
-      {/* Main Content */}
-      <div className="p-4">
-        {/* Participant List */}
-        <div className="bg-white rounded-lg overflow-hidden shadow-sm">
-          {type === 'settlement'
-            ? settlementList.map((participant, index) => (
-                <ParticipantInfo
-                  key={index}
-                  nickname={participant.nickname}
-                  profileImage={participant.profileImage}
-                  settlementStatus={participant.settlementStatus}
-                />
-              ))
-            : participationList.map((participant, index) => (
-                <ParticipantInfo
-                  key={index}
-                  nickname={participant.nickname}
-                  profileImage={participant.profileImage}
-                />
-              ))}
-        </div>
+    <div className="p-4">
+      <div className="bg-white rounded-lg overflow-hidden shadow-sm">
+        {type === 'settlement'
+          ? settlements.map(s => (
+              <ParticipantInfo
+                key={s.userId}
+                nickname={s.nickname}
+                profileImage={s.profileImage}
+                settlementStatus={s.settlementStatus}
+              />
+            ))
+          : participants.map(p => (
+              <ParticipantInfo
+                key={p.userId}
+                nickname={p.nickname}
+                profileImage={p.profileImage}
+              />
+            ))}
       </div>
-    </>
+    </div>
   );
 };
 
