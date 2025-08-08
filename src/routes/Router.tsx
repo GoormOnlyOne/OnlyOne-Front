@@ -13,7 +13,7 @@ import { MeetingDetail } from '../pages/Meeting/MeetingDetail.tsx';
 import { ParticipationStatus } from '../pages/Meeting/ParticipationStatus.tsx';
 import { MeetingCreate } from '../pages/Meeting/MeetingCreate.tsx';
 import { MeetingEdit } from '../pages/Meeting/MeetingEdit.tsx';
-import MeetingScheduleCrate from '../pages/Meeting/MeetingScheduleCrate.tsx';
+import MeetingScheduleCrate from '../pages/Meeting/MeetingScheduleCreate.tsx';
 import MeetingScheduleEdit from '../pages/Meeting/MeetingScheduleEdit.tsx';
 import { Search } from '../pages/Search.tsx';
 import { Notice } from '../pages/Notice.tsx';
@@ -35,6 +35,7 @@ import { Success } from '../pages/Payment/Success.tsx';
 import { Checkout } from '../pages/Payment/Checkout.tsx';
 import PartnerMeetings from '../pages/PartnerMeetings.tsx';
 import RecommendedMeetings from '../pages/RecommendedMeetings.tsx';
+import MyMeeting from '../pages/Meeting/MyMeeting.tsx';
 
 export const router = createBrowserRouter([
 	// [기본] 레이아웃이 적용되는 라우트들
@@ -146,10 +147,10 @@ export const router = createBrowserRouter([
 				path: '/success',
 				element: <Success />,
 			},
-			        {
-        path: 'mypage/my-meetings',
-        element: <MyMeeting />,
-      },
+			{
+				path: 'mypage/my-meetings',
+				element: <MyMeeting />,
+			},
 			{
 				path: '/partner-meetings',
 				element: <PartnerMeetings />,
