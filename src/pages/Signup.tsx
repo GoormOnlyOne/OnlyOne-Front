@@ -32,10 +32,12 @@ export const Signup = () => {
         // Step 1: 카테고리가 1개 이상 선택되어야 함
         return selectedCategories.length >= 1;
       case 2:
-        // Step 2: 지역 선택
+        // Step 2: 지역 선택 (도시와 구/군이 모두 선택되어야 함)
         return (
           selectedAddress !== undefined &&
-          Object.keys(selectedAddress).length > 0
+          selectedAddress.city !== '' &&
+          selectedAddress.district !== '' &&
+          selectedAddress.isComplete === true
         );
       case 3:
         // Step 3: 모든 필드가 채워져야 함
