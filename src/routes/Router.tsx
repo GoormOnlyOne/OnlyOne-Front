@@ -16,7 +16,7 @@ import { MeetingEdit } from '../pages/Meeting/MeetingEdit.tsx';
 import MeetingScheduleCrate from '../pages/Meeting/MeetingScheduleCrate.tsx';
 import MeetingScheduleEdit from '../pages/Meeting/MeetingScheduleEdit.tsx';
 import { Search } from '../pages/Search.tsx';
-import { Notice } from '../pages/Notice.tsx';
+import { Notification } from '../pages/Notification.tsx';
 import { Login } from '../pages/Login.tsx';
 import { Signup } from '../pages/Signup.tsx';
 import KakaoCallback from '../pages/KakaoCallback.tsx';
@@ -91,7 +91,7 @@ export const router = createBrowserRouter([
       },
       {
         path: 'notice',
-        element: <Notice />,
+        element: <Notification />,
       },
       {
         path: 'meeting/:id',
