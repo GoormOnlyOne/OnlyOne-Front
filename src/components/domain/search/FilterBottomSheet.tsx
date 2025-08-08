@@ -146,7 +146,6 @@ export const FilterBottomSheet = ({
                 onChange={(e) => handleFilterChange('district', e.target.value)}
                 className="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
-                <option value="">전체 구/군</option>
                 {availableDistricts.map(district => (
                   <option key={district} value={district}>{district}</option>
                 ))}
