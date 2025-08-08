@@ -92,7 +92,7 @@ export default function MeetingCard({ meeting, onJoinSuccess }: MeetingCardProps
 				<h3 className="font-semibold text-gray-800 mb-2">
 					{meeting.name}
 				</h3>
-				<p className="text-sm text-gray-600ㅡ mb-3 line-clamp-2">
+				<p className="text-sm text-gray-600 mb-3 line-clamp-2">
 					{meeting.description}
 				</p>
 
