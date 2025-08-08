@@ -274,7 +274,7 @@ export const Search = () => {
             찾고 싶은 모임을 검색해보세요
           </p>
           <p className="text-sm text-gray-500 mt-2">
-            모임명, 카테고리, 지역으로 검색할 수 있어요
+            모임명, 모임소개, 카테고리, 지역으로 검색할 수 있어요
           </p>
         </div>
       )}
