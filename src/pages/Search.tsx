@@ -4,15 +4,17 @@ import EmptyState from '../components/domain/search/EmptyState';
 import apiClient from '../api/client';
 import { FilterBottomSheet } from '../components/domain/search/FilterBottomSheet';
 import { FilterChips } from '../components/domain/search/FilterChips';
+import MeetingCard from '../components/domain/meeting/MeetingCard';
 
 interface Meeting {
-  club_id: number;
+  clubId: number;
   name: string;
   description: string;
-  category: string;
+  interest: string;
   district: string;
-  member_count: number;
-  club_image: string;
+  memberCount: number;
+  image: string;
+  joined: boolean;
 }
 
 interface SearchFilters {
@@ -33,6 +35,8 @@ export const Search = () => {
   const [isSearched, setIsSearched] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [showFilterSheet, setShowFilterSheet] = useState(false);
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
   const [filters, setFilters] = useState<SearchFilters>({
     city: '',
     district: '',
@@ -53,47 +57,103 @@ export const Search = () => {
     { interestId: 8, category: '재테크' }
   ];
 
-  const handleSearch = useCallback(async (query: string, searchFilters = filters) => {
+  const validateSearch = (query: string, searchFilters: SearchFilters) => {
+    // 검색어가 있는데 2글자 미만인 경우
+    if (query.trim() && query.trim().length < 2) {
+      alert('검색어는 2글자 이상 입력해주세요.');
+      return false;
+    }
+    return true;
+  };
+
+  const handleSearch = useCallback(async (query: string, searchFilters = filters, pageNum = 0, isNewSearch = false) => {
+    // 검색 유효성 검사
+    if (isNewSearch && !validateSearch(query, searchFilters)) {
+      return;
+    }
+
     setIsLoading(true);
-    setIsSearched(true);
+    if (isNewSearch) {
+      setIsSearched(true);
+      setPage(0);
+      setHasMore(true);
+    }
 
     try {
+      const trimmedQuery = query.trim();
+      
       const params = {
-        keyword: query || undefined,
+        // 키워드가 있으면 포함, 없으면 undefined
+        keyword: trimmedQuery || undefined,
         city: searchFilters.city || undefined,
         district: searchFilters.district || undefined,
         interestId: searchFilters.interestId || undefined,
         sortBy: searchFilters.sortBy,
-        page: 0,
+        page: pageNum,
         size: 20
       };
 
-      const response = await apiClient.get<Meeting[]>('/clubs/search', { params });
+      const response = await apiClient.get<Meeting[]>('/search', { params });
+			console.log(response);
       if (response.success) {
-        setSearchResults(response.data);
+        const newResults = response.data;
+        
+        if (isNewSearch) {
+          setSearchResults(newResults);
+        } else {
+          setSearchResults(prev => [...prev, ...newResults]);
+        }
+
+        // 더 이상 데이터가 없으면 hasMore를 false로 설정
+        if (newResults.length < 20) {
+          setHasMore(false);
+        }
       } else {
-        setSearchResults([]);
+        if (isNewSearch) {
+          setSearchResults([]);
+        }
       }
     } catch (error) {
       console.error('검색 실패:', error);
-      setSearchResults([]);
+      if (isNewSearch) {
+        setSearchResults([]);
+      }
     } finally {
       setIsLoading(false);
     }
   }, [filters]);
 
   useEffect(() => {
-    if (searchQuery) {
-      handleSearch(searchQuery);
-    }
+    // 검색어가 있거나, 검색어가 없어도 검색이 실행되도록 변경
+    // searchQuery가 변경될 때마다 검색 실행
+    handleSearch(searchQuery, filters, 0, true);
   }, [searchQuery, handleSearch]);
+
+  // 무한 스크롤
+  useEffect(() => {
+    if (!isSearched) return;
+
+    const handleScroll = () => {
+      const scrollHeight = document.documentElement.scrollHeight;
+      const scrollTop = document.documentElement.scrollTop;
+      const clientHeight = document.documentElement.clientHeight;
+
+      if (scrollHeight - scrollTop - clientHeight < 100 && hasMore && !isLoading) {
+        const nextPage = page + 1;
+        setPage(nextPage);
+        handleSearch(searchQuery, filters, nextPage, false);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [page, hasMore, isLoading, isSearched, searchQuery, filters, handleSearch]);
 
   const handleApplyFilters = (newFilters: SearchFilters) => {
     setFilters(newFilters);
     
-    if (searchQuery || isSearched) {
-      handleSearch(searchQuery, newFilters);
-    }
+    // 필터가 적용되면 항상 검색 실행 (검색어 유무 관계없이)
+    handleSearch(searchQuery, newFilters, 0, true);
   };
 
   const handleRemoveFilter = (key: keyof SearchFilters) => {
@@ -108,9 +168,8 @@ export const Search = () => {
     
     setFilters(newFilters);
     
-    if (searchQuery || isSearched) {
-      handleSearch(searchQuery, newFilters);
-    }
+    // 필터 제거 시에도 항상 검색 실행
+    handleSearch(searchQuery, newFilters, 0, true);
   };
 
   const handleClearAllFilters = () => {
@@ -122,89 +181,70 @@ export const Search = () => {
     };
     setFilters(defaultFilters);
     
-    if (searchQuery || isSearched) {
-      handleSearch(searchQuery, defaultFilters);
-    }
+    // 전체 필터 초기화 시에도 항상 검색 실행
+    handleSearch(searchQuery, defaultFilters, 0, true);
   };
 
   const hasActiveFilters = () => {
     return filters.city || filters.interestId;
   };
 
-  const handleJoinMeeting = (clubId: number) => {
-    console.log(`모임 ${clubId}에 가입`);
-    alert('모임 가입이 완료되었습니다!');
-  };
-
-  const handleMeetingClick = (clubId: number) => {
-    navigate(`/meeting/${clubId}`);
+  const handleJoinSuccess = (clubId: number) => {
+    // 가입 성공 시 해당 모임의 joined 상태를 업데이트
+    setSearchResults(prev => 
+      prev.map(meeting => 
+        meeting.clubId === clubId 
+          ? { ...meeting, joined: true }
+          : meeting
+      )
+    );
   };
 
   return (
     <div className="h-[calc(100vh-56px)] overflow-y-auto bg-gray-50">
       {/* 필터 헤더 */}
       <div className="sticky top-0 bg-white border-b border-gray-100 z-10">
-        {/* 검색 결과 정보 */}
-        {isSearched && (
-          <div className="px-4 py-3 border-b border-gray-50">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">
-                  {searchQuery && (
-                    <>
-                      '<span className="font-semibold text-gray-800">{searchQuery}</span>' 
-                    </>
-                  )}
-                  검색 결과
-                </p>
-                <p className="text-xs text-gray-500 mt-0.5">
-                  총 {searchResults.length}개의 모임
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
-        
         {/* 필터 바 */}
         <div className="px-4 py-3">
           <div className="flex items-center gap-3">
+            {/* 지역 필터 */}
             <button
               onClick={() => setShowFilterSheet(true)}
-              className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${
-                hasActiveFilters()
-                  ? 'bg-blue-600 text-white shadow-md'
+              className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                filters.city
+                  ? 'bg-blue-50 text-blue-600 border border-blue-200'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
-              <i className="ri-equalizer-line text-base"></i>
-              필터
+              <i className="ri-map-pin-line text-base"></i>
+              지역
             </button>
             
-            {/* 빠른 정렬 버튼 */}
-            {isSearched && searchResults.length > 0 && (
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => handleApplyFilters({ ...filters, sortBy: 'MEMBER_COUNT' })}
-                  className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                    filters.sortBy === 'MEMBER_COUNT'
-                      ? 'bg-blue-50 text-blue-600 border border-blue-200'
-                      : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'
-                  }`}
-                >
-                  인기순
-                </button>
-                <button
-                  onClick={() => handleApplyFilters({ ...filters, sortBy: 'LATEST' })}
-                  className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                    filters.sortBy === 'LATEST'
-                      ? 'bg-blue-50 text-blue-600 border border-blue-200'
-                      : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'
-                  }`}
-                >
-                  최신순
-                </button>
-              </div>
-            )}
+            {/* 관심사 필터 */}
+            <button
+              onClick={() => setShowFilterSheet(true)}
+              className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                filters.interestId
+                  ? 'bg-blue-50 text-blue-600 border border-blue-200'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              <i className="ri-heart-line text-base"></i>
+              관심사
+            </button>
+            
+            {/* 정렬 필터 */}
+            <button
+              onClick={() => setShowFilterSheet(true)}
+              className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                filters.sortBy === 'LATEST'
+                  ? 'bg-blue-50 text-blue-600 border border-blue-200'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              <i className="ri-sort-desc text-base"></i>
+							정렬
+            </button>
           </div>
         </div>
       </div>
@@ -254,65 +294,20 @@ export const Search = () => {
             <div className="px-4 py-6">
               <div className="space-y-4">
                 {searchResults.map(meeting => (
-                  <div
-                    key={meeting.club_id}
-                    className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
-                    onClick={() => handleMeetingClick(meeting.club_id)}
-                  >
-                    <div className="relative">
-                      <img
-                        src={meeting.club_image || 'https://via.placeholder.com/400x240'}
-                        alt={meeting.name}
-                        className="w-full h-48 object-cover"
-                      />
-                      <span className="absolute top-3 left-3 bg-blue-600 text-white px-3 py-1 rounded-full text-xs font-medium">
-                        {meeting.category}
-                      </span>
-                      <button
-                        className="absolute top-3 right-3 w-8 h-8 flex items-center justify-center bg-white/80 rounded-full hover:bg-white transition-colors"
-                        onClick={e => {
-                          e.stopPropagation();
-                        }}
-                      >
-                        <i className="ri-heart-line text-gray-600"></i>
-                      </button>
-                    </div>
-
-                    <div className="p-4">
-                      <h3 className="font-semibold text-gray-800 mb-2">
-                        {meeting.name}
-                      </h3>
-                      <p className="text-sm text-gray-600 mb-3 line-clamp-2">
-                        {meeting.description}
-                      </p>
-
-                      <div className="flex items-center justify-between">
-                        <div className="space-y-1">
-                          <div className="flex items-center text-sm text-gray-600">
-                            <i className="ri-map-pin-line mr-2"></i>
-                            <span>{meeting.district}</span>
-                          </div>
-
-                          <div className="flex items-center text-sm text-gray-600">
-                            <i className="ri-group-line mr-2"></i>
-                            <span>멤버 {meeting.member_count}명</span>
-                          </div>
-                        </div>
-
-                        <button
-                          onClick={e => {
-                            e.stopPropagation();
-                            handleJoinMeeting(meeting.club_id);
-                          }}
-                          className="bg-blue-600 text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-blue-700 transition-colors hover:shadow-md"
-                        >
-                          가입하기
-                        </button>
-                      </div>
-                    </div>
-                  </div>
+                  <MeetingCard 
+                    key={meeting.clubId} 
+                    meeting={meeting} 
+                    onJoinSuccess={handleJoinSuccess}
+                  />
                 ))}
               </div>
+
+              {/* 무한스크롤 상태 표시 */}
+              {isLoading && (
+                <div className="flex justify-center py-8">
+                  <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                </div>
+              )}
             </div>
           ) : (
             <EmptyState

@@ -10,6 +10,8 @@ interface CategorySectionProps {
   mode?: CategoryMode;
   /** 단일 또는 다중 선택 초기값(수정 모드에서) */
   initialValue?: Category | Category[];
+  /** 기존 호환성을 위한 defaultSelected (deprecated) */
+  defaultSelected?: string | string[];
   /** 선택이 바뀔 때 호출되는 콜백 */
   onCategoryChange?: (category: Category | Category[]) => void;
   /** 다중 선택 시 최대 개수 */
@@ -100,7 +102,7 @@ export default function CategorySection({
   const handleCategoryClick = (cat: Category) => {
     switch (mode) {
       case 'navigation':
-        navigate(`/category/${cat}`);
+        navigate(`/category?select=${cat}`);
         break;
 
       case 'single-select':

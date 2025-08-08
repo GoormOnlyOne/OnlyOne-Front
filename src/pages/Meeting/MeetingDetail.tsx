@@ -2,7 +2,6 @@ import TabBar, { type TabItem } from '../../components/common/TabBar';
 import MeetingHome from './MeetingHome';
 import MeetingFeed from './MeetingFeed';
 import MeetingChat from './MeetingChat';
-import { useParams } from 'react-router-dom';
 
 const meetingTabs: TabItem[] = [
   {
