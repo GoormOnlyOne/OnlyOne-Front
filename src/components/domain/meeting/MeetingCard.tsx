@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import apiClient from '../../../api/client';
+import Modal from '../../common/Modal';
 
 interface Meeting {
 	clubId: number;
@@ -21,26 +22,36 @@ interface MeetingCardProps {
 export default function MeetingCard({ meeting, onJoinSuccess }: MeetingCardProps) {
 	const navigate = useNavigate();
 	const [isJoining, setIsJoining] = useState(false);
+	const [showJoinModal, setShowJoinModal] = useState(false);
+
 	const handleMeetingClick = () => {
+		if (showJoinModal) return;
 		navigate(`/meeting/${meeting.clubId}`);
 	};
 
-	const handleJoinClick = async (e: React.MouseEvent) => {
+	const handleJoinClick = (e: React.MouseEvent) => {
 		e.stopPropagation();
 		if (isJoining) { // 이미 가입 중
 			return;
 		}
+		setShowJoinModal(true);
+	};
+
+	const handleConfirmJoin = async () => {
 		setIsJoining(true);
+		setShowJoinModal(false);
 
 		try {
 			const response = await apiClient.get(`/clubs/${meeting.clubId}/join`);
 
 			if (response.success) {
-				alert('모임 가입이 완료되었습니다!');
 				// 가입 성공 시 상위 컴포넌트에 알림
 				if (onJoinSuccess) {
 					onJoinSuccess(meeting.clubId);
 				}
+
+				// 모임 상세 페이지로 이동
+				navigate(`/meeting/${meeting.clubId}`);
 			}
 		} catch (error: any) {
 			console.error('가입 실패:', error);
@@ -81,7 +92,7 @@ export default function MeetingCard({ meeting, onJoinSuccess }: MeetingCardProps
 				<h3 className="font-semibold text-gray-800 mb-2">
 					{meeting.name}
 				</h3>
-				<p className="text-sm text-gray-600 mb-3 line-clamp-2">
+				<p className="text-sm text-gray-600ㅡ mb-3 line-clamp-2">
 					{meeting.description}
 				</p>
 
@@ -115,6 +126,16 @@ export default function MeetingCard({ meeting, onJoinSuccess }: MeetingCardProps
 					)}
 				</div>
 			</div>
+
+			{/* 가입 확인 모달 */}
+			<Modal
+				isOpen={showJoinModal}
+				onClose={() => setShowJoinModal(false)}
+				onConfirm={handleConfirmJoin}
+				title={`"${meeting.name}" \n가입하시겠습니까?`}
+				cancelText="취소"
+				confirmText="가입하기"
+			/>
 		</div>
 	);
 }
