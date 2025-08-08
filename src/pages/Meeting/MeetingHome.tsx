@@ -1,25 +1,24 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { showApiErrorToast } from '../../components/common/Toast/ToastProvider';
+import { showToast as globalToast } from '../../components/common/Toast/ToastProvider';
 import ScheduleList from '../../components/domain/meeting/ScheduleList';
 import apiClient from '../../api/client';
+import Modal from '../../components/common/Modal';
 
 // API 응답 타입
 interface ClubDetailResponse {
-  success: boolean;
-  data: {
-    clubId: number;
-    name: string;
-    userCount: number;
-    description: string;
-    clubImage: string;
-    district: string;
-    category: string;
-    clubRole: 'LEADER' | 'MEMBER' | 'GUEST';
-  };
+  clubId: number;
+  name: string;
+  userCount: number;
+  description: string;
+  clubImage: string;
+  district: string;
+  category: string;
+  clubRole: 'LEADER' | 'MEMBER' | 'GUEST';
 }
 
-// 컴포넌트에서 사용할 타입
+// 화면에서 사용할 타입
 interface Meeting {
   id: number;
   title: string;
@@ -31,45 +30,44 @@ interface Meeting {
   role: 'LEADER' | 'MEMBER' | 'GUEST';
 }
 
-export const MeetingHome = () => {
-  const { id: meetingId } = useParams();
+const MeetingHome: React.FC = () => {
+  const { id: meetingId } = useParams<{ id: string }>();
   const navigate = useNavigate();
+
   const [meeting, setMeeting] = useState<Meeting | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [showCTA, setShowCTA] = useState(false);
 
+  // Modal state for join confirmation
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // 1) 모임 정보 Fetch
   useEffect(() => {
-    const fetchMeetingDetail = async () => {
-      if (!meetingId) return;
+    if (!meetingId) return;
 
+    const fetchMeetingDetail = async () => {
       try {
         setLoading(true);
         const response = await apiClient.get<ClubDetailResponse>(
           `/clubs/${meetingId}`,
         );
 
-        if (response.data.success) {
-          const data = response.data.data;
-
-          console.log('모임 정보:', data);
-
-          // API 응답을 컴포넌트에서 사용하는 형태로 변환
+        if (response.success) {
+          const data = response.data;
+          // 현재 코드를 다음과 같이 수정:
           setMeeting({
             id: data.clubId,
             title: data.name,
             location: data.district,
             participantCount: data.userCount,
-            image:
-              data.clubImage ||
-              `https://readdy.ai/api/search-image?query=Korean%20people%20gathering%20for%20social%20meeting%20activity%2C%20warm%20atmosphere%2C%20indoor%20setting%2C%20friendly%20interaction%2C%20modern%20cafe%20or%20meeting%20room%2C%20soft%20lighting%2C%20diverse%20group%20of%20young%20adults%2C%20comfortable%20casual%20environment&width=375&height=200&seq=${meetingId}&orientation=landscape`,
+            image: data.clubImage || '',
             category: data.category,
             description: data.description,
             role: data.clubRole,
           });
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         showApiErrorToast(err);
-        console.error('모임 정보 조회 실패:', err);
         navigate('/meeting');
       } finally {
         setLoading(false);
@@ -77,19 +75,57 @@ export const MeetingHome = () => {
     };
 
     fetchMeetingDetail();
-  }, [meetingId]);
+  }, [meetingId, navigate]);
 
-  if (loading)
+  // 2) GUEST용 Sticky CTA 애니메이션
+  useEffect(() => {
+    if (meeting?.role === 'GUEST') {
+      const timer = setTimeout(() => setShowCTA(true), 400);
+      return () => clearTimeout(timer);
+    }
+    setShowCTA(false);
+  }, [meeting]);
+
+  // Modal handlers
+  const handleModalOpen = () => setIsModalOpen(true);
+  const handleModalClose = () => setIsModalOpen(false);
+
+  const handleMeetingJoin = async () => {
+    if (!meetingId) {
+      handleModalClose();
+      return;
+    }
+    try {
+      // TODO: post로 수정 (프&백 둘다)
+      const res = await apiClient.get<{ success: boolean }>(
+        `/clubs/${meetingId}/join`,
+      );
+      if (res.success) {
+        globalToast('모임에 가입하였습니다.', 'success', 2000);
+        // 새로 고침 혹은 리다이렉트
+        navigate(`/meeting/${meetingId}`);
+      } else {
+        throw new Error('가입에 실패했습니다.');
+      }
+    } catch (err: any) {
+      showApiErrorToast(err);
+    } finally {
+      handleModalClose();
+    }
+  };
+
+  if (loading) {
     return (
       <div className="flex justify-center items-center h-64">로딩 중...</div>
     );
-  if (error) return <div className="text-red-500 text-center">{error}</div>;
-  if (!meeting)
+  }
+  if (!meeting) {
     return <div className="text-center">모임을 찾을 수 없습니다.</div>;
+  }
 
   return (
-    <div className="px-4">
-      {/* 모임 대표 이미지 */}
+    <div className="px-4 pb-20">
+      {/* 대표 이미지 */}
       <div className="w-full h-48 bg-gray-400 rounded-lg mb-6 overflow-hidden">
         {meeting.image ? (
           <img
@@ -105,47 +141,74 @@ export const MeetingHome = () => {
       </div>
 
       {/* 모임 정보 */}
-      <div className="mb-8">
-        <h2 className="text-lg font-bold mb-2">{meeting.title}</h2>
-        <p className="text-sm text-gray-600 mb-4">
-          {meeting.location} · {meeting.category} · 멤버{' '}
-          {meeting.participantCount}명
-        </p>
-
-        <div className="mb-6">
-          <h3 className="text-base font-medium mb-3">모임 소개</h3>
-          <p className="text-sm text-gray-700">{meeting.description}</p>
-        </div>
-
-        <div className="flex gap-2">
-          {/* 모임장만 보이게 */}
-          {meeting.role === 'LEADER' && (
-            <>
-              <button
-                onClick={() => navigate(`/meeting/${meeting.id}/edit`)}
-                className="bg-blue-500 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-600 cursor-pointer"
-              >
-                모임 정보 수정
-              </button>
-              <button
-                onClick={() =>
-                  navigate(`/meeting/${meeting.id}/schedule/create`)
-                }
-                className="bg-green-500 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-green-600 cursor-pointer"
-              >
-                정기모임 추가
-              </button>
-            </>
-          )}
-        </div>
+      <h2 className="text-lg font-bold mb-2">{meeting.title}</h2>
+      <p className="text-sm text-gray-600 mb-4">
+        {meeting.location} · {meeting.category} · 멤버{' '}
+        {meeting.participantCount}명
+      </p>
+      <div className="mb-6">
+        <h3 className="text-base font-medium mb-3">모임 소개</h3>
+        <p className="text-sm text-gray-700">{meeting.description}</p>
       </div>
 
-      {/* 정기모임(스케줄) */}
+      {/* 리더 전용 버튼 */}
+      {meeting.role === 'LEADER' && (
+        <div className="flex gap-2 mb-6">
+          <button
+            onClick={() => navigate(`/meeting/${meeting.id}/edit`)}
+            className="bg-blue-500 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-600"
+          >
+            모임 정보 수정
+          </button>
+          <button
+            onClick={() => navigate(`/meeting/${meeting.id}/schedule/create`)}
+            className="bg-green-500 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-green-600"
+          >
+            정기모임 추가
+          </button>
+        </div>
+      )}
+
+      {/* ScheduleList에 clubRole 전달 */}
       <div className="mb-8">
-        <ScheduleList />
+        <ScheduleList clubRole={meeting.role} />
       </div>
+
+      {/* GUEST용 Sticky CTA */}
+      {meeting.role === 'GUEST' && (
+        <>
+          <div
+            className={`
+              fixed left-0 right-0 bottom-0 z-40 flex justify-center
+              transition-transform duration-500
+              ${showCTA ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0'}
+            `}
+          >
+            <button
+              onClick={handleModalOpen}
+              className="
+                w-[90vw] max-w-md mb-6 py-4
+                bg-blue-600 text-white text-lg font-bold
+                rounded-xl shadow-lg
+                hover:bg-blue-700 active:scale-95
+                transition-all duration-200
+              "
+            >
+              가입하기
+            </button>
+          </div>
+
+          {/* 가입 확인 모달 */}
+          <Modal
+            isOpen={isModalOpen}
+            onClose={handleModalClose}
+            onConfirm={handleMeetingJoin}
+            title="모임에 가입하시겠습니까?"
+          />
+        </>
+      )}
     </div>
   );
 };
 
-export { MeetingHome as default } from './MeetingHome';
+export default MeetingHome;

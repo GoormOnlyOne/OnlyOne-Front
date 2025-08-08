@@ -13,13 +13,17 @@ export function setGlobalToastFunction(
 }
 
 /* API 에러 응답 토스트 */
-export function showApiErrorToast(error: ApiError) {
-  const msg = error.data?.message ?? '알 수 없는 오류가 발생했습니다.';
-
+export function showApiErrorToast(error: unknown) {
+  let msg = '알 수 없는 오류가 발생했습니다.';
+  if (typeof error === 'object' && error !== null && 'data' in error) {
+    // @ts-ignore
+    msg = (error as any).data?.message ?? msg;
+  } else if (error instanceof Error) {
+    msg = error.message;
+  }
   if (globalShowToast) {
     globalShowToast(msg, 'error', 3000);
   } else {
-    // fallback으로 기본 alert 사용
     alert(msg);
   }
 }
