@@ -2,12 +2,18 @@ import { useLocation, Outlet, useParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import Header from './Header';
 import Footer from './Footer';
+import apiClient from '../../../api/client';
+import Modal from '../../common/Modal';
+import { showToast as globalToast } from '../../common/Toast/ToastProvider';
 
 export default function TitleLayout() {
   const location = useLocation();
   const pathname = location.pathname;
   const params = useParams();
+
   const [dynamicTitle, setDynamicTitle] = useState('');
+  const [leaving, setLeaving] = useState(false);
+  const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false); // 확인 모달
 
   useEffect(() => {
     if (
@@ -22,11 +28,6 @@ export default function TitleLayout() {
 
   const fetchMeetingTitle = async (meetingId: string) => {
     try {
-      // TODO: 실제 API 호출 코드
-      // const response = await fetch(`/api/meetings/${meetingId}`);
-      // const data = await response.json();
-      // setDynamicTitle(data.title);
-
       // 임시 예시
       setDynamicTitle(`모임 ${meetingId}`);
     } catch (error) {
@@ -34,6 +35,25 @@ export default function TitleLayout() {
       setDynamicTitle('모임 세');
     }
   };
+
+  // 컴포넌트 내부 어딘가(함수들 밑) 추가
+const confirmLeave = async () => {
+  const meetingId = pathname.match(/\/meeting\/(\d+)/)?.[1];
+  if (!meetingId) return;
+
+  try {
+    setLeaving(true);
+    await apiClient.delete(`/clubs/${meetingId}/leave`);
+    globalToast('모임에서 탈퇴하였습니다.', 'success', 2000);
+    // 화면은 그대로 유지 (navigate 없음)
+  } catch (e) {
+    console.error('모임 탈퇴 실패:', e);
+    globalToast('모임에 가입하지 않은 상태입니다. 잠시 후 다시 시도해주세요.', 'error', 2000);
+  } finally {
+    setLeaving(false);
+    setIsLeaveModalOpen(false);
+  }
+};
 
   let headerProps = null;
 
@@ -148,6 +168,9 @@ export default function TitleLayout() {
         titleText: meetingId || '모임 상세',
         isLike: true,
         isOut: true,
+        // ✅ 헤더에 콜백/디세이블 전달
+        onOut: () => setIsLeaveModalOpen(true),
+        outDisabled: leaving,
       };
       break;
 
@@ -212,6 +235,14 @@ export default function TitleLayout() {
           <Footer />
         </div>
       )}
+
+      {/* 탈퇴 확인 모달 */}
+      <Modal
+        isOpen={isLeaveModalOpen}
+        onClose={() => setIsLeaveModalOpen(false)}
+        onConfirm={confirmLeave}
+        title="모임에서 탈퇴하시겠습니까?"
+      />
     </div>
   );
 }
