@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 
 import CategorySection from '../../components/domain/category/CategorySection';
 import MeetingList from '../../components/domain/meeting/MeetingList';
@@ -14,10 +14,12 @@ import TabBar from '../../components/common/TabBar';
 import type { TabItem } from '../../components/common/TabBar';
 
 export const Category = () => {
-  const [searchParams] = useSearchParams();
-  const selectedCategoryFromUrl = searchParams.get('selected');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const selectedCategoryFromUrl = searchParams.get('select'); // URL에서 'select' 파라미터 읽기
   const [activeTab, setActiveTab] = useState<string>('interest');
-  const [selectedInterest, setSelectedInterest] = useState<string | null>(selectedCategoryFromUrl || 'culture');
+  // URL에서 카테고리가 전달되면 사용, 없으면 기본값 'CULTURE'
+  const [selectedInterest, setSelectedInterest] = useState<string | null>(selectedCategoryFromUrl || 'CULTURE');
   const [meetings, setMeetings] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [locationMeetings, setLocationMeetings] = useState<any[]>([]);
@@ -40,20 +42,26 @@ export const Category = () => {
     const selectedId = typeof categoryId === 'string' ? categoryId : categoryId[0];
     setSelectedInterest(selectedId);
     console.log('선택된 관심사:', selectedId);
+    
+    // URL에 선택된 카테고리 반영
+    const newSearchParams = new URLSearchParams(searchParams);
+    newSearchParams.set('select', selectedId);
+    setSearchParams(newSearchParams);
+    
     loadMeetingsByCategory(selectedId);
   };
 
-  // 카테고리 ID를 숫자로 변환하는 함수
+  // 카테고리 ID를 숫자로 변환하는 함수 (새로운 Category enum 대응)
   const getCategoryNumericId = (categoryId: string): number => {
     const categoryMap: { [key: string]: number } = {
-      'culture': 1,
-      'sports': 2, 
-      'travel': 3,
-      'music': 4,
-      'craft': 5,
-      'social': 6,
-      'language': 7,
-      'finance': 8
+      'CULTURE': 1,
+      'EXERCISE': 2, 
+      'TRAVEL': 3,
+      'MUSIC': 4,
+      'CRAFT': 5,
+      'SOCIAL': 6,
+      'LANGUAGE': 7,
+      'FINANCE': 8
     };
     return categoryMap[categoryId] || 1;
   };
@@ -127,7 +135,7 @@ export const Category = () => {
             <CategorySection
               mode="single-select"
               onCategoryChange={handleInterestChange}
-              defaultSelected={selectedCategoryFromUrl || "culture"}
+              initialValue={(selectedCategoryFromUrl as any) || "CULTURE"}
             />
           </div>
           
