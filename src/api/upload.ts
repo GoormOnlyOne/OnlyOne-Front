@@ -99,6 +99,8 @@ export const uploadImages = async (
     // 1. 파일 타입 검증
     files.forEach(validateFileType);
 
+    console.log(files, imageFolderType);
+
     // 2. presigned URL 발급
     const presignedUrls = await getPresignedUrls(files, imageFolderType);
 
