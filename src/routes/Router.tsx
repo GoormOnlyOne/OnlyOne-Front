@@ -134,9 +134,6 @@ export const router = createBrowserRouter([
       {
         path: 'settlementHistory',
         element: <SettlementHistory />,
-<<<<<<< HEAD
-      }
-=======
       },
       {
         path: 'payment',
@@ -150,14 +147,10 @@ export const router = createBrowserRouter([
         path: '/success',
         element: <Success />,
       },
-<<<<<<< HEAD
->>>>>>> 96ee3d7946c01cc47bf8f7b43daf96be7c7ec6ad
-=======
         {
         path: 'mypage/my-meetings',
         element: <MyMeeting />,
       }
->>>>>>> 7850e808ca3bf8ffeccf02bb747c6c33e50c0406
     ],
   },
 
@@ -171,15 +164,11 @@ export const router = createBrowserRouter([
     element: <Signup />,
   },
   {
-<<<<<<< HEAD
-    path: "/components",
-=======
     path: '/kakao-callback',
     element: <KakaoCallback />,
   },
   {
     path: '/components',
->>>>>>> 96ee3d7946c01cc47bf8f7b43daf96be7c7ec6ad
     element: <ComponentGallery />,
   },
 ]);

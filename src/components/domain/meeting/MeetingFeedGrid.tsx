@@ -1,6 +1,8 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import apiClient from '../../../api/client';
 import { Link } from 'react-router-dom';
+import EmptyState from '../search/EmptyState';
+
 
 interface FeedItem {
   id: number;
@@ -34,9 +36,18 @@ const MeetingFeedGrid: React.FC<MeetingFeedGridProps> = ({ clubId }) => {
   const [page, setPage] = useState(0);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
+  
+  const [firstLoaded, setFirstLoaded] = useState(false);
+  const [firstPageEmpty, setFirstPageEmpty] = useState(false); 
+
+  
+
+  // 즉시 반영되는 로딩 상태
+  const loadingRef = useRef(false);
 
   const loadMore = useCallback(() => {
-    if (loading || !hasMore) return;
+    if (loadingRef.current || !hasMore) return;
+    loadingRef.current = true;
     setLoading(true);
 
     apiClient
@@ -44,7 +55,14 @@ const MeetingFeedGrid: React.FC<MeetingFeedGridProps> = ({ clubId }) => {
         `/clubs/${clubId}/feeds?page=${page}&limit=20`
       )
       .then(response => {
-        const content = response.data.data.content;
+        const content = response.data.content;
+
+        // ✅ 첫 페이지 응답 처리
+        if (page === 0) {
+          setFirstLoaded(true);
+          setFirstPageEmpty(content.length === 0);
+        }
+
         // 마지막 페이지인지 확인
         if (content.length < 20) {
           setHasMore(false);
@@ -64,8 +82,11 @@ const MeetingFeedGrid: React.FC<MeetingFeedGridProps> = ({ clubId }) => {
         setPage(prev => prev + 1);
       })
       .catch(err => console.error('피드 로드 실패:', err))
-      .finally(() => setLoading(false));
-  }, [clubId, page, loading, hasMore]);
+      .finally(() => {
+        loadingRef.current = false;
+        setLoading(false)}
+      );
+  }, [clubId, page, hasMore]);
 
   useEffect(() => {
     loadMore();
@@ -88,6 +109,13 @@ const MeetingFeedGrid: React.FC<MeetingFeedGridProps> = ({ clubId }) => {
 
   return (
     <>
+      {!loading && firstLoaded && firstPageEmpty && (
+        <EmptyState
+          title="이 모임에는 아직 피드가 게시되지 않았습니다."
+          description="첫 사진과 후기를 남겨보세요."
+          showCreateButton={false}
+        />
+      )}
       <div className="grid grid-cols-3 gap-2 p-4">
         {items.map(item => (
           <Link key={item.id} to={`/meeting/${clubId}/feed/${item.id}`}>
