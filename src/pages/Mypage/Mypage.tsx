@@ -1,23 +1,37 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import ProfileImageUpload from '../../components/common/ProfileImage';
 import Modal from '../../components/common/Modal';
 import { useAuth } from '../../contexts/AuthContext';
 import { withdrawUser } from '../../api/auth';
+import { getMyPage } from '../../api/user';
+import type { MyPageResponse } from '../../types/endpoints/user.api';
+import { getInterestsInfo } from '../../utils/interest';
 
 export const Mypage = () => {
   const navigate = useNavigate();
   const { logout } = useAuth();
 
-  const userInfo = {
-    nickname: '별명',
-    gender: '지역(시/도) · 성별/연령 · 성별',
-    interests: ['관심사 1', '관심사 2', '관심사 3'],
-    balance: '5000',
-  };
-
+  const [userInfo, setUserInfo] = useState<MyPageResponse | null>(null);
+  const [loading, setLoading] = useState(true);
   const [isLogout, setIsLogout] = useState(false);
   const [isWithdraw, setIsWithdraw] = useState(false);
+
+  // 마이페이지 데이터 조회
+  useEffect(() => {
+    const fetchMyPageData = async () => {
+      try {
+        const data = await getMyPage();
+        setUserInfo(data);
+      } catch (error) {
+        console.error('마이페이지 데이터 조회 실패:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchMyPageData();
+  }, []);
 
   // 로그아웃 버튼
   const onClickLogout = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -62,28 +76,65 @@ export const Mypage = () => {
     }
   };
 
+  // 나이 계산 함수
+  const calculateAge = (birth: string) => {
+    const birthYear = parseInt(birth.substring(0, 4));
+    const currentYear = new Date().getFullYear();
+    return currentYear - birthYear + 1;
+  };
+
+  // 로딩 중일 때 표시
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+          <p className="text-gray-600">로딩 중...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // 사용자 정보가 없을 때
+  if (!userInfo) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-gray-600">사용자 정보를 불러올 수 없습니다.</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* 프로필 섹션 */}
       <div className="px-4 bg-white pb-4">
         <div className="flex flex-col items-center py-8">
           {/* 프로필 이미지 */}
-          <ProfileImageUpload maxSizeInMB={5} editable={false} />
+          <ProfileImageUpload 
+            maxSizeInMB={5} 
+            editable={false} 
+            defaultImage={userInfo.profile_image}
+          />
 
           {/* 사용자 정보 */}
           <h2 className="text-xl font-semibold text-gray-900 mb-2">
             {userInfo.nickname}
           </h2>
-          <p className="text-sm text-gray-600 mb-3">{userInfo.gender}</p>
+          <p className="text-sm text-gray-600 mb-3">
+            {userInfo.city} {userInfo.district} · {userInfo.gender === 'MALE' ? '남성' : '여성'} · {calculateAge(userInfo.birth)}세
+          </p>
 
           {/* 관심사 태그 */}
           <div className="flex flex-wrap justify-center gap-2">
-            {userInfo.interests.map((interest, index) => (
+            {getInterestsInfo(userInfo.interests_list).map((interest, index) => (
               <span
                 key={index}
-                className="px-3 py-1 bg-gray-100 text-gray-700 text-sm rounded-full"
+                className={`inline-flex items-center gap-1 px-3 py-1.5 text-sm rounded-full transition-colors ${interest.bgColor} ${interest.textColor}`}
               >
-                {interest}
+                <i className={`${interest.icon} text-sm`} />
+                {interest.label}
               </span>
             ))}
           </div>
@@ -97,7 +148,7 @@ export const Mypage = () => {
                 보유 포인트
               </h3>
               <h3 className="text-base font-semibold text-gray-800 leading-snug">
-                {userInfo.balance} P
+                {userInfo.balance.toLocaleString()} P
               </h3>
             </div>
 
