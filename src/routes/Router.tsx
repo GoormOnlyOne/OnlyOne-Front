@@ -1,5 +1,8 @@
 import { createBrowserRouter } from "react-router-dom";
 
+// auth
+import ProtectedRoute from "../components/auth/ProtectedRoute.tsx";
+
 // layout
 import DefaultLayout from "../components/layout/default/Layout.tsx";
 import SearchLayout from "../components/layout/search/Layout.tsx";
@@ -39,7 +42,11 @@ export const router = createBrowserRouter([
   // [기본] 레이아웃이 적용되는 라우트들
   {
     path: "/",
-    element: <DefaultLayout />,
+    element: (
+      <ProtectedRoute>
+        <DefaultLayout />
+      </ProtectedRoute>
+    ),
     children: [
       {
         index: true,
@@ -59,7 +66,11 @@ export const router = createBrowserRouter([
   // [검색] 레이아웃이 적용되는 라우트들
   {
     path: "/search",
-    element: <SearchLayout />,
+    element: (
+      <ProtectedRoute>
+        <SearchLayout />
+      </ProtectedRoute>
+    ),
     children: [
       {
         index: true,
@@ -71,7 +82,11 @@ export const router = createBrowserRouter([
   // [타이틀] 레이아웃이 적용되는 라우트들
   {
     path: "/",
-    element: <TitleLayout />,
+    element: (
+      <ProtectedRoute>
+        <TitleLayout />
+      </ProtectedRoute>
+    ),
     children: [
       {
         path: "mypage",
@@ -161,7 +176,11 @@ export const router = createBrowserRouter([
   },
   {
     path: "/signup",
-    element: <Signup />,
+    element: (
+      <ProtectedRoute requireActive={false}>
+        <Signup />
+      </ProtectedRoute>
+    ),
   },
   {
     path: '/kakao-callback',

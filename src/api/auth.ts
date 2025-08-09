@@ -23,3 +23,24 @@ export interface SignupResponse {
 export const signup = async (signupData: SignupRequest): Promise<ApiResponse<SignupResponse>> => {
   return await apiClient.post<SignupResponse>('/auth/signup', signupData);
 };
+
+// 로그아웃 API 호출
+export const logoutUser = async (): Promise<ApiResponse<null>> => {
+  return await apiClient.post<null>('/auth/logout');
+};
+
+// 현재 사용자 정보 조회 API 호출
+export const getCurrentUser = async (): Promise<ApiResponse<{
+  userId: number;
+  kakaoId: number;
+  nickname: string;
+  status: string;
+  profileImage: string;
+}>> => {
+  return await apiClient.get('/auth/me');
+};
+
+// 회원 탈퇴 API 호출
+export const withdrawUser = async (): Promise<ApiResponse<null>> => {
+  return await apiClient.post<null>('/auth/withdraw');
+};

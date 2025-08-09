@@ -3,6 +3,7 @@ import { useState } from 'react';
 import ProfileImageUpload from '../../components/common/ProfileImage';
 import Modal from '../../components/common/Modal';
 import { useAuth } from '../../contexts/AuthContext';
+import { withdrawUser } from '../../api/auth';
 
 export const Mypage = () => {
   const navigate = useNavigate();
@@ -27,11 +28,16 @@ export const Mypage = () => {
     console.log('로그아웃을 취소했습니다.');
     setIsLogout(false);
   };
-  const handleConfirmLogout = () => {
-    console.log('로그아웃을 했습니다.');
-    logout(); // AuthContext의 logout 함수 호출
-    setIsLogout(false);
-    navigate('/login'); // 로그인 페이지로 리다이렉션
+  const handleConfirmLogout = async () => {
+    try {
+      console.log('로그아웃을 했습니다.');
+      await logout();
+      setIsLogout(false);
+      navigate('/login');
+    } catch (error) {
+      console.error('로그아웃 중 오류가 발생했습니다:', error);
+      setIsLogout(false);
+    }
   };
 
   // 탈퇴하기 버튼
@@ -43,9 +49,17 @@ export const Mypage = () => {
     console.log('탈퇴하기를 취소했습니다.');
     setIsWithdraw(false);
   };
-  const handleConfirmWithdraw = () => {
-    console.log('탈퇴하기를 했습니다.');
-    setIsWithdraw(false);
+  const handleConfirmWithdraw = async () => {
+    try {
+      await withdrawUser();
+      console.log('회원 탈퇴가 완료되었습니다.');
+      await logout();
+      setIsWithdraw(false);
+      navigate('/login');
+    } catch (error) {
+      console.error('회원 탈퇴 중 오류가 발생했습니다:', error);
+      setIsWithdraw(false);
+    }
   };
 
   return (

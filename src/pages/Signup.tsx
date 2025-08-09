@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import Step1 from '../components/domain/signup/Step1';
 import Step2 from '../components/domain/signup/Step2';
 import Step3 from '../components/domain/signup/Step3';
@@ -10,6 +11,7 @@ import type { SignupRequest } from '../api/auth';
 
 export const Signup = () => {
   const navigate = useNavigate();
+  const { refreshUser } = useAuth();
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedAddress, setSelectedAddress] = useState<AddressData | undefined>();
@@ -143,7 +145,9 @@ export const Signup = () => {
   };
 
   // 회원가입 완료 핸들러
-  const handleSignupComplete = () => {
+  const handleSignupComplete = async () => {
+    // 사용자 정보를 갱신하여 최신 상태(ACTIVE)를 가져온 후 메인 페이지로 이동
+    await refreshUser();
     navigate('/');
   };
 
