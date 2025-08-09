@@ -39,13 +39,18 @@ export const Signup = () => {
           selectedAddress.district !== '' &&
           selectedAddress.isComplete === true
         );
-      case 3:
-        // Step 3: 모든 필드가 채워져야 함
+      case 3: {
+        // Step 3: 모든 필드가 채워져야 하고 닉네임은 2자 이상 10자 이하, 특수문자 제외
+        const nicknameRegex = /^[가-힣a-zA-Z0-9]{2,10}$/;
         return (
           formData.nickname !== '' &&
+          formData.nickname.trim().length >= 2 &&
+          formData.nickname.length <= 10 &&
+          nicknameRegex.test(formData.nickname.trim()) &&
           formData.gender !== '' &&
           formData.birth !== ''
         );
+      }
       default:
         return false;
     }
@@ -88,13 +93,10 @@ export const Signup = () => {
         district: selectedAddress?.district || '',
         categories: selectedCategories,
       };
-
-      console.log('회원가입 데이터:', signupData);
       
       const response = await signup(signupData);
       
       if (response.success) {
-        console.log('회원가입 성공:', response.data);
         setCurrentStep(4); // 완료 화면
       }
     } catch (error) {

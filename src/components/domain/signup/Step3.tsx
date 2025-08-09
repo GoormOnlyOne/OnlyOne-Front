@@ -19,6 +19,23 @@ const Step3 = ({
   onFormChange,
   onProfileImageChange,
 }: Step3Props) => {
+  const getNicknameError = (nickname: string) => {
+    if (!nickname || nickname.trim().length === 0) {
+      return '';
+    }
+    if (nickname.trim().length < 2) {
+      return '닉네임은 최소 2자 이상 입력해주세요.';
+    }
+    if (nickname.length > 10) {
+      return '닉네임은 최대 10자까지 입력 가능합니다.';
+    }
+    if (!/^[가-힣a-zA-Z0-9]+$/.test(nickname.trim())) {
+      return '닉네임은 한글, 영문, 숫자만 사용할 수 있습니다.';
+    }
+    return '';
+  };
+
+  const nicknameError = getNicknameError(formData.nickname);
   return (
     <div className="animate-fade-in">
       <h2 className="text-2xl font-bold text-center mb-2">정보 입력</h2>
@@ -49,13 +66,20 @@ const Step3 = ({
             value={formData.nickname}
             onChange={e => onFormChange('nickname', e.target.value)}
             placeholder="닉네임을 입력해주세요"
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 transition-colors ${
+              nicknameError
+                ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
+                : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
+            }`}
             maxLength={10}
-            minLength={2}
           />
-          <p className="text-xs text-gray-500 mt-1">
-            최소 2자 이상 10자 이하, 특수문자 제외
-          </p>
+          {nicknameError ? (
+            <p className="text-xs text-red-500 mt-1">{nicknameError}</p>
+          ) : (
+            <p className="text-xs text-gray-500 mt-1">
+              최소 2자 이상 10자 이하, 특수문자 제외
+            </p>
+          )}
         </div>
 
         {/* 성별 선택 */}
