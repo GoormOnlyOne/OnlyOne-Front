@@ -31,11 +31,7 @@ export default function TitleLayout() {
     const chatRoomId = params.chatRoomId;
     const meetingId = params.id;
 
-    if (
-      chatRoomId &&
-      pathname.startsWith('/chat/') &&
-      pathname.endsWith('/messages')
-    ) {
+    if (chatRoomId && /^\/chat\/\d+\/messages\/?$/.test(pathname)) {
       fetchChatRoomTitle(chatRoomId);
     }
 

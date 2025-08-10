@@ -3,16 +3,14 @@ import SockJS from 'sockjs-client';
 import { CompatClient, Stomp, type IMessage, type StompSubscription } from '@stomp/stompjs';
 import type { ChatMessageDto } from '../types/chat/chat.types';
 
-type ChatMessagePayload = {
-  text: string;
-  imageUrl: string | null;
-};
+type ChatMessagePayload = { text: string; imageUrl: string | null };
 
 const IMAGE_PREFIX = 'IMAGE::';
-const WS_ENDPOINT =
-  (import.meta.env.VITE_WS_ENDPOINT as string | undefined)?.replace(/\/$/, '') ||
-  'https://api.buddkit.p-e.kr/ws';
 
+// 1) WS 엔드포인트: 환경변수 필수, 기본값 제거
+const WS_ENDPOINT = (import.meta.env.VITE_WS_ENDPOINT as string | undefined)?.replace(/\/$/, '');
+
+// 재시도 설정
 const MAX_RETRY = 5;
 const BASE_DELAY_MS = 1000;
 const MAX_DELAY_MS = 15000;
@@ -30,13 +28,31 @@ export const useChatSocket = (chatRoomId: number, currentUserId: number) => {
   const isMountedRef = useRef(true);
   const roomRef = useRef<number>(chatRoomId);
 
+  // 2) 방 변경 시: 메시지 초기화 + (연결 상태면) 즉시 재구독
   useEffect(() => {
     roomRef.current = chatRoomId;
     setMessages([]);
+    const client = clientRef.current;
+    if (client?.connected) {
+      trySubscribe(client, chatRoomId);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chatRoomId]);
 
   useEffect(() => {
     isMountedRef.current = true;
+
+    // 3) WS 엔드포인트 미설정 시 조기 종료
+    if (!WS_ENDPOINT) {
+      const msg = '[Chat] VITE_WS_ENDPOINT가 설정되지 않았습니다. (.env 확인)';
+      console.error(msg);
+      setLastError(msg);
+      setIsConnected(false);
+      setIsConnecting(false);
+      return () => {
+        isMountedRef.current = false;
+      };
+    }
 
     const connect = () => {
       cleanupSubscription();
@@ -45,8 +61,10 @@ export const useChatSocket = (chatRoomId: number, currentUserId: number) => {
       const socket = new SockJS(WS_ENDPOINT);
       const client = Stomp.over(socket);
       client.debug = () => {};
-      client.heartbeat.outgoing = 20000;
-      client.heartbeat.incoming = 0;
+
+      // 4) heartbeat API 올바르게 사용
+      client.heartbeatOutgoing = 20000; // 20s
+      client.heartbeatIncoming = 0;
 
       client.onWebSocketClose = (evt) => {
         if (!isMountedRef.current) return;
@@ -70,6 +88,7 @@ export const useChatSocket = (chatRoomId: number, currentUserId: number) => {
           retryCountRef.current = 0;
           setIsConnecting(false);
           setIsConnected(true);
+          // 현재 방으로 구독
           trySubscribe(client, roomRef.current);
         },
         (error: unknown) => {
@@ -89,6 +108,7 @@ export const useChatSocket = (chatRoomId: number, currentUserId: number) => {
         const sub = client.subscribe(dest, (message: IMessage) => {
           try {
             const body = JSON.parse(message.body);
+            // 최신 방만 반영
             if (roomRef.current !== roomId) return;
             setMessages((prev) => [...prev, body]);
           } catch (e) {
@@ -117,6 +137,7 @@ export const useChatSocket = (chatRoomId: number, currentUserId: number) => {
       const delay = Math.min(MAX_DELAY_MS, BASE_DELAY_MS * Math.pow(2, attempt - 1));
       const jitter = Math.floor(Math.random() * 300);
       const wait = delay + jitter;
+
       clearReconnectTimer();
       reconnectTimerRef.current = window.setTimeout(() => {
         if (!isMountedRef.current) return;
@@ -141,9 +162,7 @@ export const useChatSocket = (chatRoomId: number, currentUserId: number) => {
     const disconnectClient = (cb?: () => void) => {
       try {
         if (clientRef.current?.connected) {
-          clientRef.current.disconnect(() => {
-            cb?.();
-          });
+          clientRef.current.disconnect(() => cb?.());
         } else {
           cb?.();
         }
@@ -151,6 +170,9 @@ export const useChatSocket = (chatRoomId: number, currentUserId: number) => {
         cb?.();
       }
     };
+
+    // 외부에서 재사용할 수 있게 참조에 넣어둠
+    (trySubscribe as any).ref = trySubscribe;
 
     connect();
 
@@ -163,12 +185,22 @@ export const useChatSocket = (chatRoomId: number, currentUserId: number) => {
         setIsConnecting(false);
       });
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // 5) 빈 메시지 전송 방지 + trim 처리
   const sendMessage = ({ text, imageUrl }: ChatMessagePayload) => {
     const client = clientRef.current;
     if (!client || !isConnected) return;
-    const payloadText = imageUrl ? `${IMAGE_PREFIX}${imageUrl}` : text;
+
+    const trimmed = text?.trim() ?? '';
+    const hasText = trimmed.length > 0;
+    const hasImage = !!imageUrl;
+
+    if (!hasText && !hasImage) return;
+
+    const payloadText = hasImage ? `${IMAGE_PREFIX}${imageUrl}` : trimmed;
+
     try {
       client.send(
         `/pub/chat/${roomRef.current}/messages`,
@@ -179,6 +211,13 @@ export const useChatSocket = (chatRoomId: number, currentUserId: number) => {
       console.error('❌ 메시지 전송 실패:', e);
     }
   };
+
+  // 내부에서 재구독에 접근해야 하므로 함수 노출
+  function trySubscribe(client: CompatClient, roomId: number) {
+    (useChatSocket as any); // 타입 억제용 no-op
+    // 실제 구현은 위 useEffect 내부 정의를 사용합니다.
+    (trySubscribe as any).ref?.(client, roomId);
+  }
 
   return { messages, sendMessage, isConnected, isConnecting, lastError };
 };

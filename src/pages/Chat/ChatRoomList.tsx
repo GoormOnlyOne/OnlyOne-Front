@@ -3,6 +3,23 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { fetchChatRoomList } from '../../api/chat';
 import type { ChatRoomSummary } from '../../types/chat/chat.types';
 
+const getLastMessagePreview = (text?: string | null, imageUrl?: string | null) => {
+  const t = (text ?? '').trim();
+
+  // 1) 서버가 imageUrl을 따로 주는 경우
+  if (imageUrl) return '사진을 보냈습니다.';
+
+  // 2) 텍스트에 IMAGE:: 프리픽스가 들어오는 경우
+  if (t.startsWith('IMAGE::')) return '사진을 보냈습니다.';
+
+  // 3) 혹시나 URL 자체가 들어오는 경우(이미지 확장자 추정)
+  const isImageUrl =
+    /^https?:\/\/\S+\.(png|jpe?g|gif|webp|bmp|svg)(\?\S+)?$/i.test(t);
+  if (isImageUrl) return '사진을 보냈습니다.';
+
+  return t || '메시지가 없습니다.';
+};
+
 const ChatRoomList = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -20,7 +37,16 @@ const ChatRoomList = () => {
       .then(res => {
         const roomList = res?.data;
         if (Array.isArray(roomList)) {
-          setRooms(roomList);
+          // 여기서 lastMessageText 가공 후 상태에 저장
+          const processed = roomList.map((r: any) => ({
+            ...r,
+            lastMessageText: getLastMessagePreview(
+              r.lastMessageText,
+              // 백엔드가 이미지 URL을 따로 주는 경우(없으면 undefined)
+              r.lastMessageImageUrl ?? r.imageUrl
+            ),
+          }));
+          setRooms(processed);
         } else {
           console.warn("❗ 예상과 다른 응답 형식:", res);
           setRooms([]);
@@ -87,7 +113,7 @@ const ChatRoomList = () => {
                   </span>
                 </div>
 
-                {/* 마지막 메시지 */}
+                {/* 마지막 메시지 (이미지면 '사진을 보냈습니다.') */}
                 <p className="text-sm text-gray-600 truncate">
                   {room.lastMessageText ?? '메시지가 없습니다.'}
                 </p>
