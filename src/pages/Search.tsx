@@ -5,6 +5,7 @@ import apiClient from '../api/client';
 import { FilterBottomSheet } from '../components/domain/search/FilterBottomSheet';
 import { FilterChips } from '../components/domain/search/FilterChips';
 import MeetingCard from '../components/domain/meeting/MeetingCard';
+import { useToast } from '../components/common/Toast/ToastContext';
 
 interface Meeting {
   clubId: number;
@@ -31,6 +32,7 @@ interface Interest {
 
 export const Search = () => {
   const { searchQuery } = useOutletContext<{ searchQuery: string }>();
+  const { showToast } = useToast();
   const [searchResults, setSearchResults] = useState<Meeting[]>([]);
   const [isSearched, setIsSearched] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -60,7 +62,7 @@ export const Search = () => {
   const validateSearch = (query: string, searchFilters: SearchFilters) => {
     // 검색어가 있는데 2글자 미만인 경우
     if (query.trim() && query.trim().length < 2) {
-      alert('검색어는 2글자 이상 입력해주세요.');
+      showToast('검색어는 2글자 이상 입력해주세요.', 'warning');
       return false;
     }
     return true;
