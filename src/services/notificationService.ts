@@ -1,5 +1,4 @@
 import { createSSEConnection } from '../api/notification';
-import FCMService from './fcm';
 import type { Notification } from '../types/notification';
 
 export type SSEEventType = 'notification' | 'unread-count' | 'heartbeat';
@@ -31,48 +30,12 @@ export class NotificationService {
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 5;
   private reconnectDelay = 1000;
-  private fcmToken: string | null = null;
-  private fcmInitialized = false;
   private isConnecting = false;
 
   constructor() {
     this.listeners.set('notification', new Set());
     this.listeners.set('unread-count', new Set());
     this.listeners.set('heartbeat', new Set());
-  }
-
-  async initializeFCM(userId: number): Promise<void> {
-    if (this.fcmInitialized) return;
-
-    try {
-      this.fcmToken = await FCMService.getToken();
-      if (this.fcmToken) {
-        const success = await FCMService.sendTokenToServer(this.fcmToken, userId);
-        if (success) {
-          console.log('FCM token registered successfully');
-        } else {
-          console.warn('Failed to register FCM token');
-        }
-      }
-
-      FCMService.setupMessageListener((payload) => {
-        console.log('FCM message received:', payload);
-        
-        const notificationData: Notification = {
-          notificationId: payload.data?.notificationId ? parseInt(payload.data.notificationId) : Date.now(),
-          content: payload.notification?.body || payload.data?.content || '',
-          type: payload.data?.type || 'COMMENT',
-          isRead: false,
-          createdAt: new Date().toISOString()
-        };
-
-        this.emitEvent('notification', notificationData);
-      });
-
-      this.fcmInitialized = true;
-    } catch (error) {
-      console.error('Failed to initialize FCM:', error);
-    }
   }
 
   async connect(userId: number): Promise<void> {
@@ -86,11 +49,6 @@ export class NotificationService {
     this.userId = userId;
     
     try {
-      // FCM 초기화 (한 번만)
-      if (!this.fcmInitialized) {
-        await this.initializeFCM(userId);
-      }
-      
       // 기존 연결이 있으면 정리
       if (this.eventSource) {
         this.eventSource.close();
