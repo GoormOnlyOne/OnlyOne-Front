@@ -566,7 +566,7 @@ const MeetingFeedDetail = () => {
         title="댓글을 삭제하시겠습니까?"
       />
 
-      {/* ✅ 피드 삭제 확인 모달 (분리) */}
+      {/* 피드 삭제 확인 모달*/}
       <Modal
         isOpen={isFeedModalOpen}
         onClose={() => setIsFeedModalOpen(false)}

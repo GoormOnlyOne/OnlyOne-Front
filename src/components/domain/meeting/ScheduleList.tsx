@@ -43,7 +43,7 @@ export default function ScheduleList({ clubRole }: ScheduleListProps) {
     null,
   );
   const [modalAction, setModalAction] = useState<
-    'join' | 'leave' | 'settlement' | ''
+    'join' | 'leave' | 'settlement' | 'delete' | ''
   >('');
   const [openMenuId, setOpenMenuId] = useState<number | null>(null);
 
@@ -57,13 +57,12 @@ export default function ScheduleList({ clubRole }: ScheduleListProps) {
 
       try {
         setLoading(true);
-        setError(null); // 에러 상태 초기화
+        setError(null);
         const response = await apiClient.get<ScheduleListResponse>(
           `/clubs/${meetingId}/schedules`,
         );
 
         if (response.success && response.data) {
-          // response.data가 배열인지 확인
           if (Array.isArray(response.data)) {
             setSchedules(response.data);
           } else {
@@ -77,7 +76,7 @@ export default function ScheduleList({ clubRole }: ScheduleListProps) {
         }
       } catch (err: unknown) {
         console.error('정기모임 목록 조회 실패:', err);
-        setSchedules([]); // 에러 발생 시 빈 배열로 설정
+        setSchedules([]);
         setError(
           (err as Error).message || '정기모임 목록을 불러오는데 실패했습니다.',
         );
@@ -103,14 +102,12 @@ export default function ScheduleList({ clubRole }: ScheduleListProps) {
     }
   };
 
-  // 디데이는 작은 도트 스타일
   const getDdayDot = (dday: string) => {
     if (dday === 'D-DAY') return 'w-2 h-2 bg-red-500 animate-pulse';
     if (dday.startsWith('D-')) return 'w-2 h-2 bg-[#F5921F]';
     return 'w-2 h-2 bg-gray-400';
   };
 
-  // 뱃지는 카드형
   const getStatusCard = (scheduleStatus: string) => {
     const baseStyle =
       'inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium';
@@ -389,13 +386,16 @@ export default function ScheduleList({ clubRole }: ScheduleListProps) {
   };
 
   const handleScheduleEdit = (scheduleId: number) => {
-    if (!meetingId) return;
+    if (!scheduleId) return;
     navigate(`/meeting/${meetingId}/schedule/${scheduleId}/edit`);
   };
 
   // handleScheduleDelete 임시 구현 추가
-  const handleScheduleDelete = (scheduleId: number) => {
-    // TODO: 실제 삭제 로직 구현 필요
+  const handleScheduleDelete = (schedule: Schedule) => {
+    setSelectedSchedule(schedule);
+    // setModalAction('delete');
+    // setIsModalOpen(true);
+    // setModalTitle(`${schedule.name}을 삭제하시겠습니까?`);
     globalToast('삭제 기능은 아직 구현되지 않았습니다.', 'info', 2000);
   };
 
@@ -495,9 +495,7 @@ export default function ScheduleList({ clubRole }: ScheduleListProps) {
                               수정
                             </button>
                             <button
-                              onClick={() =>
-                                handleScheduleDelete(schedule.scheduleId)
-                              }
+                              onClick={() => handleScheduleDelete(schedule)}
                               className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
                             >
                               삭제
@@ -521,6 +519,7 @@ export default function ScheduleList({ clubRole }: ScheduleListProps) {
         )}
       </div>
 
+      {/* 모달 창 */}
       <Modal
         isOpen={isModalOpen}
         onClose={handleModalCancel}
