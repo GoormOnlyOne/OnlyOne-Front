@@ -124,13 +124,6 @@ const ChatRoom: React.FC = () => {
 
   return (
     <div className="flex flex-col h-screen bg-gray-50 overflow-hidden max-w-full w-full">
-      {/* 헤더 */}
-      <div className="px-2 sm:px-4 py-2 sm:py-3 bg-white border-b shadow-sm">
-        <h2 className="text-base sm:text-lg font-semibold">
-          {chatRoomName || `채팅방 #${chatRoomIdNum || '-'}`}
-        </h2>
-      </div>
-
       {/* 채팅 메시지 영역 */}
       <div className="flex-1 overflow-y-auto px-2 sm:px-4 py-3 space-y-2 w-full max-w-full">
         {loading && <div className="text-gray-400 text-sm">불러오는 중...</div>}
