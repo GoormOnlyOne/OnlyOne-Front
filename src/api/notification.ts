@@ -8,23 +8,6 @@ import type {
 // 호환성을 위한 타입 별칭
 export interface NotificationResponse extends NotificationListResponse {}
 
-// FCM 토큰 등록/업데이트
-export const updateFcmToken = async (userId: number, fcmToken: string) => {
-  const params = new URLSearchParams({ fcmToken });
-  const response = await apiClient.put<{ success: boolean; data: null }>(
-    `/users/${userId}/fcm-token?${params.toString()}`
-  );
-  return response.data;
-};
-
-// FCM 토큰 삭제
-export const deleteFcmToken = async (userId: number) => {
-  const response = await apiClient.delete<{ success: boolean; data: null }>(
-    `/users/${userId}/fcm-token`
-  );
-  return response.data;
-};
-
 // 알림 목록 조회 (첫 페이지 조회 시 자동으로 모든 알림 읽음 처리)
 export const getNotifications = async (params: {
   userId: number;
@@ -82,19 +65,4 @@ export const deleteNotification = async (params: {
     `/notifications/${params.notificationId}?${searchParams.toString()}`
   );
   return response.data;
-};
-
-// SSE 연결 생성 (리팩토링된 경로: /sse/subscribe/{userId})
-export const createSSEConnection = (userId: number, lastEventId?: string): EventSource => {
-  let sseUrl = `${import.meta.env.VITE_API_BASE_URL}/sse/subscribe/${userId}`;
-  
-  // Last-Event-ID를 URL 파라미터로 전달 (EventSource는 헤더 설정 제한이 있음)
-  if (lastEventId) {
-    const params = new URLSearchParams({ lastEventId });
-    sseUrl += `?${params.toString()}`;
-  }
-  
-  return new EventSource(sseUrl, {
-    withCredentials: false
-  });
 };
