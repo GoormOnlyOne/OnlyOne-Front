@@ -25,22 +25,21 @@ export const getNotifications = async (params: {
     searchParams.append('size', params.size.toString());
   }
 
-  const response = await apiClient.get<{
-    success: boolean;
-    data: NotificationListResponse;
-  }>(`/notifications?${searchParams.toString()}`);
+  const response = await apiClient.get<NotificationListResponse>(
+    `/notifications?${searchParams.toString()}`
+  );
   
-  return response.data; // CommonResponse에서 data 추출
+  return response.data; // ApiResponse에서 data 추출
 };
 
 // 알림 생성
 export const createNotification = async (data: CreateNotificationRequest) => {
-  const response = await apiClient.post<{
-    success: boolean;
-    data: CreateNotificationResponse;
-  }>('/notifications', data);
+  const response = await apiClient.post<CreateNotificationResponse>(
+    '/notifications', 
+    data
+  );
   
-  return response.data; // CommonResponse에서 data 추출
+  return response.data; // ApiResponse에서 data 추출
 };
 
 // 모든 알림 읽음 처리 (백엔드에서 자동으로 처리되므로 더 이상 필요 없음)
@@ -61,7 +60,7 @@ export const deleteNotification = async (params: {
     userId: params.userId.toString(),
   });
 
-  const response = await apiClient.delete<{ success: boolean; data: null }>(
+  const response = await apiClient.delete<null>(
     `/notifications/${params.notificationId}?${searchParams.toString()}`
   );
   return response.data;
