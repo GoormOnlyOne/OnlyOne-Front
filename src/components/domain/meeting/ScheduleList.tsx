@@ -34,7 +34,7 @@ interface ScheduleListProps {
 export default function ScheduleList({ clubRole }: ScheduleListProps) {
   const navigate = useNavigate();
   const { id: meetingId } = useParams();
-  const [schedules, setSchedules] = useState<Schedule[]>([]);
+  const [schedules, setSchedules] = useState<Schedule[]>([]); // 초기값을 빈 배열로 설정
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -49,19 +49,35 @@ export default function ScheduleList({ clubRole }: ScheduleListProps) {
 
   useEffect(() => {
     const fetchSchedules = async () => {
-      if (!meetingId) return;
+      if (!meetingId) {
+        setError('모임 ID가 없습니다.');
+        setLoading(false);
+        return;
+      }
 
       try {
         setLoading(true);
+        setError(null); // 에러 상태 초기화
         const response = await apiClient.get<ScheduleListResponse>(
           `/clubs/${meetingId}/schedules`,
         );
 
-        if (response.success) {
-          setSchedules(response.data); // response.data만 전달
+        if (response.success && response.data) {
+          // response.data가 배열인지 확인
+          if (Array.isArray(response.data)) {
+            setSchedules(response.data);
+          } else {
+            console.error('API 응답 데이터가 배열이 아닙니다:', response.data);
+            setSchedules([]);
+            setError('잘못된 데이터 형식입니다.');
+          }
+        } else {
+          setSchedules([]);
+          setError('정기모임 목록을 불러올 수 없습니다.');
         }
       } catch (err: unknown) {
         console.error('정기모임 목록 조회 실패:', err);
+        setSchedules([]); // 에러 발생 시 빈 배열로 설정
         setError(
           (err as Error).message || '정기모임 목록을 불러오는데 실패했습니다.',
         );
@@ -74,33 +90,41 @@ export default function ScheduleList({ clubRole }: ScheduleListProps) {
   }, [meetingId]);
 
   const formatDateTime = (dateTime: string) => {
-    const date = new Date(dateTime);
-    return date.toLocaleDateString('ko-KR', {
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
+    try {
+      const date = new Date(dateTime);
+      return date.toLocaleDateString('ko-KR', {
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+    } catch {
+      return dateTime; // 날짜 파싱 실패 시 원본 반환
+    }
   };
 
-  const getDdayColor = (dday: string) => {
-    if (dday === 'D-DAY') return 'bg-red-500 text-white';
-    if (dday.startsWith('D-')) return 'bg-orange-500 text-white';
-    return 'bg-gray-500 text-white';
+  // 디데이는 작은 도트 스타일
+  const getDdayDot = (dday: string) => {
+    if (dday === 'D-DAY') return 'w-2 h-2 bg-red-500 animate-pulse';
+    if (dday.startsWith('D-')) return 'w-2 h-2 bg-[#F5921F]';
+    return 'w-2 h-2 bg-gray-400';
   };
 
-  const getStatusBadge = (scheduleStatus: string) => {
+  // 뱃지는 카드형
+  const getStatusCard = (scheduleStatus: string) => {
+    const baseStyle =
+      'inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium';
     switch (scheduleStatus) {
       case 'READY':
-        return 'bg-green-100 text-green-800';
+        return `${baseStyle} bg-[#F5921F]/10 text-[#F5921F] ring-1 ring-[#F5921F]/20`;
       case 'ENDED':
-        return 'bg-gray-100 text-gray-800';
+        return `${baseStyle} bg-[#7E4805]/10 text-[#7E4805] ring-1 ring-[#7E4805]/20`;
       case 'SETTLING':
-        return 'bg-orange-100 text-orange-800';
+        return `${baseStyle} bg-[#FFAE00]/10 text-[#7E4805] ring-1 ring-[#FFAE00]/30`;
       case 'CLOSED':
-        return 'bg-red-100 text-red-800';
+        return `${baseStyle} bg-[#F4B187]/10 text-[#7E4805] ring-1 ring-[#F4B187]/30`;
       default:
-        return 'bg-gray-100 text-gray-800';
+        return `${baseStyle} bg-gray-100 text-gray-600 ring-1 ring-gray-200`;
     }
   };
 
@@ -136,9 +160,8 @@ export default function ScheduleList({ clubRole }: ScheduleListProps) {
       schedule.scheduleStatus === 'ENDED' ||
       schedule.scheduleStatus === 'SETTLING';
     const buttonText = isSettlement ? '정산 현황' : '참여 현황';
-    const buttonClass = isSettlement
-      ? 'bg-blue-100 text-blue-700 px-3 py-1 rounded text-sm font-medium hover:bg-blue-200 transition-colors cursor-pointer'
-      : 'bg-gray-100 text-gray-700 px-3 py-1 rounded text-sm font-medium hover:bg-gray-200 transition-colors cursor-pointer';
+    const buttonClass =
+      'bg-gray-100 text-gray-700 px-3 py-1 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors cursor-pointer';
 
     return (
       <button
@@ -179,6 +202,22 @@ export default function ScheduleList({ clubRole }: ScheduleListProps) {
     setIsModalOpen(false);
     setSelectedSchedule(null);
     setModalAction('');
+  };
+
+  const refreshSchedules = async () => {
+    if (!meetingId) return;
+
+    try {
+      const response = await apiClient.get<ScheduleListResponse>(
+        `/clubs/${meetingId}/schedules`,
+      );
+
+      if (response.success && Array.isArray(response.data)) {
+        setSchedules(response.data);
+      }
+    } catch (err) {
+      console.error('스케줄 목록 새로고침 실패:', err);
+    }
   };
 
   const handleModalConfirm = async () => {
@@ -223,14 +262,13 @@ export default function ScheduleList({ clubRole }: ScheduleListProps) {
           globalToast('정산 완료했습니다.', 'success', 2000);
         }
       }
+
+      // 성공 후 스케줄 목록 새로고침
+      await refreshSchedules();
     } catch (err: unknown) {
       console.error('정기모임 참여/나가기/정산 실패:', err);
       showApiErrorToast(err);
     } finally {
-      const response = await apiClient.get<ScheduleListResponse>(
-        `/clubs/${meetingId}/schedules`,
-      );
-      setSchedules(response.data); // response.data만 전달
       setIsModalOpen(false);
       setSelectedSchedule(null);
       setModalAction('');
@@ -248,7 +286,7 @@ export default function ScheduleList({ clubRole }: ScheduleListProps) {
           return (
             <button
               onClick={() => handleActionClick('나가기', schedule)}
-              className="bg-blue-500 text-white px-4 py-2 rounded text-sm font-medium hover:bg-blue-600 transition-colors cursor-pointer"
+              className="bg-[#F5921F] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#EF7C30] transition-colors cursor-pointer"
             >
               나가기
             </button>
@@ -257,7 +295,7 @@ export default function ScheduleList({ clubRole }: ScheduleListProps) {
           return (
             <button
               onClick={() => handleActionClick('참여하기', schedule)}
-              className="bg-red-500 text-white px-4 py-2 rounded text-sm font-medium hover:bg-red-600 transition-colors cursor-pointer"
+              className="bg-[#F5921F] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#EF7C30] transition-colors cursor-pointer"
             >
               참여하기
             </button>
@@ -265,11 +303,11 @@ export default function ScheduleList({ clubRole }: ScheduleListProps) {
         }
       }
       if (schedule.scheduleStatus === 'ENDED') {
-        // 리더 && ENDED: 정산하기(빨간색, 활성화)
+        // 리더 && ENDED: 정산하기(활성화)
         return (
           <button
             onClick={() => handleActionClick('정산하기', schedule)}
-            className="bg-red-500 text-white px-4 py-2 rounded text-sm font-medium hover:bg-red-600 transition-colors cursor-pointer"
+            className="bg-[#F5921F] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#EF7C30] transition-colors cursor-pointer"
           >
             정산하기
           </button>
@@ -280,7 +318,7 @@ export default function ScheduleList({ clubRole }: ScheduleListProps) {
         return (
           <button
             disabled
-            className="bg-gray-400 text-white px-4 py-2 rounded text-sm font-medium hover:bg-gray-500 transition-colors cursor-pointer"
+            className="bg-gray-400 text-white px-4 py-2 rounded-lg text-sm font-medium cursor-not-allowed"
           >
             정산하기
           </button>
@@ -291,7 +329,7 @@ export default function ScheduleList({ clubRole }: ScheduleListProps) {
         return (
           <button
             disabled
-            className="bg-gray-400 text-white px-4 py-2 rounded text-sm font-medium cursor-not-allowed"
+            className="bg-gray-400 text-white px-4 py-2 rounded-lg text-sm font-medium cursor-not-allowed"
           >
             정산하기
           </button>
@@ -305,7 +343,7 @@ export default function ScheduleList({ clubRole }: ScheduleListProps) {
           return (
             <button
               onClick={() => handleActionClick('나가기', schedule)}
-              className="bg-blue-500 text-white px-4 py-2 rounded text-sm font-medium hover:bg-blue-600 transition-colors cursor-pointer"
+              className="bg-[#F5921F] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#EF7C30] transition-colors cursor-pointer"
             >
               나가기
             </button>
@@ -314,7 +352,7 @@ export default function ScheduleList({ clubRole }: ScheduleListProps) {
           return (
             <button
               onClick={() => handleActionClick('참여하기', schedule)}
-              className="bg-red-500 text-white px-4 py-2 rounded text-sm font-medium hover:bg-red-600 transition-colors cursor-pointer"
+              className="bg-[#F5921F] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#EF7C30] transition-colors cursor-pointer"
             >
               참여하기
             </button>
@@ -325,7 +363,7 @@ export default function ScheduleList({ clubRole }: ScheduleListProps) {
           return (
             <button
               onClick={() => handleActionClick('정산하기', schedule)}
-              className="bg-gray-400 text-white px-4 py-2 rounded text-sm font-medium cursor-not-allowed"
+              className="bg-[#F5921F] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#EF7C30] transition-colors cursor-pointer"
             >
               정산하기
             </button>
@@ -340,7 +378,7 @@ export default function ScheduleList({ clubRole }: ScheduleListProps) {
         return (
           <button
             disabled
-            className="bg-gray-400 text-white px-4 py-2 rounded text-sm font-medium cursor-not-allowed"
+            className="bg-gray-400 text-white px-4 py-2 rounded-lg text-sm font-medium cursor-not-allowed"
           >
             정산하기
           </button>
@@ -381,16 +419,19 @@ export default function ScheduleList({ clubRole }: ScheduleListProps) {
     );
   }
 
+  // schedules가 배열인지 확인하고 안전하게 처리
+  const safeSchedules = Array.isArray(schedules) ? schedules : [];
+
   return (
     <>
       <div className="space-y-4">
         <h2 className="font-bold">정기 모임</h2>
-        {schedules.length === 0 ? (
+        {safeSchedules.length === 0 ? (
           <div className="text-center text-gray-500 py-8">
             등록된 정기모임이 없습니다.
           </div>
         ) : (
-          schedules.map(schedule => (
+          safeSchedules.map(schedule => (
             <div
               key={schedule.scheduleId}
               className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow"
@@ -409,16 +450,17 @@ export default function ScheduleList({ clubRole }: ScheduleListProps) {
                       <span>{`인당 비용 | ${schedule.cost === 0 ? '무료' : `${schedule.cost.toLocaleString()}₩`}`}</span>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    {/* 디데이와 상태 뱃지를 왼쪽으로 배치 */}
-                    <span
-                      className={`px-2 py-1 rounded-full text-xs font-medium ${getDdayColor(schedule.dday)}`}
-                    >
-                      {schedule.dday}
-                    </span>
-                    <span
-                      className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusBadge(schedule.scheduleStatus)}`}
-                    >
+                  <div className="flex items-center gap-3">
+                    {/* 디데이와 상태 뱃지 */}
+                    <div className="flex items-center gap-2">
+                      <div
+                        className={`rounded-full ${getDdayDot(schedule.dday)}`}
+                      ></div>
+                      <span className="text-xs font-medium text-gray-600">
+                        {schedule.dday}
+                      </span>
+                    </div>
+                    <span className={getStatusCard(schedule.scheduleStatus)}>
                       {getStatusText(schedule.scheduleStatus)}
                     </span>
 
