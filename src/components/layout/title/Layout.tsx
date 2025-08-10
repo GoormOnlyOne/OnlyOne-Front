@@ -5,6 +5,7 @@ import Footer from './Footer';
 import apiClient from '../../../api/client';
 import Modal from '../../common/Modal';
 import { showToast as globalToast } from '../../common/Toast/ToastProvider';
+import { fetchChatMessages } from '../../../api/chat';
 
 export default function TitleLayout() {
   const location = useLocation();
@@ -15,7 +16,29 @@ export default function TitleLayout() {
   const [leaving, setLeaving] = useState(false);
   const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false); // 확인 모달
 
+  const fetchChatRoomTitle = async (chatRoomId: string) => {
+    try {
+      const res = await fetchChatMessages(Number(chatRoomId));
+      const name = res?.data?.chatRoomName ?? null;
+      setDynamicTitle(name || `채팅방 #${chatRoomId}`);
+    } catch (error) {
+       console.error('채팅방 제목 불러오기 실패:', error);
+       setDynamicTitle(`채팅방`);
+      }
+  };
+
   useEffect(() => {
+    const chatRoomId = params.chatRoomId;
+    const meetingId = params.id;
+
+    if (
+      chatRoomId &&
+      pathname.startsWith('/chat/') &&
+      pathname.endsWith('/messages')
+    ) {
+      fetchChatRoomTitle(chatRoomId);
+    }
+
     if (
       params.id &&
       pathname.startsWith('/meeting/') &&
@@ -24,7 +47,7 @@ export default function TitleLayout() {
       // API 호출 예시
       fetchMeetingTitle(params.id);
     }
-  }, [params.id, pathname]);
+  }, [params.chatRoomId, params.id, pathname]);
 
   const fetchMeetingTitle = async (meetingId: string) => {
     try {
@@ -205,6 +228,16 @@ const confirmLeave = async () => {
         isBack: true,
         isTitle: true,
         titleText: '정모 수정하기',
+        isLike: false,
+        isOut: false,
+      };
+      break;
+
+      case /^\/chat\/\d+\/messages\/?$/.test(pathname):
+      headerProps = {
+        isBack: true,
+        isTitle: true,
+        titleText: dynamicTitle || '채팅방',
         isLike: false,
         isOut: false,
       };

@@ -29,6 +29,7 @@ const OtherChatMessage: React.FC<OtherChatMessageProps> = ({
           <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center overflow-hidden">
             {!imageError ? (
               <img
+                loading="lazy"
                 src={profileImage}
                 alt={username}
                 className="w-full h-full object-cover"
@@ -54,6 +55,7 @@ const OtherChatMessage: React.FC<OtherChatMessageProps> = ({
         <div className="flex items-end space-x-2">
           {imageUrl ? (
             <img
+              loading="lazy"
               src={imageUrl}
               alt="받은 이미지"
               className="rounded-lg max-w-full h-auto shadow-md"

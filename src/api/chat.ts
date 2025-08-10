@@ -2,8 +2,6 @@
 
 import apiClient from '../api/client';
 import type {
-  ChatMessageDto,
-  SendMessageRequest,
   PagedResponse,
   ChatRoomSummary,
   ChatRoomMessageResponse,
