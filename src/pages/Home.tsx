@@ -17,7 +17,7 @@ export const Home = () => {
       </div>
 
       {/* 추천 모임 리스트 */}
-      <MeetingList />
+      <MeetingList showHomeSpecialSections={true} />
 
       {/* 맨 위로 가기 버튼 */}
       <ScrollToTopButton />
