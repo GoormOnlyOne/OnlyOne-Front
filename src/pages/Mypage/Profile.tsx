@@ -49,10 +49,12 @@ export const Profile = () => {
         // Step 1: 카테고리가 1개 이상 선택되어야 함
         return selectedCategories.length >= 1;
       case 2:
-        // Step 2: 지역 선택
+        // Step 2: 지역 선택 (도시와 구/군이 모두 선택되어야 함)
         return (
           selectedAddress !== undefined &&
-          Object.keys(selectedAddress).length > 0
+          selectedAddress.city !== '' &&
+          selectedAddress.district !== '' &&
+          selectedAddress.isComplete === true
         );
       case 3:
         // Step 3: 모든 필드가 채워져야 함
@@ -172,7 +174,7 @@ export const Profile = () => {
   };
 
   return (
-    <div className="w-full bg-white max-w-md mx-auto p-8">
+    <div className="min-h-screen w-full bg-white px-4 py-8 sm:px-6 md:px-8 lg:max-w-2xl lg:mx-auto">
       <Stepper />
 
       {/* Step별 콘텐츠 */}
@@ -204,7 +206,7 @@ export const Profile = () => {
         {currentStep === 1 && (
           <button
             onClick={handleCancel}
-            className="flex-1 px-6 py-3 border border-gray-300 rounded-lg font-medium hover:bg-gray-50 transition-colors"
+            className="flex-1 px-6 py-3 border border-gray-300 rounded-lg font-medium hover:bg-gray-50 transition-colors cursor-pointer"
           >
             취소
           </button>
@@ -213,7 +215,7 @@ export const Profile = () => {
         {currentStep > 1 && (
           <button
             onClick={handlePrev}
-            className="flex-1 px-6 py-3 border border-gray-300 rounded-lg font-medium hover:bg-gray-50 transition-colors"
+            className="flex-1 px-6 py-3 border border-gray-300 rounded-lg font-medium hover:bg-gray-50 transition-colors cursor-pointer"
           >
             이전
           </button>
@@ -230,7 +232,7 @@ export const Profile = () => {
                 : 'bg-gray-800 text-white hover:bg-gray-900'
             }
             disabled:opacity-50 disabled:cursor-not-allowed
-            ${!isStepValid() ? 'cursor-not-allowed' : ''}
+            ${!isStepValid() ? 'cursor-not-allowed' : 'cursor-pointer'}
           `}
         >
           {currentStep === totalSteps ? '수정완료' : '다음'}
