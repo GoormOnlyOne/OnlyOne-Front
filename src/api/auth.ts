@@ -29,15 +29,23 @@ export const logoutUser = async (): Promise<ApiResponse<null>> => {
   return await apiClient.post<null>('/auth/logout');
 };
 
+type UserStatus = 'GUEST' | 'ACTIVE' | 'INACTIVE';
+
 // 현재 사용자 정보 조회 API 호출
 export const getCurrentUser = async (): Promise<ApiResponse<{
   userId: number;
   kakaoId: number;
   nickname: string;
-  status: string;
+  status: UserStatus;
   profileImage: string;
 }>> => {
-  return await apiClient.get('/auth/me');
+  return apiClient.get<{
+    userId: number;
+    kakaoId: number;
+    nickname: string;
+    status: UserStatus;
+    profileImage: string;
+  }>('/auth/me');
 };
 
 // 회원 탈퇴 API 호출
