@@ -39,7 +39,6 @@ const MeetingFeedEdit = () => {
       } catch (error) {
         console.error('피드 정보 불러오기 실패:', error);
         showApiErrorToast(error);
-        navigate(`/meeting/${meetingId}/feed/${feedId}`);
       } finally {
         setLoading(false);
       }

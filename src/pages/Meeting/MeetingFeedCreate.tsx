@@ -27,7 +27,6 @@ const MeetingFeedCreate = () => {
     } catch (error) {
       console.error('피드 생성실패:', error);
       showApiErrorToast(error);
-      navigate(`/meeting/${meetingId}`);
     }
   };
 
