@@ -4,6 +4,7 @@ import ScrollToTopButton from '../../components/common/ScrollToTopButton';
 import { useNavigate } from 'react-router-dom';
 import { showApiErrorToast } from '../../components/common/Toast/ToastProvider';
 import apiClient from '../../api/client';
+import Loading from '../../components/common/Loading';
 
 interface WalletTransactionResponse {
   type: 'INCOMING' | 'OUTGOING' | 'CHARGE';
@@ -122,7 +123,9 @@ const WalletHistory = ({ type }: WalletHistoryProps) => {
     }).format(date);
 
   return (
-    <div className="px-4 pb-20">
+    <div className="px-4 pb-20 relative">
+      {loading && <Loading overlay text="불러오는 중..." />}
+
       <h2 className="text-base font-semibold text-gray-800 leading-snug mb-2">
         {type === 'all' && '전체 내역'}
         {type === 'charge' && '충전 내역'}
@@ -183,9 +186,9 @@ const WalletHistory = ({ type }: WalletHistoryProps) => {
         </div>
       )}
 
-      {loading && (
+      {loading && !walletTransactions.length && (
         <div className="flex justify-center py-8">
-          <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+          <Loading text="불러오는 중..." />
         </div>
       )}
 

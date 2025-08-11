@@ -10,6 +10,7 @@ import { useChatSocket } from '../../hooks/useChatSocket';
 import type { ChatMessageDto } from '../../types/chat/chat.types';
 import { getUserIdFromToken } from '../../utils/auth';
 import { Image } from 'lucide-react';
+import Loading from '../../components/common/Loading';
 
 const formatChatTime = (iso: string) => {
   const d = new Date(iso);
@@ -125,9 +126,19 @@ const ChatRoom: React.FC = () => {
   return (
     <div className="flex flex-col h-screen bg-gray-50 overflow-hidden max-w-full w-full">
       {/* 채팅 메시지 영역 */}
-      <div className="flex-1 overflow-y-auto px-2 sm:px-4 py-3 space-y-2 w-full max-w-full">
-        {loading && <div className="text-gray-400 text-sm">불러오는 중...</div>}
-        {error && <div className="text-red-500 text-sm">{error}</div>}
+      <div
+        className="flex-1 overflow-y-auto px-2 sm:px-4 py-3 space-y-2 w-full max-w-full relative" // ★ 변경: relative 추가
+        aria-busy={loading} // ★ 변경: 접근성
+      >
+        {/* ★ 변경: 공통 로딩(오버레이) */}
+        {loading && <Loading overlay text="메시지 불러오는 중..." />}
+
+        {/* ★ 변경: 텍스트 로더 제거, 에러만 표시 */}
+        {error && (
+          <div className="text-red-600 bg-red-50 border border-red-200 rounded-md px-3 py-2 text-sm">
+            {error}
+          </div>
+        )}
 
         {!loading &&
           !error &&

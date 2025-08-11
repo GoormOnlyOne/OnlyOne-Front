@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import apiClient from '../api/client';
 import { useAuth } from '../contexts/AuthContext';
+import Loading from '../components/common/Loading';
 
 // 백엔드 응답 타입 정의
 interface KakaoLoginResponse {
@@ -92,10 +93,7 @@ const KakaoCallback: React.FC = () => {
   return (
     <div className="flex flex-col justify-center items-center h-screen px-5">
       {loading && (
-        <div className="text-center">
-          <div className="mb-4">카카오 로그인 처리 중...</div>
-          <div className="w-10 h-10 border-4 border-gray-200 border-t-blue-500 rounded-full animate-spin mx-auto"></div>
-        </div>
+        <Loading text="카카오 로그인 처리 중..." />
       )}
 
       {error && (

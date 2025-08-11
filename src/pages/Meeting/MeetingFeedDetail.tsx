@@ -11,6 +11,7 @@ import apiClient from '../../api/client';
 import { showApiErrorToast } from '../../components/common/Toast/ToastProvider';
 import Modal from '../../components/common/Modal';
 import { showToast as globalToast } from '../../components/common/Toast/ToastProvider';
+import Loading from '../../components/common/Loading'; 
 
 interface Comment {
   commentId: number;
@@ -314,8 +315,8 @@ const MeetingFeedDetail = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="text-gray-500">로딩 중...</div>
+      <div className="min-h-screen relative bg-white">
+        <Loading overlay text="로딩 중..." />
       </div>
     );
   }

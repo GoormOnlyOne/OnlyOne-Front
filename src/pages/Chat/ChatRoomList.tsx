@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { fetchChatRoomList } from '../../api/chat';
 import type { ChatRoomSummary } from '../../types/chat/chat.types';
+import Loading from '../../components/common/Loading';
 
 const getLastMessagePreview = (text?: string | null, imageUrl?: string | null) => {
   const t = (text ?? '').trim();
@@ -64,10 +65,12 @@ const ChatRoomList = () => {
   };
 
   return (
-    <div className="p-4">
+    <div className="p-4 relative" aria-busy={loading}> {/* ★ 변경: relative + aria-busy */}
+      {loading && <Loading overlay text="불러오는 중..." />} {/* ★ 변경: 공통 로딩 오버레이 */}
+
       <h2 className="text-xl font-bold mb-4">채팅방 목록</h2>
 
-      {loading && <p className="text-gray-500">불러오는 중...</p>}
+      {/* ★ 변경: 기존 텍스트 로더 제거 */}
 
       {!loading && rooms.length === 0 && (
         <div className="flex flex-col items-center justify-center py-12">

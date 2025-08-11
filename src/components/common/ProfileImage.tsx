@@ -2,6 +2,7 @@ import React, { useState, useRef, useCallback } from 'react';
 import clsx from 'clsx';
 import defaultProfileImage from '../../assets/user_profile.jpg';
 import { uploadImage } from '../../api/upload';
+import Loading from './Loading';
 
 export interface ProfileImage {
   file: File;
@@ -153,7 +154,7 @@ export const ProfileImageUpload: React.FC<ProfileImageUploadProps> = ({
         {/* 업로드 로딩 표시 */}
         {isUploading && (
           <div className="absolute inset-0 rounded-full bg-black/50 flex items-center justify-center">
-            <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+            <Loading size="sm" />
           </div>
         )}
 
