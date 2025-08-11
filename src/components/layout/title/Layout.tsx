@@ -1,4 +1,4 @@
-import { useLocation, Outlet, useParams } from 'react-router-dom';
+import { useLocation, Outlet, useParams, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import Header from './Header';
 import Footer from './Footer';
@@ -11,6 +11,8 @@ export default function TitleLayout() {
   const location = useLocation();
   const pathname = location.pathname;
   const params = useParams();
+  const navigate = useNavigate();
+  const clubIdFromState = (location.state as { clubId?: number } | null)?.clubId ?? null;
 
   const [dynamicTitle, setDynamicTitle] = useState('');
   const [leaving, setLeaving] = useState(false);
@@ -266,6 +268,13 @@ export default function TitleLayout() {
         titleText: dynamicTitle || '채팅방',
         isLike: false,
         isOut: false,
+        onBack: () => {
+          if (clubIdFromState) {
+            navigate(`/meeting/${clubIdFromState}?tab=chat`, { replace: true });
+          } else {
+            navigate(-1);
+          }
+        },
       };
       break;
 
