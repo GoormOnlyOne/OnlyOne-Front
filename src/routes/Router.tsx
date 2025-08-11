@@ -12,7 +12,6 @@ import TitleLayout from '../components/layout/title/Layout.tsx';
 import { Home } from '../pages/Home.tsx';
 import { Category } from '../pages/Category/Category.tsx';
 import { Meeting } from '../pages/Meeting/Meeting.tsx';
-import Feed from '../pages/Feed/Feed';
 import { MeetingDetail } from '../pages/Meeting/MeetingDetail.tsx';
 import { ParticipationStatus } from '../pages/Meeting/ParticipationStatus.tsx';
 import { MeetingCreate } from '../pages/Meeting/MeetingCreate.tsx';
@@ -43,6 +42,7 @@ import MyMeeting from '../pages/Meeting/MyMeeting.tsx';
 
 import ChatRoomList from '../pages/Chat/ChatRoomList';
 import ChatRoom from '../pages/Chat/ChatRoom';
+import FeedList from '../pages/Feed/FeedList.tsx';
 
 export const router = createBrowserRouter([
 
@@ -190,6 +190,10 @@ export const router = createBrowserRouter([
 			{
 				path: 'recommended-meetings',
 				element: <RecommendedMeetings />,
+			},
+			{
+				path: 'feed',
+				element: <FeedList />,
 			},
 		],
 	},
