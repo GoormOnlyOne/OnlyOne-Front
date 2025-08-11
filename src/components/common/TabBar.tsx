@@ -10,7 +10,7 @@ export interface TabItem {
 interface TabBarProps {
   tabs: TabItem[];
   defaultTab?: string;
-  onTabChange?: (tabId: string) => void;
+  onTabChange?: (tabId: string) => void | boolean;
 }
 
 const TabBar: React.FC<TabBarProps> = ({ tabs, defaultTab, onTabChange }) => {
@@ -22,8 +22,10 @@ const TabBar: React.FC<TabBarProps> = ({ tabs, defaultTab, onTabChange }) => {
     (tabId: string) => {
       if (tabId === activeTab) return;
 
+      const result = onTabChange?.(tabId);
+      if (result === false) return;
+
       setActiveTab(tabId);
-      onTabChange?.(tabId);
     },
     [activeTab, onTabChange],
   );

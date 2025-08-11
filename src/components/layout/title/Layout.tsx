@@ -15,6 +15,7 @@ export default function TitleLayout() {
   const [dynamicTitle, setDynamicTitle] = useState('');
   const [leaving, setLeaving] = useState(false);
   const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false); // 확인 모달
+  const [clubRole, setClubRole] = useState<'LEADER' | 'MEMBER' | 'GUEST' | null>(null);
 
   const fetchChatRoomTitle = async (chatRoomId: string) => {
     try {
@@ -47,11 +48,16 @@ export default function TitleLayout() {
 
   const fetchMeetingTitle = async (meetingId: string) => {
     try {
-      // 임시 예시
-      setDynamicTitle(`모임 ${meetingId}`);
+      const response = await apiClient.get(`/clubs/${meetingId}`);
+      if (response.success) {
+        setDynamicTitle(response.data.name);
+        setClubRole(response.data.clubRole);
+      } else {
+        setDynamicTitle(`모임 ${meetingId}`);
+      }
     } catch (error) {
       console.error('Failed to fetch meeting title:', error);
-      setDynamicTitle('모임 세');
+      setDynamicTitle('모임 상세');
     }
   };
 
@@ -184,9 +190,9 @@ const confirmLeave = async () => {
       headerProps = {
         isBack: true,
         isTitle: true,
-        titleText: meetingId || '모임 상세',
+        titleText: dynamicTitle || '모임 상세',
         isLike: true,
-        isOut: true,
+        isOut: clubRole !== 'GUEST',
         // ✅ 헤더에 콜백/디세이블 전달
         onOut: () => setIsLeaveModalOpen(true),
         outDisabled: leaving,
