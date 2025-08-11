@@ -288,7 +288,7 @@ export default function TitleLayout() {
 			</main>
 
 			{/* 고정 푸터 - 높이를 명시적으로 설정 */}
-			{pathname === '/mypage' || pathname === '/feed' &&(
+			{(pathname === '/mypage' || pathname === '/feed') && (
 				<div className="h-16 flex-shrink-0">
 					<Footer />
 				</div>
