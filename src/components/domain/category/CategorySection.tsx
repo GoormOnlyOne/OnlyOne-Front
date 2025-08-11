@@ -151,35 +151,35 @@ export default function CategorySection({
               key={id}
               onClick={() => handleCategoryClick(id)}
               disabled={!selectable && mode === 'multi-select'}
-              className={`relative flex flex-col items-center justify-center aspect-square w-full p-2 sm:p-3 rounded-2xl transition-all duration-300 transform
+              className={`relative flex flex-col items-center justify-center aspect-square w-full p-2 sm:p-3 rounded-2xl transition-all duration-300 transform group
                 ${selectable ? 'cursor-pointer' : 'cursor-not-allowed'}
                 ${
                   selected
-                    ? 'bg-gradient-to-br from-blue-500 to-purple-500 scale-105 shadow-lg'
+                    ? 'bg-gradient-to-br from-brand-primary via-brand-secondary to-[#FFAE00] scale-105 shadow-lg shadow-brand-warm/30'
                     : selectable
-                      ? 'bg-gradient-to-br from-blue-50 to-purple-50 hover:from-blue-100 hover:to-purple-100 hover:scale-105'
-                      : 'bg-gray-100 opacity-50'
+                      ? 'bg-gradient-to-br from-brand-light to-brand-soft hover:from-brand-primary/60 hover:via-brand-secondary/60 hover:to-[#FFAE00]/60 hover:scale-105 hover:shadow-md hover:shadow-brand-warm/20'
+                      : 'bg-neutral-100 opacity-50'
                 }
               `}
             >
               {selected && (
-                <div className="absolute inset-0 rounded-2xl bg-white opacity-20 animate-pulse" />
+                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/30 via-white/20 to-white/10 animate-pulse" />
               )}
               <div
                 className={`w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center mb-1 sm:mb-2 rounded-xl transition-all duration-300 ${selected ? 'bg-white/20 backdrop-blur-sm' : 'bg-white/40'}`}
               >
                 <i
-                  className={`${selected ? activeIcon : icon} transition-all duration-300 ${selected ? 'text-white text-xl sm:text-2xl animate-bounce-once' : selectable ? 'text-gray-700 text-lg sm:text-xl' : 'text-gray-400 text-lg sm:text-xl'}`}
+                  className={`${selected ? activeIcon : icon} transition-all duration-300 ${selected ? 'text-white text-xl sm:text-2xl animate-bounce-once drop-shadow-sm' : selectable ? 'text-brand-deepest group-hover:text-white text-lg sm:text-xl' : 'text-neutral-400 text-lg sm:text-xl'}`}
                 ></i>
               </div>
               <span
-                className={`${selected ? 'text-white' : selectable ? 'text-gray-700' : 'text-gray-400'} text-[10px] sm:text-xs font-medium transition-colors duration-300`}
+                className={`${selected ? 'text-white font-semibold drop-shadow-sm' : selectable ? 'text-brand-deepest group-hover:text-white font-medium' : 'text-neutral-400'} text-[10px] sm:text-xs transition-all duration-300`}
               >
                 {label}
               </span>
               {mode === 'multi-select' && selected && (
                 <div className="absolute -top-1 -right-1 w-5 h-5 bg-white rounded-full flex items-center justify-center shadow-sm">
-                  <span className="text-xs font-bold text-blue-500">✓</span>
+                  <span className="text-xs font-bold text-brand-primary drop-shadow-sm">✓</span>
                 </div>
               )}
               {mode === 'multi-select' && !selectable && !selected && (
@@ -195,7 +195,7 @@ export default function CategorySection({
       </div>
       {mode === 'multi-select' && selectedCategories.length === maxSelection && (
         <div className="mt-4 text-center">
-          <p className="text-sm text-orange-600 font-medium animate-fade-in">
+          <p className="text-sm text-brand-primary font-semibold animate-fade-in bg-brand-light/50 py-2 px-4 rounded-full">
             최대 {maxSelection}개까지 선택 가능합니다.
           </p>
         </div>
