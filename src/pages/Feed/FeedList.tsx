@@ -4,6 +4,7 @@ import { BottomSheet } from '../../components/common/BottomSheet';
 import CommentSection, { type Comment } from '../../components/common/CommentSection';
 import userProfile from '../../assets/user_profile.jpg';
 import apiClient from '../../api/client';
+import { showApiErrorToast } from '../../components/common/Toast/ToastProvider';
 
 interface FeedData {
 	clubId: number;
@@ -52,9 +53,10 @@ interface FeedData {
 interface FeedItemProps {
 	feed: FeedData;
 	onCommentClick: (feedId: number) => void;
+	onLikeClick: (feedId: number) => void;
 }
 
-const FeedItem = ({ feed, onCommentClick }: FeedItemProps) => {
+const FeedItem = ({ feed, onCommentClick, onLikeClick }: FeedItemProps) => {
 	const [currentImageIndex, setCurrentImageIndex] = useState(0);
 	const [rootFeedImageIndex, setRootFeedImageIndex] = useState(0);
 
@@ -468,7 +470,10 @@ const FeedItem = ({ feed, onCommentClick }: FeedItemProps) => {
 
 			{/* 좋아요와 댓글 버튼과 리피드 버튼 */}
 			<div className="flex items-center gap-4 px-4 py-3 border-t border-gray-100">
-				<button className="flex items-center gap-2">
+				<button
+					className="flex items-center gap-2"
+					onClick={() => onLikeClick(feed.feedId)}
+				>
 					<i
 						className={`text-xl ${feed.liked ? 'ri-heart-fill text-red-500' : 'ri-heart-line'}`}
 					/>
@@ -494,6 +499,8 @@ export const FeedList = () => {
 	const [loading, setLoading] = useState(true);
 	const [commentBottomSheetOpen, setCommentBottomSheetOpen] = useState(false);
 	const [selectedFeed, setSelectedFeed] = useState<FeedData | null>(null);
+	const likeSendingRef = useRef<Set<number>>(new Set());
+	const bottomSheetScrollRef = useRef<HTMLDivElement>(null);
 
 	// API 호출
 	useEffect(() => {
@@ -525,12 +532,64 @@ export const FeedList = () => {
 		fetchFeeds();
 	}, []);
 
+	// 좋아요 처리
+	const handleLikeClick = async (feedId: number) => {
+		// 이미 처리 중인 피드인지 확인
+		if (likeSendingRef.current.has(feedId)) return;
+
+		// 처리 중 목록에 추가
+		likeSendingRef.current.add(feedId);
+
+		try {
+			// 현재 피드 찾기
+			const currentFeed = feeds.find(f => f.feedId === feedId);
+			if (!currentFeed) return;
+
+			// 즉시 UI 업데이트 (Optimistic Update)
+			const currentLiked = currentFeed.liked;
+			const currentLikeCount = currentFeed.likeCount;
+
+			setFeeds(prev => prev.map(feed =>
+				feed.feedId === feedId
+					? {
+						...feed,
+						liked: !feed.liked,
+						likeCount: !feed.liked ? feed.likeCount + 1 : Math.max(0, feed.likeCount - 1)
+					}
+					: feed
+			));
+
+			// API 호출
+			await apiClient.put(`/clubs/${currentFeed.clubId}/feeds/${feedId}/likes`);
+
+		} catch (error) {
+			// 실패 시 원래 상태로 롤백
+			const currentFeed = feeds.find(f => f.feedId === feedId);
+			if (currentFeed) {
+				setFeeds(prev => prev.map(feed =>
+					feed.feedId === feedId
+						? {
+							...feed,
+							liked: !currentFeed.liked,
+							likeCount: !currentFeed.liked ? currentFeed.likeCount - 1 : currentFeed.likeCount + 1
+						}
+						: feed
+				));
+			}
+			showApiErrorToast(error);
+			console.error('좋아요 처리 실패:', error);
+		} finally {
+			// 처리 중 목록에서 제거
+			likeSendingRef.current.delete(feedId);
+		}
+	};
+
 	const handleCommentClick = async (feedId: number) => {
 		const feed = feeds.find(f => f.feedId === feedId);
 		if (!feed) {
 			return;
 		}
-		
+
 		// 초기화
 		setSelectedFeed({
 			...feed,
@@ -542,7 +601,7 @@ export const FeedList = () => {
 			// 댓글 목록 로드
 			const response = await apiClient.get(`/feeds/${feedId}/comments?page=0&limit=20`);
 			const comments = response.data?.content || response.data?.data || response.data || [];
-			
+
 			// 댓글을 포함한 피드 정보 업데이트
 			setSelectedFeed({
 				...feed,
@@ -576,6 +635,7 @@ export const FeedList = () => {
 						key={feed.feedId}
 						feed={feed}
 						onCommentClick={handleCommentClick}
+						onLikeClick={handleLikeClick}
 					/>
 				))}
 			</div>
@@ -592,6 +652,7 @@ export const FeedList = () => {
 				}}
 				title="댓글"
 				maxHeight="60vh"
+				scrollRef={bottomSheetScrollRef}
 			>
 				{selectedFeed && (
 					<CommentSection
@@ -605,9 +666,18 @@ export const FeedList = () => {
 								commentCount: count,
 							};
 							setSelectedFeed(updatedFeed);
-							setFeeds(prev => prev.map(feed =>	
+							setFeeds(prev => prev.map(feed =>
 								feed.feedId === selectedFeed.feedId ? updatedFeed : feed
 							));
+							
+							// 댓글이 추가되었을 때 (개수가 증가했을 때) 스크롤을 맨 아래로
+							if (count > selectedFeed.commentCount && bottomSheetScrollRef.current) {
+								setTimeout(() => {
+									if (bottomSheetScrollRef.current) {
+										bottomSheetScrollRef.current.scrollTop = bottomSheetScrollRef.current.scrollHeight;
+									}
+								}, 100);
+							}
 						}}
 						enableInfiniteScroll={true}
 						showAsBottomSheet={true}
