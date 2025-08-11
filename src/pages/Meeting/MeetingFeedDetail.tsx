@@ -466,8 +466,7 @@ const MeetingFeedDetail = () => {
           >
             <i
               className={`${feedData.liked ? 'ri-heart-fill text-red-500' : 'ri-heart-line text-gray-600'} ${likeAnimating ? 'scale-125 animate-bounce' : ''}`}
-            />
-            +{' '}
+            />{' '}
           </button>
           <span className="text-sm font-medium">{feedData.likeCount}</span>
         </div>
