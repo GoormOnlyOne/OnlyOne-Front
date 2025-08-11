@@ -59,7 +59,6 @@ const MeetingFeedGrid: React.FC<MeetingFeedGridProps> = ({ clubId }) => {
       )
       .then(response => {
         const content = response?.data?.content ?? [];
-
         if (page === 1) {
           setFirstLoaded(true);
           setFirstPageEmpty(content.length === 0);
