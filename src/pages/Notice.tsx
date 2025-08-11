@@ -14,8 +14,17 @@ export const Notice = () => {
         setLoading(true);
         // 임시로 userId=1로 설정 (실제로는 로그인한 사용자 ID 사용)
         const response = await getNotifications({ userId: 1 });
-        setNotifications(response.notifications);
-        setUnreadCount(response.unreadCount);
+        
+        // 첫 페이지 조회 시 모든 알림을 읽음 처리로 UI 업데이트
+        const readNotifications = response.notifications.map(notification => ({
+          ...notification,
+          isRead: true // 백엔드에서 자동으로 읽음 처리되므로 UI에서도 반영
+        }));
+        
+        setNotifications(readNotifications);
+        setUnreadCount(0); // 모든 알림이 읽음 처리되었으므로 0으로 설정
+        
+        console.log('✅ 알림 목록 조회 완료 - 모든 알림이 읽음 처리됨');
       } catch (err) {
         setError('알림을 불러오는데 실패했습니다.');
         console.error('알림 조회 실패:', err);
