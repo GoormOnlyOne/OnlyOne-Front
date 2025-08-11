@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import apiClient from '../../../api/client';
 import MeetingCard, {type Meeting} from './MeetingCard';
 import EmptyState from '../search/EmptyState';
+import Loading from '../../common/Loading';
 
 
 interface MeetingListProps {
@@ -127,6 +128,12 @@ export default function MeetingList({
   if (mode === 'home') {
     return (
       <div className="px-4 pb-20">
+		{loading && meetings.length === 0 && (
+          <div className="py-4">
+            <Loading text="로딩 중..." overlay={false} />
+          </div>
+        )}
+
         {showHomeSpecialSections && (
           <>
             {/* 맞춤 추천 모임 섹션 */}
@@ -166,6 +173,13 @@ export default function MeetingList({
                 <span className="text-[#EF7C30] font-semibold">다른 모임</span>
                 도 구경해 보세요.
               </h2>
+
+			  {loading && partnerMeetings.length === 0 && (
+                <div className="py-3">
+                  <Loading text="불러오는 중..." overlay={false} />
+                </div>
+              )}
+
               <div className="space-y-4 mt-2">
                 {partnerMeetings.map(meeting => (
                   <MeetingCard key={meeting.clubId} meeting={meeting} />
@@ -186,11 +200,18 @@ export default function MeetingList({
         )}
 
         {!showHomeSpecialSections && (
-          <div className="space-y-4">
-            {meetings.map(meeting => (
-              <MeetingCard key={meeting.clubId} meeting={meeting} />
-            ))}
-          </div>
+          <>
+            {loading && meetings.length === 0 && (
+              <div className="py-4">
+                <Loading text="모임 불러오는 중..." overlay={false} />
+              </div>
+            )}
+            <div className="space-y-4">
+              {meetings.map(meeting => (
+                <MeetingCard key={meeting.clubId} meeting={meeting} />
+              ))}
+            </div>
+          </>
         )}
       </div>
     );
@@ -198,8 +219,12 @@ export default function MeetingList({
 
   // 전체 모드 렌더링
   return (
-    <div className="h-[calc(100vh-56px)] overflow-y-auto bg-gray-50">
-      {/* 모임 목록 */}
+    <div className="h-[calc(100vh-56px)] overflow-y-auto bg-gray-50 relative">
+      {loading && meetings.length === 0 && (
+        <Loading overlay text="로딩 중..." />
+      )}
+
+	  {/* 모임 목록 */}
       <div className="px-4 py-6">
         <div className="space-y-4">
           {meetings.map(meeting => (
@@ -211,10 +236,9 @@ export default function MeetingList({
           ))}
         </div>
 
-        {/* 로딩 스피너 */}
-        {loading && (
-          <div className="flex justify-center py-8">
-            <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+        {loading && meetings.length > 0 && (
+          <div className="py-6">
+            <Loading text="불러오는 중..." overlay={false} />
           </div>
         )}
 

@@ -70,6 +70,14 @@ export const deleteNotification = async (params: {
   return response.data;
 };
 
+// 읽지 않은 알림 개수 조회
+export const getUnreadCount = async (): Promise<number> => {
+  const response = await apiClient.get<number>(
+    `/notifications/unread-count`
+  );
+  return response.data;
+};
+
 // SSE 연결 생성
 export const createSSEConnection = (
   userId: number,

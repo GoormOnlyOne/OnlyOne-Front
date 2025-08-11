@@ -7,6 +7,8 @@ import CommentSection, {
 import userProfile from '../../assets/user_profile.jpg';
 import apiClient from '../../api/client';
 import { showApiErrorToast } from '../../components/common/Toast/ToastProvider';
+import SortChips from '../../components/common/SortChips';
+
 import { type Meeting } from '../../components/domain/meeting/MeetingCard'
 
 interface FeedData {
@@ -576,22 +578,26 @@ export const FeedList = () => {
 	const [selectedClub, setSelectedClub] = useState<Meeting | null>(null); // 선택된 모임
 	const likeSendingRef = useRef<Set<number>>(new Set());
 	const bottomSheetScrollRef = useRef<HTMLDivElement>(null);
+	type SortMode = 'latest' | 'popular';
+	const [sortMode, setSortMode] = useState<SortMode>('latest');
 	const [selectedRefeedFeedId, setSelectedRefeedFeedId] = useState<number | null>(null);
 	const [refeedContent, setRefeedContent] = useState(''); // 리피드 내용 상태 추가
 
 
-	// API 호출
 	useEffect(() => {
+		let cancelled = false;
 		const fetchFeeds = async () => {
 			try {
 				setLoading(true);
-				const response = await apiClient.get('/feeds?page=0&limit=20');
+
+				const path = sortMode === 'popular' ? '/feeds/popular' : '/feeds';
+				const response = await apiClient.get(`${path}?page=0&limit=20`);
 
 				// API 응답 데이터를 FeedData 형태로 변환
 				const rawFeeds =
 					response.data?.data || response.data?.content || response.data || [];
 
-				console.log('피드 목록 확인~~~~: ', rawFeeds);
+				if (cancelled) return;
 
 				const feedsData = rawFeeds.map((feed: any) => ({
 					...feed,
@@ -601,15 +607,17 @@ export const FeedList = () => {
 
 				setFeeds(feedsData);
 			} catch (error) {
+				if (cancelled) return;
 				console.error('피드 로드 실패:', error);
 				setFeeds([]);
 			} finally {
-				setLoading(false);
+				if (!cancelled) setLoading(false);
 			}
 		};
 
 		fetchFeeds();
-	}, []);
+		return () => { cancelled = true; };
+	}, [sortMode]);
 
 	const handleRefeedClick = async (feedId: number) => {
 		setSelectedRefeedFeedId(feedId);
@@ -761,6 +769,9 @@ export const FeedList = () => {
 
 	return (
 		<div className="min-h-screen bg-gray-50">
+			<div className="z-10 bg-white px-4 pt-3 pb-2">
+				<SortChips value={sortMode} onChange={setSortMode} />
+			</div>
 			{/* 피드 리스트 */}
 			<div className="pb-4">
 				{feeds.map(feed => (
