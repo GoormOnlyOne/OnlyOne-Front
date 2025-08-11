@@ -93,8 +93,7 @@ const MeetingHome: React.FC = () => {
       return;
     }
     try {
-      // TODO: post로 수정 (프&백 둘다)
-      const res = await apiClient.get<{ success: boolean }>(
+      const res = await apiClient.post<{ success: boolean }>(
         `/clubs/${meetingId}/join`,
       );
       if (res.success) {
