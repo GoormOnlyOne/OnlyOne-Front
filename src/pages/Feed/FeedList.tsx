@@ -7,6 +7,7 @@ import CommentSection, {
 import userProfile from '../../assets/user_profile.jpg';
 import apiClient from '../../api/client';
 import { showApiErrorToast } from '../../components/common/Toast/ToastProvider';
+import { type Meeting } from '../../components/domain/meeting/MeetingCard'
 
 interface FeedData {
 	clubId: number;
@@ -56,9 +57,10 @@ interface FeedItemProps {
 	feed: FeedData;
 	onCommentClick: (feedId: number) => void;
 	onLikeClick: (feedId: number) => void;
+	onRefeedClick: (feedId: number) => void;
 }
 
-const FeedItem = ({ feed, onCommentClick, onLikeClick }: FeedItemProps) => {
+const FeedItem = ({ feed, onCommentClick, onLikeClick, onRefeedClick }: FeedItemProps) => {
 	const [currentImageIndex, setCurrentImageIndex] = useState(0);
 	const [rootFeedImageIndex, setRootFeedImageIndex] = useState(0);
 
@@ -552,8 +554,9 @@ const FeedItem = ({ feed, onCommentClick, onLikeClick }: FeedItemProps) => {
 					<i className="ri-chat-3-line text-xl" />
 					<span className="text-sm">{feed.commentCount}</span>
 				</button>
-				<button className="flex items-center gap-2"
-				
+				<button
+					className="flex items-center gap-2"
+					onClick={() => onRefeedClick(feed.feedId)}
 				>
 					<i className="ri-repeat-line text-xl" />
 				</button>
@@ -566,9 +569,16 @@ export const FeedList = () => {
 	const [feeds, setFeeds] = useState<FeedData[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [commentBottomSheetOpen, setCommentBottomSheetOpen] = useState(false);
+	const [refeedBottomSheetOpen, setRefeedBottomSheetOpen] = useState(false);
 	const [selectedFeed, setSelectedFeed] = useState<FeedData | null>(null);
+	const [myClubs, setMyClubs] = useState<Meeting[]>([]); // 내 모임 목록
+	const [clubsLoading, setClubsLoading] = useState(false); // 모임 로딩 상태
+	const [selectedClub, setSelectedClub] = useState<Meeting | null>(null); // 선택된 모임
 	const likeSendingRef = useRef<Set<number>>(new Set());
 	const bottomSheetScrollRef = useRef<HTMLDivElement>(null);
+	const [selectedRefeedFeedId, setSelectedRefeedFeedId] = useState<number | null>(null);
+	const [refeedContent, setRefeedContent] = useState(''); // 리피드 내용 상태 추가
+
 
 	// API 호출
 	useEffect(() => {
@@ -600,6 +610,51 @@ export const FeedList = () => {
 
 		fetchFeeds();
 	}, []);
+
+	const handleRefeedClick = async (feedId: number) => {
+		setSelectedRefeedFeedId(feedId);
+		setRefeedBottomSheetOpen(true);
+
+		// 내 모임 목록 로드
+		try {
+			setClubsLoading(true);
+			const response = await apiClient.get('/search/user'); // 또는 /clubs/my
+			const clubsData = response.data || [];
+			setMyClubs(clubsData);
+		} catch (error) {
+			console.error('내 모임 목록 로드 실패:', error);
+			setMyClubs([]);
+		} finally {
+			setClubsLoading(false);
+		}
+	};
+
+	// 모임 선택 핸들러
+	const handleClubSelect = (club: Meeting) => {
+		setSelectedClub(club);
+	};
+
+	// 리피드 확인 핸들러
+	const handleRefeedConfirm = async () => {
+		if (!selectedClub || !selectedRefeedFeedId) return;
+
+		try {
+			// 리피드 API 호출
+			await apiClient.post(`/feeds/${selectedRefeedFeedId}/${selectedClub.clubId}`, {
+				content: refeedContent
+			});
+
+			console.log('리피드 성공!');
+			setRefeedBottomSheetOpen(false);
+			setSelectedClub(null);
+			setSelectedRefeedFeedId(null);
+			setMyClubs([]);
+		} catch (error) {
+			console.error('리피드 실패:', error);
+			showApiErrorToast(error);
+		}
+	};
+
 
 	// 좋아요 처리
 	const handleLikeClick = async (feedId: number) => {
@@ -714,6 +769,7 @@ export const FeedList = () => {
 						feed={feed}
 						onCommentClick={handleCommentClick}
 						onLikeClick={handleLikeClick}
+						onRefeedClick={handleRefeedClick}
 					/>
 				))}
 			</div>
@@ -767,6 +823,134 @@ export const FeedList = () => {
 						showAsBottomSheet={true}
 					/>
 				)}
+			</BottomSheet>
+
+
+			{/* 리피드 바텀시트 */}
+			<BottomSheet
+				isOpen={refeedBottomSheetOpen}
+				onClose={() => {
+					setRefeedBottomSheetOpen(false);
+					setSelectedClub(null);
+					setSelectedRefeedFeedId(null);
+					setMyClubs([]);
+					setRefeedContent(''); // 내용 초기화 추가
+				}}
+				title="리피드할 모임 선택"
+				maxHeight="80vh" // 높이 조금 늘림
+			>
+				<div className="flex flex-col h-full">
+					<div className="flex-1 overflow-y-auto">
+						{clubsLoading ? (
+							// 로딩 중
+							<div className="flex items-center justify-center py-8">
+								<div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mr-2"></div>
+								<div className="text-gray-500">내 모임을 불러오는 중...</div>
+							</div>
+						) : myClubs.length > 0 ? (
+							// 모임 목록
+							<div className="p-4 space-y-3">
+								<div className="text-sm text-gray-600 mb-4">
+									리피드할 내 모임을 선택해주세요
+								</div>
+								{myClubs.map(club => (
+									<div
+										key={club.clubId}
+										onClick={() => handleClubSelect(club)}
+										className={`flex items-center gap-3 p-3 border rounded-lg cursor-pointer transition-colors ${selectedClub?.clubId === club.clubId
+											? 'border-blue-500 bg-blue-50'
+											: 'border-gray-200 hover:bg-gray-50'
+											}`}
+									>
+										{/* 클럽 이미지 */}
+										<div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-200 flex-shrink-0">
+											{club.image ? (
+												<img
+													src={club.image}
+													className="w-full h-full object-cover"
+													alt={club.name}
+												/>
+											) : (
+												<div className="w-full h-full flex items-center justify-center">
+													<i className="ri-group-line text-xl text-gray-400"></i>
+												</div>
+											)}
+										</div>
+
+										{/* 클럽 이름 */}
+										<div className="flex-1">
+											<div className="font-medium text-gray-900">
+												{club.name}
+											</div>
+											<div className="text-sm text-gray-500">
+												멤버 {club.memberCount}명
+											</div>
+										</div>
+
+										{/* 라디오 버튼 */}
+										<div className="w-5 h-5 flex-shrink-0">
+											<div className={`w-full h-full rounded-full border-2 flex items-center justify-center ${selectedClub?.clubId === club.clubId
+												? 'border-blue-500 bg-blue-500'
+												: 'border-gray-300 bg-white'
+												}`}>
+												{selectedClub?.clubId === club.clubId && (
+													<div className="w-2 h-2 bg-white rounded-full"></div>
+												)}
+											</div>
+										</div>
+									</div>
+								))}
+
+								{/* 리피드 내용 입력 섹션 추가 */}
+								<div className="mt-6 pt-4 border-t border-gray-200">
+									<div className="mb-3">
+										<label className="block text-sm font-medium text-gray-700 mb-2">
+											리피드 메시지 (선택사항)
+										</label>
+										<textarea
+											value={refeedContent}
+											onChange={(e) => setRefeedContent(e.target.value)}
+											placeholder="이 피드에 대한 생각을 공유해보세요..."
+											className="w-full p-3 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+											rows={3}
+											maxLength={300}
+										/>
+										<div className="text-right text-xs text-gray-500 mt-1">
+											{refeedContent.length}/300
+										</div>
+									</div>
+								</div>
+							</div>
+						) : (
+							// 모임이 없는 경우
+							<div className="text-center py-12">
+								<i className="ri-group-line text-5xl text-gray-300 mb-4"></i>
+								<div className="text-lg font-medium text-gray-600 mb-2">
+									가입한 모임이 없습니다
+								</div>
+								<div className="text-sm text-gray-400">
+									모임에 가입한 후 다른 모임으로 리피드해보세요
+								</div>
+							</div>
+						)}
+					</div>
+
+					{/* 확인 버튼 */}
+					{myClubs.length > 0 && (
+						<div className="p-4 border-t bg-white">
+							<button
+								onClick={handleRefeedConfirm}
+								disabled={!selectedClub}
+								className={`w-full py-3 rounded-lg font-medium transition-colors ${selectedClub
+									? 'bg-blue-500 text-white hover:bg-blue-600'
+									: 'bg-gray-200 text-gray-400 cursor-not-allowed'
+									}`}
+							>
+								{selectedClub ? `"${selectedClub.name}"으로 리피드하기` : '모임을 선택해주세요'}
+							</button>
+						</div>
+					)}
+				</div>
 			</BottomSheet>
 		</div>
 	);
