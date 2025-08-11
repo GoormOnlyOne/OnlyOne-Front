@@ -32,6 +32,12 @@ function AppContent() {
       return;
     }
 
+    // 이미 초기화된 경우 재초기화 스킵 (중복 방지)
+    if (fcmService.isReady()) {
+      console.log('📱 FCM 이미 초기화됨 - 재초기화 스킵');
+      return;
+    }
+
     const initializeFCM = async () => {
       try {
         console.log('📱 FCM 초기화 시작... (인증된 사용자:', user.userId + ')');

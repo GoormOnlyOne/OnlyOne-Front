@@ -5,7 +5,10 @@ export class FCMService {
   private isInitialized = false;
 
   constructor() {
-    this.setupForegroundListener();
+    // 브라우저 환경에서만 포그라운드 리스너 설정 (SSR 안전성)
+    if (typeof window !== 'undefined') {
+      this.setupForegroundListener();
+    }
   }
 
   /**
@@ -13,6 +16,12 @@ export class FCMService {
    */
   async initialize(): Promise<boolean> {
     try {
+      // 이미 초기화되고 토큰이 있는 경우 빠른 반환 (멱등성)
+      if (this.isInitialized && this.fcmToken) {
+        console.log('🚀 FCM 서비스 이미 초기화됨');
+        return true;
+      }
+
       console.log('🚀 FCM 서비스 초기화 시작');
       
       // 서비스 워커 등록
@@ -119,7 +128,7 @@ export class FCMService {
    * 알림 권한 상태 확인
    */
   getNotificationPermission(): NotificationPermission {
-    return Notification.permission;
+    return typeof Notification !== 'undefined' ? Notification.permission : 'denied';
   }
 
   /**
@@ -127,6 +136,11 @@ export class FCMService {
    */
   async requestNotificationPermission(): Promise<NotificationPermission> {
     try {
+      if (typeof Notification === 'undefined') {
+        console.warn('이 브라우저는 Notification을 지원하지 않습니다.');
+        return 'denied';
+      }
+      
       const permission = await Notification.requestPermission();
       console.log('🔔 알림 권한 상태:', permission);
       return permission;
