@@ -89,13 +89,13 @@ const ChatRoomList = () => {
             >
               {/* 아이콘 */}
               <div className="flex-shrink-0 mr-3">
-                <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                <div className="w-12 h-12 bg-[#FFAE00]/20 rounded-full flex items-center justify-center">
                   <i
                     className={`${
                       room.type === 'SCHEDULE'
-                        ? 'ri-calendar-event-line text-blue-600'
-                        : 'ri-group-line text-blue-600'
-                    } text-xl`}
+                        ? 'ri-calendar-event-line'
+                        : 'ri-group-line'
+                    } text-[#FFAE00] text-xl`}
                   ></i>
                 </div>
               </div>

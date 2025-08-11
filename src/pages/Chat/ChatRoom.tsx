@@ -208,7 +208,8 @@ const ChatRoom: React.FC = () => {
           )}
 
           <div className="flex flex-wrap items-center gap-2 w-full">
-            <label className="cursor-pointer flex items-center text-blue-500 hover:text-blue-700">
+            {/* 이미지 아이콘 색상 변경 */}
+            <label className="cursor-pointer flex items-center text-[#FFAE00] hover:text-[#e89d00]">
               <Image className="w-5 h-5" />
               <input
                 type="file"
@@ -222,11 +223,12 @@ const ChatRoom: React.FC = () => {
               value={text}
               onChange={(e) => setText(e.target.value)}
               placeholder="메시지를 입력하세요"
-              className="flex-1 min-w-0 px-3 py-1.5 sm:px-4 sm:py-2 border rounded-full text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="flex-1 min-w-0 px-3 py-1.5 sm:px-4 sm:py-2 border rounded-full text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-[#FFAE00]"
             />
+            {/* 전송 버튼 색상 변경 */}
             <button
               type="submit"
-              className="px-3 sm:px-4 py-1.5 sm:py-2 bg-blue-500 text-white rounded-full text-xs sm:text-sm hover:bg-blue-600 disabled:opacity-50"
+              className="px-3 sm:px-4 py-1.5 sm:py-2 bg-[#FFAE00] text-white rounded-full text-xs sm:text-sm hover:bg-[#e89d00] disabled:opacity-50"
               disabled={!text.trim() && !imageFile}
             >
               전송
