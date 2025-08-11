@@ -31,6 +31,7 @@ export class NotificationService {
   private maxReconnectAttempts = 5;
   private reconnectDelay = 1000;
   private isConnecting = false;
+  private lastHeartbeatLog = 0;
 
   constructor() {
     this.listeners.set('notification', new Set());
@@ -41,39 +42,52 @@ export class NotificationService {
   async connect(userId: number): Promise<void> {
     // 이미 연결 중이거나 연결되어 있으면 중복 방지
     if (this.isConnecting || this.eventSource?.readyState === EventSource.OPEN) {
-      console.log('SSE connection already exists or in progress, skipping');
+      console.log('🔄 SSE 연결 이미 존재 또는 진행 중 - 생략', {
+        isConnecting: this.isConnecting,
+        readyState: this.eventSource?.readyState,
+        userId
+      });
       return;
     }
 
+    console.log('🔄 NotificationService SSE 연결 시작', { userId, timestamp: new Date().toISOString() });
     this.isConnecting = true;
     this.userId = userId;
     
     try {
       // 기존 연결이 있으면 정리
       if (this.eventSource) {
+        console.log('🔌 기존 SSE 연결 정리 중...');
         this.eventSource.close();
         this.eventSource = null;
       }
       
       // SSE 연결
-      console.log('Creating new SSE connection for userId:', userId);
+      console.log('🌐 새로운 SSE 연결 생성 시작', { userId });
       this.eventSource = createSSEConnection(userId);
       this.setupEventListeners();
     } catch (error) {
-      console.error('Failed to establish SSE connection:', error);
+      console.error('❌ NotificationService SSE 연결 실패:', error);
       this.isConnecting = false;
       throw error;
     }
   }
 
   disconnect(): void {
+    console.log('🔌 NotificationService SSE 연결 종료 시작', {
+      isConnected: this.isConnected(),
+      userId: this.userId,
+      reconnectAttempts: this.reconnectAttempts,
+      timestamp: new Date().toISOString()
+    });
+    
     this.isConnecting = false;
     if (this.eventSource) {
       this.eventSource.close();
       this.eventSource = null;
     }
     this.reconnectAttempts = 0;
-    console.log('SSE connection disconnected');
+    console.log('✅ NotificationService SSE 연결 종료 완료');
   }
 
   addEventListener<T extends SSEEventType>(
@@ -101,19 +115,28 @@ export class NotificationService {
 
     this.eventSource.addEventListener('notification', (event) => {
       try {
+        console.log('📢 알림 이벤트 수신:', {
+          data: event.data.substring(0, 100) + '...',
+          lastEventId: event.lastEventId,
+          timestamp: new Date().toISOString()
+        });
         const data = JSON.parse(event.data);
         this.emitEvent('notification', data);
       } catch (error) {
-        console.error('Failed to parse notification event:', error);
+        console.error('❌ 알림 이벤트 파싱 실패:', error);
       }
     });
 
     this.eventSource.addEventListener('unread-count', (event) => {
       try {
+        console.log('📊 안읽은 알림 수 이벤트 수신:', {
+          data: event.data,
+          timestamp: new Date().toISOString()
+        });
         const data = JSON.parse(event.data);
         this.emitEvent('unread-count', data);
       } catch (error) {
-        console.error('Failed to parse unread-count event:', error);
+        console.error('❌ 안읽은 알림 수 이벤트 파싱 실패:', error);
       }
     });
 
@@ -127,21 +150,40 @@ export class NotificationService {
           // JSON이 아닌 경우 문자열 그대로 사용
           data = { status: event.data };
         }
+        // heartbeat 로그는 5초마다만 출력하여 로그 스팸 방지
+        const now = Date.now();
+        if (!this.lastHeartbeatLog || now - this.lastHeartbeatLog > 5000) {
+          console.log('💚 SSE Heartbeat 확인:', {
+            data: event.data,
+            timestamp: new Date().toISOString()
+          });
+          this.lastHeartbeatLog = now;
+        }
         this.emitEvent('heartbeat', data);
-        // heartbeat 로그는 너무 빈번하므로 생략
       } catch (error) {
-        console.error('Failed to handle heartbeat event:', error);
+        console.error('❌ Heartbeat 이벤트 처리 실패:', error);
       }
     });
 
     this.eventSource.onopen = () => {
-      console.log('SSE connection opened successfully');
+      console.log('✅ NotificationService SSE 연결 성공!', {
+        userId: this.userId,
+        readyState: this.eventSource?.readyState,
+        reconnectAttempts: this.reconnectAttempts,
+        timestamp: new Date().toISOString()
+      });
       this.reconnectAttempts = 0;
       this.isConnecting = false; // 연결 완료
     };
 
     this.eventSource.onerror = (error) => {
-      console.error('SSE connection error:', error);
+      console.error('❌ NotificationService SSE 연결 에러:', {
+        error,
+        userId: this.userId,
+        readyState: this.eventSource?.readyState,
+        reconnectAttempts: this.reconnectAttempts,
+        timestamp: new Date().toISOString()
+      });
       this.isConnecting = false; // 연결 실패
       this.handleReconnect();
     };
@@ -157,16 +199,27 @@ export class NotificationService {
 
   private handleReconnect(): void {
     if (this.reconnectAttempts >= this.maxReconnectAttempts) {
-      console.error('Max reconnection attempts reached');
+      console.error('🚫 NotificationService 최대 재연결 시도 횟수 도달', {
+        maxAttempts: this.maxReconnectAttempts,
+        userId: this.userId,
+        timestamp: new Date().toISOString()
+      });
       return;
     }
 
     this.reconnectAttempts++;
     const delay = this.reconnectDelay * Math.pow(2, this.reconnectAttempts - 1);
 
+    console.log('🔄 NotificationService 재연결 예약', {
+      delay: `${delay}ms`,
+      attempt: `${this.reconnectAttempts}/${this.maxReconnectAttempts}`,
+      userId: this.userId,
+      timestamp: new Date().toISOString()
+    });
+
     setTimeout(async () => {
       if (this.userId) {
-        console.log(`Attempting to reconnect (${this.reconnectAttempts}/${this.maxReconnectAttempts})`);
+        console.log('🔄 NotificationService 재연결 시도 실행', { userId: this.userId });
         this.disconnect();
         await this.connect(this.userId);
       }

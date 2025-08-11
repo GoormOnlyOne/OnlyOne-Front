@@ -4,6 +4,7 @@ import { AuthProvider } from './contexts/AuthContext';
 import { ToastProvider, useToast } from './components/common/Toast/ToastContext';
 import { setGlobalToastFunction } from './components/common/Toast/ToastProvider';
 import { router } from './routes/Router';
+import SSEStatus from './components/common/SSEStatus';
 
 function AppContent() {
   const { showToast } = useToast();
@@ -23,7 +24,12 @@ function AppContent() {
     setGlobalToastFunction(toastWrapper);
   }, [showToast]);
 
-  return <RouterProvider router={router} />;
+  return (
+    <>
+      <RouterProvider router={router} />
+      <SSEStatus />
+    </>
+  );
 }
 
 function App() {
