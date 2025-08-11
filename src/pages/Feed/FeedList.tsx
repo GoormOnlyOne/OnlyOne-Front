@@ -170,7 +170,7 @@ const FeedItem = ({ feed, onCommentClick, onLikeClick }: FeedItemProps) => {
 								alt={`피드 이미지 ${currentImageIndex + 1}`}
 								className="w-full h-full object-cover"
 								onError={e => {
-									e.currentTarget.src = '/placeholder-image.jpg';
+									e.currentTarget.src = `https://picsum.photos/seed/picsum/200/300`;
 								}}
 							/>
 						) : (
@@ -275,7 +275,7 @@ const FeedItem = ({ feed, onCommentClick, onLikeClick }: FeedItemProps) => {
 														alt={`rootFeed 이미지 ${rootFeedImageIndex + 1}`}
 														className="w-full h-full object-cover"
 														onError={e => {
-															e.currentTarget.src = '/placeholder-image.jpg';
+															e.currentTarget.src = `https://picsum.photos/seed/picsum/200/300`;
 														}}
 													/>
 												) : (
@@ -413,7 +413,7 @@ const FeedItem = ({ feed, onCommentClick, onLikeClick }: FeedItemProps) => {
 															alt={`피드 이미지 ${rootFeedImageIndex + 1}`}
 															className="w-full h-full object-cover"
 															onError={e => {
-																e.currentTarget.src = '/placeholder-image.jpg';
+																e.currentTarget.src = `https://picsum.photos/seed/picsum/200/300`;
 															}}
 														/>
 													) : (
@@ -552,7 +552,9 @@ const FeedItem = ({ feed, onCommentClick, onLikeClick }: FeedItemProps) => {
 					<i className="ri-chat-3-line text-xl" />
 					<span className="text-sm">{feed.commentCount}</span>
 				</button>
-				<button className="flex items-center gap-2">
+				<button className="flex items-center gap-2"
+				
+				>
 					<i className="ri-repeat-line text-xl" />
 				</button>
 			</div>
