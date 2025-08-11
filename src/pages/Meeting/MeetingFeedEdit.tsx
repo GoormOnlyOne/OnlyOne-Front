@@ -7,6 +7,7 @@ import apiClient from '../../api/client';
 import { showApiErrorToast } from '../../components/common/Toast/ToastProvider';
 import { useNavigate, useParams } from 'react-router-dom';
 import { showToast as globalToast } from '../../components/common/Toast/ToastProvider';
+import Loading from '../../components/common/Loading';
 
 const MeetingFeedEdit = () => {
   const { meetingId, feedId } = useParams();
@@ -84,10 +85,8 @@ const MeetingFeedEdit = () => {
   // 로딩 상태 표시
   if (loading) {
     return (
-      <div className="p-4">
-        <div className="text-center text-gray-500">
-          피드 정보를 불러오는 중...
-        </div>
+      <div className="relative min-h-screen">
+        <Loading overlay text="로딩 중..." />
       </div>
     );
   }

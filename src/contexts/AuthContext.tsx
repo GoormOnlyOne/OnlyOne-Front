@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { logoutUser, getCurrentUser } from '../api/auth';
+import Loading from '../components/common/Loading';
 
 // 사용자 타입 정의
 export interface User {
@@ -147,7 +148,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   return (
     <AuthContext.Provider value={value}>
-      {children}
+      {isLoading ? (
+        <div className="min-h-screen flex items-center justify-center">
+          <Loading text="로그인 상태 확인 중..." />
+        </div>
+      ) : (
+        children
+      )}
     </AuthContext.Provider>
   );
 };

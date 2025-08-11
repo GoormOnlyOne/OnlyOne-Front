@@ -7,6 +7,7 @@ import {
   showApiErrorToast,
   showToast as globalToast,
 } from '../../common/Toast/ToastProvider';
+import Loading from '../../common/Loading';
 
 export interface Schedule {
   scheduleId: number;
@@ -399,122 +400,112 @@ export default function ScheduleList({ clubRole }: ScheduleListProps) {
     globalToast('삭제 기능은 아직 구현되지 않았습니다.', 'info', 2000);
   };
 
-  if (loading) {
-    return (
-      <div className="space-y-4">
-        <h2 className="font-bold">정기 모임</h2>
-        <div className="flex justify-center items-center h-32">
-          <span className="text-gray-500">로딩 중...</span>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="space-y-4">
-        <h2 className="font-bold">정기 모임</h2>
-        <div className="text-red-500 text-center">{error}</div>
-      </div>
-    );
-  }
-
   // schedules가 배열인지 확인하고 안전하게 처리
   const safeSchedules = Array.isArray(schedules) ? schedules : [];
 
   return (
     <>
-      <div className="space-y-4">
-        <h2 className="font-bold">정기 모임</h2>
-        {safeSchedules.length === 0 ? (
-          <div className="text-center text-gray-500 py-8">
-            등록된 정기모임이 없습니다.
-          </div>
-        ) : (
-          safeSchedules.map(schedule => (
-            <div
-              key={schedule.scheduleId}
-              className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow"
-            >
-              <div className="p-4">
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex-1">
-                    {/* 스케줄 정보 */}
-                    <h3 className="font-semibold text-gray-800 mb-1">
-                      {schedule.name}
-                    </h3>
-                    <p className="text-sm text-gray-600 mb-1">
-                      {`일시 | ${formatDateTime(schedule.scheduleTime)}`}
-                    </p>
-                    <div className="text-sm text-gray-600">
-                      <span>{`인당 비용 | ${schedule.cost === 0 ? '무료' : `${schedule.cost.toLocaleString()}₩`}`}</span>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    {/* 디데이와 상태 뱃지 */}
-                    <div className="flex items-center gap-2">
-                      <div
-                        className={`rounded-full ${getDdayDot(schedule.dday)}`}
-                      ></div>
-                      <span className="text-xs font-medium text-gray-600">
-                        {schedule.dday}
-                      </span>
-                    </div>
-                    <span className={getStatusCard(schedule.scheduleStatus)}>
-                      {getStatusText(schedule.scheduleStatus)}
-                    </span>
+      <div className="relative" aria-busy={loading}>
+        {loading && <Loading overlay text="로딩 중..." />}
 
-                    {/* 리더에게만 보이는 더보기 아이콘 */}
-                    {clubRole === 'LEADER' && (
-                      <div className="relative">
-                        <button
-                          onClick={() =>
-                            setOpenMenuId(
-                              openMenuId === schedule.scheduleId
-                                ? null
-                                : schedule.scheduleId,
-                            )
-                          }
-                          className="p-1 rounded hover:bg-gray-100"
-                        >
-                          <MoreVertical className="w-5 h-5 text-gray-500" />
-                        </button>
+        <div className="space-y-4"></div>
+          <h2 className="font-bold">정기 모임</h2>
 
-                        {/* 드롭다운 메뉴*/}
-                        {openMenuId === schedule.scheduleId && (
-                          <div
-                            className="absolute right-0 mt-2 w-32 bg-white border border-gray-200 rounded shadow-lg z-50"
-                            onMouseLeave={() => setOpenMenuId(null)}
-                          >
-                            <button
-                              onClick={() =>
-                                handleScheduleEdit(schedule.scheduleId)
-                              }
-                              className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
-                            >
-                              수정
-                            </button>
-                            <button
-                              onClick={() => handleScheduleDelete(schedule)}
-                              className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
-                            >
-                              삭제
-                            </button>
-                          </div>
-                        )}
+          {error && (
+            <div className="text-red-700 bg-red-50 border border-red-200 rounded-md px-3 py-2">
+              {error}
+            </div>
+          )}
+
+          {safeSchedules.length === 0 && !loading && !error ? (
+            <div className="text-center text-gray-500 py-8">
+              등록된 정기모임이 없습니다.
+            </div>
+          ) : (
+            safeSchedules.map(schedule => (
+              <div
+                key={schedule.scheduleId}
+                className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow"
+              >
+                <div className="p-4">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex-1">
+                      {/* 스케줄 정보 */}
+                      <h3 className="font-semibold text-gray-800 mb-1">
+                        {schedule.name}
+                      </h3>
+                      <p className="text-sm text-gray-600 mb-1">
+                        {`일시 | ${formatDateTime(schedule.scheduleTime)}`}
+                      </p>
+                      <div className="text-sm text-gray-600">
+                        <span>{`인당 비용 | ${schedule.cost === 0 ? '무료' : `${schedule.cost.toLocaleString()}₩`}`}</span>
                       </div>
-                    )}
-                  </div>
-                </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      {/* 디데이와 상태 뱃지 */}
+                      <div className="flex items-center gap-2">
+                        <div
+                          className={`rounded-full ${getDdayDot(schedule.dday)}`}
+                        ></div>
+                        <span className="text-xs font-medium text-gray-600">
+                          {schedule.dday}
+                        </span>
+                      </div>
+                      <span className={getStatusCard(schedule.scheduleStatus)}>
+                        {getStatusText(schedule.scheduleStatus)}
+                      </span>
 
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    {getParticipationStatus(schedule)}
-                    {getActionButton(schedule)}
+                      {/* 리더에게만 보이는 더보기 아이콘 */}
+                      {clubRole === 'LEADER' && (
+                        <div className="relative">
+                          <button
+                            onClick={() =>
+                              setOpenMenuId(
+                                openMenuId === schedule.scheduleId
+                                  ? null
+                                  : schedule.scheduleId,
+                              )
+                            }
+                            className="p-1 rounded hover:bg-gray-100"
+                          >
+                            <MoreVertical className="w-5 h-5 text-gray-500" />
+                          </button>
+
+                          {/* 드롭다운 메뉴*/}
+                          {openMenuId === schedule.scheduleId && (
+                            <div
+                              className="absolute right-0 mt-2 w-32 bg-white border border-gray-200 rounded shadow-lg z-50"
+                              onMouseLeave={() => setOpenMenuId(null)}
+                            >
+                              <button
+                                onClick={() =>
+                                  handleScheduleEdit(schedule.scheduleId)
+                                }
+                                className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
+                              >
+                                수정
+                              </button>
+                              <button
+                                onClick={() => handleScheduleDelete(schedule)}
+                                className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                              >
+                                삭제
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      {getParticipationStatus(schedule)}
+                      {getActionButton(schedule)}
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
           ))
         )}
       </div>
