@@ -485,7 +485,10 @@ const MeetingFeedDetail = () => {
             className="flex items-start gap-3 px-4 py-3 bg-white rounded-lg border border-gray-100 m-4 hover:shadow-sm transition-shadow"
           >
             <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center flex-shrink-0">
-              <img src={userProfile} className="w-8 h-8 rounded-full"></img>
+              <img
+                src={comment.profileImage}
+                className="w-8 h-8 rounded-full"
+              ></img>
             </div>
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-1">

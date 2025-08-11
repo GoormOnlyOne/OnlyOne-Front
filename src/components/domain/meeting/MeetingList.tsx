@@ -1,10 +1,8 @@
-// src/components/domain/meeting/MeetingList.tsx
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import apiClient from '../../../api/client';
 import MeetingCard from './MeetingCard';
 import EmptyState from '../search/EmptyState';
-import Loading from '../../common/Loading'; // ✅ 추가
 
 interface Meeting {
   clubId: number;
@@ -35,15 +33,14 @@ export default function MeetingList({
   const [hasMore, setHasMore] = useState(true);
   const navigate = useNavigate();
 
-  const isInitialLoading = loading && page === 0; // ✅ 초기 로딩 판단
-
   // 데이터 로드 함수
   const loadMeetings = async (pageNum: number, isNewLoad = false) => {
     if (loading) return;
 
     setLoading(true);
     try {
-      const endpoint = mode === 'full' ? apiEndpoint! : '/search/recommendations';
+      const endpoint =
+        mode === 'full' ? apiEndpoint! : '/search/recommendations';
       const size = mode === 'full' ? 20 : 5;
 
       const response = await apiClient.get<Meeting[]>(endpoint, {
@@ -75,9 +72,12 @@ export default function MeetingList({
     if (!showHomeSpecialSections) return;
 
     try {
-      const response = await apiClient.get<Meeting[]>('/search/teammates-clubs', {
-        params: { page: 0, size: 5 },
-      });
+      const response = await apiClient.get<Meeting[]>(
+        '/search/teammates-clubs',
+        {
+          params: { page: 0, size: 5 },
+        },
+      );
       if (response.success) {
         setPartnerMeetings(response.data);
       }
@@ -105,7 +105,11 @@ export default function MeetingList({
       const scrollTop = document.documentElement.scrollTop;
       const clientHeight = document.documentElement.clientHeight;
 
-      if (scrollHeight - scrollTop - clientHeight < 100 && hasMore && !loading) {
+      if (
+        scrollHeight - scrollTop - clientHeight < 100 &&
+        hasMore &&
+        !loading
+      ) {
         const nextPage = page + 1;
         setPage(nextPage);
         loadMeetings(nextPage);
@@ -129,45 +133,23 @@ export default function MeetingList({
     alert('모임 가입이 완료되었습니다!');
   };
 
-  // ✅ 홈 모드: 초기 로딩 시 스켈레톤으로 대체
+  // 홈 모드 렌더링
   if (mode === 'home') {
-    // 초기 로딩 스켈레톤
-    if (isInitialLoading) {
-      return (
-        <div className="px-4 pb-20 space-y-8">
-          {showHomeSpecialSections ? (
-            <>
-              <section>
-                <h2 className="text-base font-semibold text-gray-800 leading-snug mb-4">
-                  내게 딱 맞는 모임을 찾아보세요!
-                </h2>
-                <Loading variant="skeleton" rows={5} />
-              </section>
-              <section>
-                <h2 className="text-base font-semibold text-gray-800 leading-snug mb-4">
-                  모임 친구들은 이런 활동도 해요!
-                </h2>
-                <Loading variant="skeleton" rows={5} />
-              </section>
-            </>
-          ) : (
-            <Loading variant="skeleton" rows={5} />
-          )}
-        </div>
-      );
-    }
-
-    // 데이터 렌더
     return (
-      <div className="px-4 pb-20">
+      <div className="px-4 pb-20 mt-10">
         {showHomeSpecialSections && (
           <>
             {/* 맞춤 추천 모임 섹션 */}
             <div>
-              <h2 className="text-base font-semibold text-gray-800 leading-snug mb-4">
+              <h1 className="text-2xl font-semibold text-gray-800 leading-snug mb-1">
                 내게 딱 맞는 모임을 찾아보세요!
+              </h1>
+              <h2 className="text-lg text-gray-400">
+                내 취향{' '}
+                <span className="text-[#EF7C30] font-semibold">맞춤 모임</span>
+                을 소개해드려요.
               </h2>
-              <div className="space-y-4">
+              <div className="space-y-4 mt-2">
                 {meetings.map(meeting => (
                   <MeetingCard key={meeting.clubId} meeting={meeting} />
                 ))}
@@ -177,7 +159,15 @@ export default function MeetingList({
               <div className="flex justify-center mt-6 mb-8">
                 <button
                   onClick={handleViewMoreRecommended}
-                  className="px-6 py-3 bg-white border border-gray-200 rounded-full text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                  className="
+    bg-[#F5921F] text-white text-base font-bold
+    px-6 py-2.5 rounded-full
+    border-2 border-[#F5921F]
+    hover:bg-[#EF7C30]
+    transform hover:scale-105
+    transition-all duration-200
+    focus:outline-none focus:ring-2 focus:ring-[#F5921F]/40
+  "
                 >
                   더보기 →
                 </button>
@@ -186,11 +176,15 @@ export default function MeetingList({
 
             {/* 함께하는 사람들의 모임 섹션 */}
             <div className="mb-8">
-              <h2 className="text-base font-semibold text-gray-800 leading-snug mb-4">
+              <h1 className="text-2xl font-semibold text-gray-800 leading-snug mb-1">
                 모임 친구들은 이런 활동도 해요!
+              </h1>
+              <h2 className="text-lg text-gray-400">
+                함께하는 멤버들의{' '}
+                <span className="text-[#EF7C30] font-semibold">다른 모임</span>
+                도 구경해 보세요.
               </h2>
-
-              <div className="space-y-4">
+              <div className="space-y-4 mt-2">
                 {partnerMeetings.map(meeting => (
                   <MeetingCard key={meeting.clubId} meeting={meeting} />
                 ))}
@@ -199,8 +193,16 @@ export default function MeetingList({
               {/* 더보기 버튼 */}
               <div className="flex justify-center mt-6">
                 <button
-                  onClick={handleViewMore}
-                  className="px-6 py-3 bg-white border border-gray-200 rounded-full text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                  onClick={handleViewMoreRecommended}
+                  className="
+    bg-[#F5921F] text-white text-base font-bold
+    px-6 py-2.5 rounded-full
+    border-2 border-[#F5921F]
+    hover:bg-[#EF7C30]
+    transform hover:scale-105
+    transition-all duration-200
+    focus:outline-none focus:ring-2 focus:ring-[#F5921F]/40
+  "
                 >
                   더보기 →
                 </button>
@@ -223,6 +225,7 @@ export default function MeetingList({
   // 전체 모드 렌더링
   return (
     <div className="h-[calc(100vh-56px)] overflow-y-auto bg-gray-50">
+      {/* 모임 목록 */}
       <div className="px-4 py-6">
         <div className="space-y-4">
           {meetings.map(meeting => (
@@ -234,10 +237,10 @@ export default function MeetingList({
           ))}
         </div>
 
-        {/* ✅ 무한 스크롤 로딩: 공통 로더로 교체 */}
+        {/* 로딩 스피너 */}
         {loading && (
           <div className="flex justify-center py-8">
-            <Loading text="불러오는 중..." />
+            <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
           </div>
         )}
 
