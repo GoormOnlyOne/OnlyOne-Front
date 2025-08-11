@@ -38,7 +38,7 @@ function AppContent() {
         const fcmInitialized = await fcmService.initialize();
         
         if (fcmInitialized) {
-          await fcmService.sendTokenToBackend(user.userId);
+          await fcmService.sendTokenToBackend();
           console.log('✅ FCM 초기화 및 토큰 전송 완료');
         } else {
           console.log('⚠️ FCM 초기화 실패 (알림 권한 거부 또는 브라우저 미지원)');

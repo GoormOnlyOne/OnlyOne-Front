@@ -1,8 +1,9 @@
 // Firebase 메시징 서비스 워커
-importScripts('https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js');
-importScripts('https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging-compat.js');
+importScripts('https://www.gstatic.com/firebasejs/12.1.0/firebase-app-compat.js');
+importScripts('https://www.gstatic.com/firebasejs/12.1.0/firebase-messaging-compat.js');
 
-// Firebase 설정 - buddkit 프로젝트
+// Firebase 설정 - 환경변수에서 가져오기
+// 주의: 이 설정은 .env 파일과 동기화되어야 합니다
 const firebaseConfig = {
   apiKey: "AIzaSyBtmNNWYOo2Ei_tBDn2FNjTEA93rVg6LlU",
   authDomain: "buddkit-40bb2.firebaseapp.com",

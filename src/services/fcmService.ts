@@ -74,7 +74,7 @@ export class FCMService {
   /**
    * FCM 토큰을 백엔드로 전송
    */
-  async sendTokenToBackend(userId: number): Promise<boolean> {
+  async sendTokenToBackend(): Promise<boolean> {
     if (!this.fcmToken) {
       console.error('❌ FCM 토큰이 없습니다.');
       return false;
@@ -82,7 +82,6 @@ export class FCMService {
 
     try {
       console.log('📤 FCM 토큰을 백엔드로 전송 중...', {
-        userId,
         token: this.fcmToken.substring(0, 20) + '...'
       });
 
