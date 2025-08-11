@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useSearchParams, useParams } from 'react-router-dom';
 import ParticipantInfo from '../../components/domain/meeting/ParticipantInfo';
 import apiClient from '../../api/client';
+import { showApiErrorToast } from '../../components/common/Toast/ToastProvider';
 
 interface ParticipatorResponse {
   userId: number;
@@ -82,8 +83,8 @@ export const ParticipationStatus: React.FC = () => {
           setParticipants(transformed);
         }
       } catch (err: any) {
-        console.error(err);
-        setError(err.message || '데이터를 불러오는 중 오류가 발생했습니다.');
+        showApiErrorToast(err);
+        console.error('데이터를 불러오는 중 오류 발생');
       } finally {
         setLoading(false);
       }
