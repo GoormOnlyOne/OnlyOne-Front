@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getUnreadCount } from '../../../api/notification';
-import { getUserIdFromToken } from '../../../utils/auth';
 import logo from '../../../assets/image.png';
 
 export default function Header() {
