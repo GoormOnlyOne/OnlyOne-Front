@@ -39,7 +39,7 @@ const formatCount = (n: number) =>
 
 const MeetingFeedGrid: React.FC<MeetingFeedGridProps> = ({ clubId }) => {
   const [items, setItems] = useState<FeedItem[]>([]);
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState(0);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
 
@@ -59,7 +59,7 @@ const MeetingFeedGrid: React.FC<MeetingFeedGridProps> = ({ clubId }) => {
       )
       .then(response => {
         const content = response?.data?.content ?? [];
-        if (page === 1) {
+        if (page === 0) {
           setFirstLoaded(true);
           setFirstPageEmpty(content.length === 0);
         }
