@@ -68,7 +68,7 @@ export default function ScrollToTopButton() {
         onMouseLeave={() => setShowTooltip(false)}
         className={`
           w-12 h-12 
-          bg-gradient-to-br from-blue-500 to-purple-500
+          bg-gradient-to-br from-brand-primary to-brand-secondary
           text-white 
           rounded-full 
           shadow-lg hover:shadow-xl
