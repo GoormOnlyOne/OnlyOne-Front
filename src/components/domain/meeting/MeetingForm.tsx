@@ -4,10 +4,7 @@ import AddressSelector, {
   type AddressData,
 } from '../../../components/common/AddressSelector';
 import Modal from '../../common/Modal';
-import {
-  showToast as globalToast,
-  showToast,
-} from '../../common/Toast/ToastProvider';
+import { showToast as globalToast } from '../../common/Toast/ToastProvider';
 
 export type Category =
   | 'CULTURE'

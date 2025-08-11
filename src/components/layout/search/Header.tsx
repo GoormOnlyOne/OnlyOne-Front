@@ -26,9 +26,8 @@ export default function SearchHeader({
   };
 
   const handleSearch = () => {
-    if (searchTerm.trim()) {
-      onSearch?.(searchTerm.trim());
-    }
+    // 빈 검색어도 허용 (필터만으로 검색 가능)
+    onSearch?.(searchTerm.trim());
   };
 
   // enter 눌렀을 때도 검색 동작

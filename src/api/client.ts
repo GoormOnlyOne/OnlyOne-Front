@@ -33,7 +33,7 @@ class ApiClient {
       timeout: 10000,
       headers: {
         'Content-Type': 'application/json',
-        'Accept': 'application/json',
+        Accept: 'application/json',
       },
     });
 
@@ -74,10 +74,10 @@ class ApiClient {
             // 리프레시도 실패하면 AuthContext에 알려서 로그아웃 처리
             localStorage.removeItem('accessToken');
             localStorage.removeItem('refreshToken');
-            
+
             // AuthContext에 인증 오류 알림
             window.dispatchEvent(new CustomEvent('auth-error'));
-            
+
             return Promise.reject(refreshError);
           }
         }
@@ -145,6 +145,24 @@ class ApiClient {
   ): Promise<ApiResponse<T>> {
     try {
       const response = await this.instance.patch<ApiResponse<T>>(
+        url,
+        data,
+        config,
+      );
+      return response.data;
+    } catch (error) {
+      throw this.handleError(error);
+    }
+  }
+
+  // PUT 요청
+  async put<T = any>(
+    url: string,
+    data?: any,
+    config?: AxiosRequestConfig,
+  ): Promise<ApiResponse<T>> {
+    try {
+      const response = await this.instance.put<ApiResponse<T>>(
         url,
         data,
         config,
