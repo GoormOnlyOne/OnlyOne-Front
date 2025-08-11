@@ -162,7 +162,7 @@ const MeetingFeedDetail = () => {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-neutral-50">
       {/* 피드 작성자 정보 */}
       <div className="flex items-center justify-between p-4 border-b border-gray-100">
         <div className="flex items-center gap-3">
@@ -244,12 +244,12 @@ const MeetingFeedDetail = () => {
             />
           ) : (
             <span className="text-gray-500">사진이 들어갑니다.</span>
-          )}
+          )} 
         </div>
 
         {/* 이미지 카운터 */}
         {feedData.imageUrls.length > 1 && (
-          <div className="absolute top-4 right-4 bg-black bg-opacity-50 text-white px-2 py-1 rounded text-sm">
+          <div className="absolute top-4 right-4 bg-black/50 text-white px-2 py-1 rounded text-sm">
             {currentImageIndex + 1}/{feedData.imageUrls.length}
           </div>
         )}
@@ -259,13 +259,13 @@ const MeetingFeedDetail = () => {
           <>
             <button
               onClick={handlePrevImage}
-              className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-black bg-opacity-50 text-white rounded-full flex items-center justify-center hover:bg-opacity-70 text-xl"
+              className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/50 text-white rounded-full flex items-center justify-center hover:bg-opacity-70 text-xl"
             >
               <i className="ri-arrow-left-wide-line"></i>
             </button>
             <button
               onClick={handleNextImage}
-              className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-black bg-opacity-50 text-white rounded-full flex items-center justify-center hover:bg-opacity-70 text-xl"
+              className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/50 text-white rounded-full flex items-center justify-center hover:bg-opacity-70 text-xl"
             >
               <i className="ri-arrow-right-wide-line"></i>
             </button>
@@ -279,7 +279,7 @@ const MeetingFeedDetail = () => {
               <button
                 key={index}
                 onClick={() => setCurrentImageIndex(index)}
-                className={`w-2 h-2 rounded-full ${index === currentImageIndex ? 'bg-blue-500' : 'bg-gray-300'}`}
+                className={`w-2 h-2 rounded-full ${index === currentImageIndex ? 'bg-brand-primary' : 'bg-gray-300'}`}
               />
             ))}
           </div>

@@ -72,8 +72,7 @@ const ChatRoomList = () => {
       {' '}
       {/* ★ 변경: relative + aria-busy */}
       {loading && <Loading overlay text="불러오는 중..." />}{' '}
-      {/* ★ 변경: 공통 로딩 오버레이 */}
-      <h2 className="text-xl font-bold mb-4">채팅방 목록</h2>
+
       {/* ★ 변경: 기존 텍스트 로더 제거 */}
       {!loading && rooms.length === 0 && (
         <div className="flex flex-col items-center justify-center py-12">
