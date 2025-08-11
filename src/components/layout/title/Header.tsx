@@ -18,7 +18,9 @@ export default function TitleHeader({
   titleText = '타이틀',
   isLike = false,
   isOut = false,
-  onBack, onOut, outDisabled
+  onBack,
+  onOut,
+  outDisabled,
 }: TitleHeaderProps) {
   const navigate = useNavigate();
 
@@ -55,14 +57,14 @@ export default function TitleHeader({
 
         {/* 우측: 아이콘 버튼들 */}
         <div className="flex items-center gap-2">
-          {isLike && (
+          {/* {isLike && (
             <button
               className="cursor-pointer w-10 h-10 flex items-center justify-center rounded-full bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer"
               aria-label="좋아요"
             >
               <i className="ri-heart-line text-gray-600 text-lg"></i>
             </button>
-          )}
+          )} */}
           {isOut && (
             <button
               onClick={onOut}
