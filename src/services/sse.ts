@@ -51,11 +51,29 @@ export class SSEService {
         this.eventSource.onerror = (error) => {
           console.error('❌ SSE 연결 에러 발생:', {
             error,
+            errorType: error.type,
             userId,
             readyState: this.eventSource?.readyState,
+            url: this.eventSource?.url,
             reconnectAttempts: this.reconnectAttempts,
             timestamp: new Date().toISOString()
           });
+          
+          // readyState에 따른 상세 에러 정보
+          if (this.eventSource) {
+            const readyStateText = {
+              0: 'CONNECTING',
+              1: 'OPEN', 
+              2: 'CLOSED'
+            }[this.eventSource.readyState] || 'UNKNOWN';
+            
+            console.error('🔍 SSE 상태 상세:', {
+              readyState: this.eventSource.readyState,
+              readyStateText,
+              url: this.eventSource.url
+            });
+          }
+          
           if (this.reconnectAttempts === 0) {
             reject(new Error('Failed to establish SSE connection'));
           }
