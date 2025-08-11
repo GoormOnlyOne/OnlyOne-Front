@@ -71,9 +71,9 @@ export const deleteNotification = async (params: {
 };
 
 // 읽지 않은 알림 개수 조회
-export const getUnreadCount = async (userId: number): Promise<number> => {
+export const getUnreadCount = async (): Promise<number> => {
   const response = await apiClient.get<number>(
-    `/notifications/unread-count?userId=${userId}`
+    `/notifications/unread-count`
   );
   return response.data;
 };

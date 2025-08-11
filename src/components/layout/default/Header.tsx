@@ -13,10 +13,7 @@ export default function Header() {
         const token = localStorage.getItem('accessToken');
         if (!token) return;
         
-        const userId = getUserIdFromToken(token);
-        if (!userId) return;
-        
-        const count = await getUnreadCount(userId);
+        const count = await getUnreadCount();
         setUnreadCount(count);
       } catch {
         // 알림 개수 조회 실패 무시
