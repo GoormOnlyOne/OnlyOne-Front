@@ -457,14 +457,18 @@ const MeetingFeedDetail = () => {
       {/* 좋아요와 댓글 정보 */}
       <div className="flex items-center gap-4 px-4 py-2 border-b border-gray-100">
         <div className="flex items-center gap-1">
-          <i
+          <button
+            type="button"
             onClick={handleLike}
-            className={`${feedData.liked ? 'ri-heart-fill text-red-500' : 'ri-heart-line text-gray-600'}
-                transition-all duration-300 cursor-pointer hover:scale-110
-                ${likeAnimating ? 'scale-125 animate-bounce' : ''}`}
             aria-label="좋아요"
-            role="button"
-          />
+            aria-pressed={feedData.liked}
+            className="transition-all duration-300 cursor-pointer hover:scale-110"
+          >
+            <i
+              className={`${feedData.liked ? 'ri-heart-fill text-red-500' : 'ri-heart-line text-gray-600'} ${likeAnimating ? 'scale-125 animate-bounce' : ''}`}
+            />
+            +{' '}
+          </button>
           <span className="text-sm font-medium">{feedData.likeCount}</span>
         </div>
         <div className="flex items-center gap-1">
