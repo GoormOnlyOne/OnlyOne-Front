@@ -7,6 +7,7 @@ import {
   showApiErrorToast,
   showToast as globalToast,
 } from '../../common/Toast/ToastProvider';
+import Loading from '../../common/Loading';
 
 export interface Schedule {
   scheduleId: number;
@@ -403,38 +404,31 @@ export default function ScheduleList({ clubRole }: ScheduleListProps) {
     globalToast('삭제 기능은 아직 구현되지 않았습니다.', 'info', 2000);
   };
 
-  if (loading) {
-    return (
-      <div className="space-y-4">
-        <h2 className="font-bold text-xl">정기 모임</h2>
-        <div className="flex justify-center items-center h-32">
-          <span className="text-gray-500">로딩 중...</span>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="space-y-4">
-        <h2 className="font-bold text-xl">정기 모임</h2>
-        <div className="text-red-500 text-center">{error}</div>
-      </div>
-    );
-  }
-
   // schedules가 배열인지 확인하고 안전하게 처리
   const safeSchedules = Array.isArray(schedules) ? schedules : [];
 
   return (
     <>
-      <div className="space-y-4">
+      <div className="space-y-4 relative">
         <h2 className="font-bold text-xl">정기 모임</h2>
-        {safeSchedules.length === 0 ? (
+
+        {/* ✅ 로딩 오버레이 */}
+        {loading && <Loading overlay text="정기 모임 불러오는 중..." />}
+
+        {/* 에러 */}
+        {error && !loading && (
+          <div className="text-red-500 text-center">{error}</div>
+        )}
+
+        {/* 데이터 없음 */}
+        {!loading && !error && safeSchedules.length === 0 && (
           <div className="text-center text-gray-500 py-8">
             등록된 정기모임이 없습니다.
           </div>
-        ) : (
+        )}
+
+        {/* 리스트 */}
+        {!loading && !error && safeSchedules.length > 0 && (
           safeSchedules.map(schedule => (
             <div
               key={schedule.scheduleId}
@@ -443,7 +437,6 @@ export default function ScheduleList({ clubRole }: ScheduleListProps) {
               <div className="p-4">
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex-1">
-                    {/* 스케줄 정보 */}
                     <h3 className="font-semibold text-lg text-gray-800 mb-1">
                       {schedule.name}
                     </h3>
@@ -451,49 +444,40 @@ export default function ScheduleList({ clubRole }: ScheduleListProps) {
                       🗓️ {`일시 | ${formatDateTime(schedule.scheduleTime)}`}
                     </p>
                     <div className="text-sm text-gray-600">
-                      <span>💰 {`인당 비용 | ${schedule.cost === 0 ? '무료' : `${schedule.cost.toLocaleString()}₩`}`}</span>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    {/* 디데이와 상태 뱃지 */}
-                    <div className="flex items-center gap-2">
-                      <div
-                        className={`rounded-full ${getDdayDot(schedule.dday)}`}
-                      ></div>
-                      <span className="text-md font-medium text-gray-600">
-                        {schedule.dday}
+                      <span>
+                        💰 {`인당 비용 | ${schedule.cost === 0 ? '무료' : `${schedule.cost.toLocaleString()}₩`}`}
                       </span>
                     </div>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2">
+                      <div className={`rounded-full ${getDdayDot(schedule.dday)}`}></div>
+                      <span className="text-md font-medium text-gray-600">{schedule.dday}</span>
+                    </div>
+
                     <span className={getStatusCard(schedule.scheduleStatus)}>
                       {getStatusText(schedule.scheduleStatus)}
                     </span>
 
-                    {/* 리더에게만 보이는 더보기 아이콘 */}
                     {clubRole === 'LEADER' && (
                       <div className="relative">
                         <button
                           onClick={() =>
-                            setOpenMenuId(
-                              openMenuId === schedule.scheduleId
-                                ? null
-                                : schedule.scheduleId,
-                            )
+                            setOpenMenuId(openMenuId === schedule.scheduleId ? null : schedule.scheduleId)
                           }
                           className="p-1 rounded hover:bg-gray-100"
                         >
                           <MoreVertical className="w-5 h-5 text-gray-500" />
                         </button>
 
-                        {/* 드롭다운 메뉴*/}
                         {openMenuId === schedule.scheduleId && (
                           <div
                             className="absolute right-0 mt-2 w-32 bg-white border border-gray-200 rounded shadow-lg z-50"
                             onMouseLeave={() => setOpenMenuId(null)}
                           >
                             <button
-                              onClick={() =>
-                                handleScheduleEdit(schedule.scheduleId)
-                              }
+                              onClick={() => handleScheduleEdit(schedule.scheduleId)}
                               className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
                             >
                               수정
