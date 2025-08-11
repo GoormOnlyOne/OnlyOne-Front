@@ -70,7 +70,6 @@ export const CommentSection = ({
 		if (!newComment.trim() || commentSubmitting) return;
 
 		const commentContent = newComment.trim();
-		setNewComment(''); // 입력창 즉시 비우기
 		setCommentSubmitting(true);
 
 		try {
@@ -78,6 +77,9 @@ export const CommentSection = ({
 			await apiClient.post(`/clubs/${clubId}/feeds/${feedId}/comments`, {
 				content: commentContent
 			});
+
+			// 성공 시에만 입력창 비우기
+			setNewComment('');
 
 			// 댓글 목록 새로고침
 			if (enableInfiniteScroll) {
@@ -96,7 +98,6 @@ export const CommentSection = ({
 
 		} catch (error) {
 			console.error('댓글 추가 실패:', error);
-			setNewComment(commentContent); // 실패 시 입력 내용 복원
 			alert('댓글 추가에 실패했습니다. 다시 시도해주세요.');
 		} finally {
 			setCommentSubmitting(false);
@@ -191,7 +192,7 @@ export const CommentSection = ({
 								className={`flex items-start gap-3 py-3 ${
 									showAsBottomSheet 
 										? 'bg-white rounded-lg border border-gray-100 mx-4 mb-3 px-3 hover:shadow-sm transition-shadow' 
-										: 'bg-white rounded-lg border border-gray-100 m-4 hover:shadow-sm transition-shadow'
+										: 'bg-white rounded-lg border border-gray-100 m-4 px-4 hover:shadow-sm transition-shadow'
 								}`}
 							>
 								<div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center flex-shrink-0">
@@ -231,13 +232,6 @@ export const CommentSection = ({
 						{commentsLoading && (
 							<div className="flex justify-center py-4">
 								<div className="text-gray-500 text-sm">댓글을 불러오는 중...</div>
-							</div>
-						)}
-						
-						{/* 더 이상 댓글이 없을 때 표시 */}
-						{enableInfiniteScroll && !commentsHasMore && comments.length > 0 && (
-							<div className="flex justify-center py-4">
-								<div className="text-gray-400 text-sm">모든 댓글을 불러왔습니다</div>
 							</div>
 						)}
 					</>

@@ -7,6 +7,7 @@ interface BottomSheetProps {
   children: React.ReactNode;
   showCloseButton?: boolean;
   maxHeight?: string;
+  scrollRef?: React.RefObject<HTMLDivElement>;
 }
 
 export const BottomSheet = ({ 
@@ -15,7 +16,8 @@ export const BottomSheet = ({
   title, 
   children, 
   showCloseButton = true,
-  maxHeight = "60vh"
+  maxHeight = "60vh",
+  scrollRef
 }: BottomSheetProps) => {
   const sheetRef = useRef<HTMLDivElement>(null);
 
@@ -72,7 +74,7 @@ export const BottomSheet = ({
         </div>
 
         {/* 내용 */}
-        <div className="flex-1 overflow-y-auto min-h-0">
+        <div ref={scrollRef} className="flex-1 overflow-y-auto min-h-0">
           {children}
         </div>
       </div>
