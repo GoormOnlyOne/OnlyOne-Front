@@ -87,15 +87,20 @@ export class FCMService {
       });
 
       const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/';
-      const url = `${baseUrl}users/fcm-token?fcmToken=${encodeURIComponent(this.fcmToken)}`;
+      const url = new URL(`users/fcm-token?fcmToken=${encodeURIComponent(this.fcmToken)}`, baseUrl).toString();
+      
+      const token = localStorage.getItem('accessToken');
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+      
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
+      }
       
       const response = await fetch(url, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          // TODO: JWT 토큰이 있으면 여기에 추가
-          // 'Authorization': `Bearer ${getAuthToken()}`
-        }
+        headers
       });
 
       if (response.ok) {
