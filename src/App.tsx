@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { RouterProvider } from 'react-router-dom';
-import { AuthProvider } from './contexts/AuthContext';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { ToastProvider, useToast } from './components/common/Toast/ToastContext';
 import { setGlobalToastFunction } from './components/common/Toast/ToastProvider';
 import { router } from './routes/Router';
@@ -8,6 +8,7 @@ import fcmService from './services/fcmService';
 
 function AppContent() {
   const { showToast } = useToast();
+  const { isAuthenticated, user, isLoading } = useAuth();
 
   useEffect(() => {
     // ToastType 차이 해결을 위한 래퍼 함수
@@ -24,17 +25,20 @@ function AppContent() {
     setGlobalToastFunction(toastWrapper);
   }, [showToast]);
 
-  // FCM 초기화
+  // FCM 초기화 (인증된 사용자만)
   useEffect(() => {
+    if (isLoading || !isAuthenticated || !user) {
+      console.log('📱 FCM 초기화 대기 중... (인증 대기 또는 미인증 상태)');
+      return;
+    }
+
     const initializeFCM = async () => {
       try {
-        console.log('📱 FCM 초기화 시작...');
+        console.log('📱 FCM 초기화 시작... (인증된 사용자:', user.userId + ')');
         const fcmInitialized = await fcmService.initialize();
         
         if (fcmInitialized) {
-          // 환경변수에서 userId 가져오기 (임시로 1 사용)
-          const testUserId = parseInt(import.meta.env.VITE_TEST_USER_ID || '1');
-          await fcmService.sendTokenToBackend(testUserId);
+          await fcmService.sendTokenToBackend(user.userId);
           console.log('✅ FCM 초기화 및 토큰 전송 완료');
         } else {
           console.log('⚠️ FCM 초기화 실패 (알림 권한 거부 또는 브라우저 미지원)');
@@ -45,7 +49,7 @@ function AppContent() {
     };
 
     initializeFCM();
-  }, []);
+  }, [isAuthenticated, user, isLoading]);
 
   return <RouterProvider router={router} />;
 }
