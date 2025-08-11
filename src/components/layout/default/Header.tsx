@@ -22,17 +22,17 @@ export default function Header() {
         <div className="flex items-center space-x-3">
           <Link
             to="/search"
-            className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-50 hover:bg-gray-100 transition-colors"
+            className="w-10 h-10 flex items-center justify-center rounded-full bg-neutral-50 hover:bg-neutral-100 transition-colors"
           >
             <i className="ri-search-line text-gray-600 text-lg"></i>
           </Link>
 
           <Link
             to="/notice"
-            className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-50 hover:bg-gray-100 transition-colors relative"
+            className="w-10 h-10 flex items-center justify-center rounded-full bg-neutral-50 hover:bg-neutral-100 transition-colors relative"
           >
-            <i className="ri-notification-2-line text-gray-600 text-lg"></i>
-            <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center text-xs text-white">
+            <i className="ri-notification-2-line text-gray-600 text-l"></i>
+            <span className="absolute -top-1 -right-1 w-5 h-5 bg-brand-secondary rounded-full flex items-center justify-center text-xs text-white">
               3
             </span>
           </Link>

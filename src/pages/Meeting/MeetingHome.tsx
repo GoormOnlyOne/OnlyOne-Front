@@ -124,9 +124,9 @@ const MeetingHome: React.FC = () => {
   }
 
   return (
-    <div className="px-4 pb-20">
+    <>
       {/* 대표 이미지 */}
-      <div className="w-full h-48 bg-gray-400 rounded-2xl mb-6 overflow-hidden shadow-sm">
+      <div className="w-full h-48 bg-gray-400 mb-6 overflow-hidden">
         {meeting.image ? (
           <img
             src={meeting.image}
@@ -142,105 +142,98 @@ const MeetingHome: React.FC = () => {
         )}
       </div>
 
-      {/* 모임 정보 */}
-      <div className="mb-6">
-        <h2 className="text-2xl font-bold mb-3 text-gray-900">
-          {meeting.title}
-        </h2>
+      <div className="px-4 pb-20">
+        {/* 모임 정보 */}
+        <div className="mb-6">
+          <h2 className="text-2xl font-bold mb-3 text-brand-primary">
+            {meeting.title}
+          </h2>
 
-        <div className="space-y-2 mb-4 ml-0">
-          {/* 모임 메타 정보 */}
-          <div className="flex items-center gap-2 text-sm text-gray-600">
-            <MapPin className="w-4 h-4" />
-            <span>{meeting.location}</span>
-          </div>
-          <div className="flex items-center gap-2 text-sm text-gray-600">
-            <Tag className="w-4 h-4" />
-            <span>{meeting.category}</span>
-          </div>
-          <div className="flex items-center gap-2 text-sm text-gray-600">
-            <Users className="w-4 h-4" />
-            <span>멤버 {meeting.participantCount}명</span>
-          </div>
-        </div>
-
-        {/* 모임 소개 */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow">
-          <div className="p-4">
-            <div className="flex items-start justify-between mb-3">
-              <div className="flex-1">
-                {/* 스케줄 정보 */}
-                <h3 className="font-semibold text-gray-800 mb-1">모임 소개</h3>
-                <p className="text-sm text-gray-600 mb-1">
-                  {meeting.description}
-                </p>
-              </div>
+          <div className="space-y-2 mb-4 ml-0">
+            {/* 모임 메타 정보 */}
+            <div className="flex items-center gap-2 text-sm text-gray-600">
+              <MapPin className="w-4 h-4 text-brand-primary" />
+              <span>{meeting.location}</span>
+            </div>
+            <div className="flex items-center gap-2 text-sm text-gray-600">
+              <Tag className="w-4 h-4 text-brand-primary" />
+              <span>{meeting.category}</span>
+            </div>
+            <div className="flex items-center gap-2 text-sm text-gray-600">
+              <Users className="w-4 h-4 text-brand-primary" />
+              <span>멤버 {meeting.participantCount}명</span>
             </div>
           </div>
+
+          {/* 모임 소개 */}
+          <h2 className="font-bold text-xl mb-4">모임 소개</h2>
+          <p className="text-sm text-gray-600 mb-1">
+            {meeting.description}
+          </p>
         </div>
-      </div>
 
-      {/* 리더 전용 버튼 */}
-      {meeting.role === 'LEADER' && (
-        <div className="mb-6">
-          <div className="flex gap-3">
-            <button
-              onClick={() => navigate(`/meeting/${meeting.id}/edit`)}
-              className="flex-1 flex items-center justify-center gap-2 bg-white border border-gray-200 text-gray-700 px-4 py-3 rounded-xl text-sm font-medium hover:bg-gray-50 transition-colors shadow-sm"
-            >
-              <Settings className="w-4 h-4" />
-              모임 정보 수정
-            </button>
-            <button
-              onClick={() => navigate(`/meeting/${meeting.id}/schedule/create`)}
-              className="flex-1 flex items-center justify-center gap-2 bg-[#F5921F] text-white px-4 py-3 rounded-xl text-sm font-medium hover:bg-[#EF7C30] transition-colors shadow-sm"
-            >
-              <Plus className="w-4 h-4" />
-              정기모임 추가
-            </button>
+        {/* 리더 전용 버튼 */}
+        {meeting.role === 'LEADER' && (
+          <div className="mb-6">
+            <div className="flex gap-3">
+              <button
+                onClick={() => navigate(`/meeting/${meeting.id}/edit`)}
+                className="flex-1 flex items-center justify-center gap-2 bg-white text-gray-700 px-4 py-3 rounded-xl text-sm font-medium hover:bg-gray-50 transition-colors bg-gradient-to-br from-brand-light to-brand-soft hover:shadow-md transition-shadow"
+              >
+                <Settings className="w-4 h-4" />
+                모임 정보 수정
+              </button>
+              <button
+                onClick={() => navigate(`/meeting/${meeting.id}/schedule/create`)}
+                className="flex-1 flex items-center justify-center gap-2 bg-[#F5921F] text-white px-4 py-3 rounded-xl text-sm font-medium hover:bg-[#EF7C30] transition-colors hover:shadow-md transition-shadow"
+              >
+                <Plus className="w-4 h-4" />
+                정기모임 추가
+              </button>
+            </div>
           </div>
+        )}
+
+        {/* ScheduleList에 clubRole 전달 */}
+        <div className="mb-8">
+          <ScheduleList clubRole={meeting.role} />
         </div>
-      )}
 
-      {/* ScheduleList에 clubRole 전달 */}
-      <div className="mb-8">
-        <ScheduleList clubRole={meeting.role} />
-      </div>
-
-      {/* GUEST용 Sticky CTA */}
-      {meeting.role === 'GUEST' && (
-        <>
-          <div
-            className={`
-              fixed left-0 right-0 bottom-0 z-40 flex justify-center
-              transition-transform duration-500
-              ${showCTA ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0'}
-            `}
-          >
-            <button
-              onClick={handleModalOpen}
-              className="
-                w-[90vw] max-w-md mb-6 py-4
-                bg-[#F5921F] text-white text-lg font-bold
-                rounded-xl shadow-lg
-                hover:bg-[#EF7C30] active:scale-95
-                transition-all duration-200
-              "
+        {/* GUEST용 Sticky CTA */}
+        {meeting.role === 'GUEST' && (
+          <>
+            <div
+              className={`
+                fixed left-0 right-0 bottom-0 z-40 flex justify-center
+                transition-transform duration-500
+                ${showCTA ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0'}
+              `}
             >
-              가입하기
-            </button>
-          </div>
+              <button
+                onClick={handleModalOpen}
+                className="
+                  w-[90vw] max-w-md mb-6 py-4
+                  bg-[#F5921F] text-white text-lg font-bold
+                  rounded-xl shadow-lg
+                  hover:bg-[#EF7C30] active:scale-95
+                  transition-all duration-200
+                "
+              >
+                가입하기
+              </button>
+            </div>
 
-          {/* 가입 확인 모달 */}
-          <Modal
-            isOpen={isModalOpen}
-            onClose={handleModalClose}
-            onConfirm={handleMeetingJoin}
-            title="모임에 가입하시겠습니까?"
-          />
-        </>
-      )}
-    </div>
+            {/* 가입 확인 모달 */}
+            <Modal
+              isOpen={isModalOpen}
+              onClose={handleModalClose}
+              onConfirm={handleMeetingJoin}
+              title="모임에 가입하시겠습니까?"
+            />
+          </>
+        )}
+      </div>
+    </>
   );
 };
 
