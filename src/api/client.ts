@@ -155,24 +155,6 @@ class ApiClient {
     }
   }
 
-  // PUT 요청
-  async put<T = any>(
-    url: string,
-    data?: any,
-    config?: AxiosRequestConfig,
-  ): Promise<ApiResponse<T>> {
-    try {
-      const response = await this.instance.put<ApiResponse<T>>(
-        url,
-        data,
-        config,
-      );
-      return response.data;
-    } catch (error) {
-      throw this.handleError(error);
-    }
-  }
-
   // DELETE 요청
   async delete<T = any>(
     url: string,
