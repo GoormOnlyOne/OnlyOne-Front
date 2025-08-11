@@ -124,11 +124,11 @@ const ChatRoom: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-gray-50 overflow-hidden max-w-full w-full">
+    <div className="flex flex-col h-[calc(100dvh-56px)] bg-gray-50 overflow-hidden max-w-full w-full">
       {/* 채팅 메시지 영역 */}
       <div
-        className="flex-1 overflow-y-auto px-2 sm:px-4 py-3 space-y-2 w-full max-w-full relative" // ★ 변경: relative 추가
-        aria-busy={loading} // ★ 변경: 접근성
+        className="flex-1 min-h-0 overflow-y-auto no-scrollbar px-2 sm:px-4 py-3 space-y-2 w-full max-w-full relative"
+        aria-busy={loading}
       >
         {/* ★ 변경: 공통 로딩(오버레이) */}
         {loading && <Loading overlay text="메시지 불러오는 중..." />}
@@ -184,7 +184,7 @@ const ChatRoom: React.FC = () => {
       </div>
 
       {/* 입력창 */}
-      <div className="px-2 sm:px-4 py-2 sm:py-3 border-t bg-white">
+      <div className="px-2 sm:px-4 py-2 sm:py-3 border-t bg-white shrink-0">
         <form className="flex flex-col space-y-2 w-full max-w-full" onSubmit={handleSend}>
           {imagePreview && (
             <div className="flex items-center justify-between">
