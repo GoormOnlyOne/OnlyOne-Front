@@ -6,6 +6,7 @@ import ScheduleList from '../../components/domain/meeting/ScheduleList';
 import apiClient from '../../api/client';
 import Modal from '../../components/common/Modal';
 import { Settings, Plus, MapPin, Users, Tag } from 'lucide-react';
+import Loading from '../../components/common/Loading';
 
 // API 응답 타입
 interface ClubDetailResponse {
@@ -112,9 +113,12 @@ const MeetingHome: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-64">로딩 중...</div>
+      <div className="relative min-h-[50vh]">
+        <Loading overlay text="로딩 중..." />
+      </div>
     );
   }
+
   if (!meeting) {
     return <div className="text-center">모임을 찾을 수 없습니다.</div>;
   }
@@ -140,12 +144,12 @@ const MeetingHome: React.FC = () => {
 
       {/* 모임 정보 */}
       <div className="mb-6">
-        <h2 className="text-xl font-bold mb-3 text-gray-900">
+        <h2 className="text-2xl font-bold mb-3 text-gray-900">
           {meeting.title}
         </h2>
 
-        {/* 모임 메타 정보 */}
-        <div className="space-y-2 mb-4">
+        <div className="space-y-2 mb-4 ml-0">
+          {/* 모임 메타 정보 */}
           <div className="flex items-center gap-2 text-sm text-gray-600">
             <MapPin className="w-4 h-4" />
             <span>{meeting.location}</span>
@@ -161,13 +165,18 @@ const MeetingHome: React.FC = () => {
         </div>
 
         {/* 모임 소개 */}
-        <div className="bg-gray-50 rounded-xl p-4">
-          <h3 className="text-base font-semibold mb-2 text-gray-900">
-            모임 소개
-          </h3>
-          <p className="text-sm text-gray-700 leading-relaxed">
-            {meeting.description}
-          </p>
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow">
+          <div className="p-4">
+            <div className="flex items-start justify-between mb-3">
+              <div className="flex-1">
+                {/* 스케줄 정보 */}
+                <h3 className="font-semibold text-gray-800 mb-1">모임 소개</h3>
+                <p className="text-sm text-gray-600 mb-1">
+                  {meeting.description}
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 

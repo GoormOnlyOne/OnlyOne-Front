@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { uploadImages } from '../../../api/upload';
 import { showApiErrorToast } from '../../common/Toast/ToastProvider';
+import Loading from '../../common/Loading';
 
 export interface InitialData {
   feedUrls: string[];
@@ -137,18 +138,12 @@ const MeetingFeedForm = ({
     }
   };
 
-  if (loading) {
-    return (
-      <div className="p-4">
-        <div className="text-center text-gray-500">로딩 중...</div>
-      </div>
-    );
-  }
-
   const totalImages = selectedImages.length + existingImageUrls.length;
 
   return (
-    <div className="p-4">
+    <div className="p-4 relative">
+      {loading && <Loading overlay text="로딩 중..." />}
+
       {/* 이미지 등록 영역 */}
       <div className="mb-4">
         <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -251,6 +246,7 @@ const MeetingFeedForm = ({
           className="w-full h-24 p-3 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           placeholder="모임에 대한 소감이나 사진에 대한 설명을 작성해주세요"
           maxLength={1000}
+          disabled={loading}
         />
         <div className="text-right text-sm text-gray-500 mt-1">
           {content.length}/1000
@@ -269,8 +265,15 @@ const MeetingFeedForm = ({
               : 'bg-blue-500 text-white hover:bg-blue-600'
           }`}
           type="button"
-        >
-          {loading ? '처리 중...' : mode === 'edit' ? '수정 완료' : '완료'}
+          >
+          {loading ? (
+            <span className="inline-flex items-center gap-2 justify-center">
+              <Loading size="sm" />
+              로딩 중...
+            </span>
+          ) : (
+            mode === 'edit' ? '수정 완료' : '완료'
+          )}
         </button>
 
         {/* 취소 버튼 */}

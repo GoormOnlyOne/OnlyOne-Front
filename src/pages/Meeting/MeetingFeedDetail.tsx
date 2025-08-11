@@ -11,6 +11,17 @@ import apiClient from '../../api/client';
 import { showApiErrorToast } from '../../components/common/Toast/ToastProvider';
 import Modal from '../../components/common/Modal';
 import { showToast as globalToast } from '../../components/common/Toast/ToastProvider';
+import Loading from '../../components/common/Loading'; 
+
+interface Comment {
+  commentId: number;
+  userId: number;
+  nickname: string;
+  profileImage: string;
+  content: string;
+  createdAt: string;
+  commentMine: boolean;
+}
 import CommentSection, { type Comment } from '../../components/common/CommentSection';
 
 
@@ -304,6 +315,13 @@ const MeetingFeedDetail = () => {
 		return () => observer.disconnect();
 	}, [loadMoreComments, hasMoreComments, commentsLoading]);
 
+  if (loading) {
+    return (
+      <div className="min-h-screen relative bg-white">
+        <Loading overlay text="로딩 중..." />
+      </div>
+    );
+  }
 	if (loading) {
 		return (
 			<div className="min-h-screen bg-white flex items-center justify-center">
@@ -468,6 +486,53 @@ const MeetingFeedDetail = () => {
 				</div>
 			</div>
 
+      {/* 댓글 목록 */}
+      <div className="flex-1 pb-28">
+        {feedData.comments.map(comment => (
+          <div
+            key={comment.commentId}
+            className="flex items-start gap-3 px-4 py-3 bg-white rounded-lg border border-gray-100 m-4 hover:shadow-sm transition-shadow"
+          >
+            <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center flex-shrink-0">
+              <img
+                src={comment.profileImage}
+                className="w-8 h-8 rounded-full"
+              ></img>
+            </div>
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-sm font-medium">{comment.nickname}</span>
+                <span className="text-xs text-gray-500">
+                  {new Date(comment.createdAt)
+                    .toLocaleDateString('ko-KR', {
+                      month: '2-digit',
+                      day: '2-digit',
+                    })
+                    .replace(/\./g, '/')
+                    .replace(/\/$/, '')
+                    .replace(/\s/g, '')}{' '}
+                  {new Date(comment.createdAt).toLocaleTimeString('ko-KR', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: false,
+                  })}
+                </span>
+                {comment.commentMine && (
+                  <button
+                    onClick={() => {
+                      setDeleteTargetId(comment.commentId);
+                      setIsModalOpen(true);
+                    }}
+                    className="ml-auto px-2 py-1 text-xs bg-red-100 text-red-600 rounded hover:bg-red-200 transition-colors"
+                  >
+                    삭제
+                  </button>
+                )}
+              </div>
+              <p className="text-sm text-gray-700">{comment.content}</p>
+            </div>
+          </div>
+        ))}
 			{/* 댓글 목록 */}
 			<div className="flex-1 pb-28">
 				{feedData.comments.map(comment => (

@@ -38,10 +38,10 @@ const formatCount = (n: number) =>
 	}).format(n);
 
 const MeetingFeedGrid: React.FC<MeetingFeedGridProps> = ({ clubId }) => {
-	const [items, setItems] = useState<FeedItem[]>([]);
-	const [page, setPage] = useState(0);
-	const [loading, setLoading] = useState(false);
-	const [hasMore, setHasMore] = useState(true);
+  const [items, setItems] = useState<FeedItem[]>([]);
+  const [page, setPage] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
 
 	const [firstLoaded, setFirstLoaded] = useState(false);
 	const [firstPageEmpty, setFirstPageEmpty] = useState(false);
@@ -53,16 +53,16 @@ const MeetingFeedGrid: React.FC<MeetingFeedGridProps> = ({ clubId }) => {
 		loadingRef.current = true;
 		setLoading(true);
 
-		apiClient
-			.get<CommonResponse<PageResponse<FeedSummaryDto>>>(
-				`/clubs/${clubId}/feeds?page=${page}&limit=20`,
-			)
-			.then(response => {
-				const content = response?.data?.content ?? [];
-				if (page === 1) {
-					setFirstLoaded(true);
-					setFirstPageEmpty(content.length === 0);
-				}
+    apiClient
+      .get<CommonResponse<PageResponse<FeedSummaryDto>>>(
+        `/clubs/${clubId}/feeds?page=${page}&limit=20`,
+      )
+      .then(response => {
+        const content = response?.data?.content ?? [];
+        if (page === 0) {
+          setFirstLoaded(true);
+          setFirstPageEmpty(content.length === 0);
+        }
 
 				if (content.length < 20) {
 					setHasMore(false);

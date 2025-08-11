@@ -5,6 +5,7 @@ import apiClient from '../api/client';
 import { FilterBottomSheet } from '../components/domain/search/FilterBottomSheet';
 import { FilterChips } from '../components/domain/search/FilterChips';
 import MeetingCard from '../components/domain/meeting/MeetingCard';
+import Loading from '../components/common/Loading';
 import { useToast } from '../components/common/Toast/ToastContext';
 
 interface Meeting {
@@ -46,6 +47,9 @@ export const Search = () => {
     sortBy: 'MEMBER_COUNT'
   });
   const navigate = useNavigate();
+
+  const isInitialLoading = isLoading && page === 0;
+  const isNextPageLoading = isLoading && page > 0;
 
   // 정적 관심사 데이터
   const interests: Interest[] = [
@@ -282,15 +286,10 @@ export const Search = () => {
       )}
 
       {/* 로딩 상태 */}
-      {isLoading && (
-        <div className="flex flex-col justify-center items-center h-[60vh]">
-          <div className="w-12 h-12 border-3 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-          <p className="text-gray-600 mt-4">검색 중...</p>
-        </div>
-      )}
+      {isInitialLoading && <Loading overlay text="검색 중..." />}
 
       {/* 검색 결과 */}
-      {isSearched && !isLoading && (
+      {isSearched && (
         <>
           {searchResults.length > 0 ? (
             <div className="px-4 py-6">
@@ -304,20 +303,22 @@ export const Search = () => {
                 ))}
               </div>
 
-              {/* 무한스크롤 상태 표시 */}
-              {isLoading && (
+              {/* 다음 페이지 로딩 인라인 표시 */}
+              {isNextPageLoading && (
                 <div className="flex justify-center py-8">
-                  <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                  <Loading text="로딩 중..." />
                 </div>
               )}
             </div>
           ) : (
-            <EmptyState
-              title="검색 결과가 없습니다"
-              description={`'${searchQuery}'에 대한 모임을 찾을 수 없어요`}
-              image="https://readdy.ai/api/search-image?query=Empty%20state%20illustration%2C%20no%20search%20results%2C%20minimalist%20design%2C%20soft%20colors&width=200&height=200"
-              showCreateButton={true}
-            />
+            !isInitialLoading && ( // ★ 변경: 초기 로딩 중엔 빈 상태 숨김
+              <EmptyState
+                title="검색 결과가 없습니다"
+                description={`'${searchQuery}'에 대한 모임을 찾을 수 없어요`}
+                image="https://readdy.ai/api/search-image?query=Empty%20state%20illustration%2C%20no%20search%20results%2C%20minimalist%20design%2C%20soft%20colors&width=200&height=200"
+                showCreateButton={true}
+              />
+            )
           )}
         </>
       )}

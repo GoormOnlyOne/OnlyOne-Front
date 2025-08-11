@@ -1,13 +1,14 @@
 import { useEffect } from 'react';
 import { RouterProvider } from 'react-router-dom';
-import { AuthProvider } from './contexts/AuthContext';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { ToastProvider, useToast } from './components/common/Toast/ToastContext';
 import { setGlobalToastFunction } from './components/common/Toast/ToastProvider';
 import { router } from './routes/Router';
-import { notificationService } from './services/notificationService';
+import fcmService from './services/fcmService';
 
 function AppContent() {
   const { showToast } = useToast();
+  const { isAuthenticated, user, isLoading } = useAuth();
 
   useEffect(() => {
     // ToastType 차이 해결을 위한 래퍼 함수
@@ -24,32 +25,37 @@ function AppContent() {
     setGlobalToastFunction(toastWrapper);
   }, [showToast]);
 
-  // SSE 연결 시작
+  // FCM 초기화 (인증된 사용자만)
   useEffect(() => {
-    const initializeSSE = async () => {
+    if (isLoading || !isAuthenticated || !user) {
+      console.log('📱 FCM 초기화 대기 중... (인증 대기 또는 미인증 상태)');
+      return;
+    }
+
+    // 이미 초기화된 경우 재초기화 스킵 (중복 방지)
+    if (fcmService.isReady()) {
+      console.log('📱 FCM 이미 초기화됨 - 재초기화 스킵');
+      return;
+    }
+
+    const initializeFCM = async () => {
       try {
-        console.log('🚀 SSE 연결 초기화 시작 (/sse/subscribe/{userId} 엔드포인트 사용)');
+        console.log('📱 FCM 초기화 시작... (인증된 사용자:', user.userId + ')');
+        const fcmInitialized = await fcmService.initialize();
         
-        // 환경변수나 AuthContext에서 userId 가져오기 (임시로 1 사용)
-        const testUserId = parseInt(import.meta.env.VITE_TEST_USER_ID || '1');
-        
-        // SSE 연결은 NotificationService에서만 생성 (중복 방지)
-        await notificationService.connect(testUserId);
-        console.log('✅ Notification Service 연결 완료');
-        
+        if (fcmInitialized) {
+          await fcmService.sendTokenToBackend();
+          console.log('✅ FCM 초기화 및 토큰 전송 완료');
+        } else {
+          console.log('⚠️ FCM 초기화 실패 (알림 권한 거부 또는 브라우저 미지원)');
+        }
       } catch (error) {
-        console.error('❌ SSE 초기화 실패:', error);
+        console.error('❌ FCM 초기화 실패:', error);
       }
     };
 
-    initializeSSE();
-
-    // 컴포넌트 언마운트 시 연결 정리
-    return () => {
-      notificationService.disconnect();
-      console.log('🔌 SSE 서비스 정리 완료');
-    };
-  }, []);
+    initializeFCM();
+  }, [isAuthenticated, user, isLoading]);
 
   return <RouterProvider router={router} />;
 }
