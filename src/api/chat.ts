@@ -17,9 +17,7 @@ export const fetchChatMessages = (chatRoomId: number) =>
  * 클럽 내 채팅방 목록 조회
  */
 export const fetchChatRoomList = (clubId: number) =>
-  apiClient.get<PagedResponse<ChatRoomSummary[]>>(
-    `/clubs/${clubId}/chat`
-  );
+  apiClient.get<PagedResponse<ChatRoomSummary[]>>(`/clubs/${clubId}/chat`);
 
 /**
  * 메시지 삭제

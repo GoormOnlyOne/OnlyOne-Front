@@ -36,7 +36,6 @@ export interface ChatRoomMessageResponse {
   messages: ChatMessageDto[];
 }
 
-
 // 공통 응답 타입
 export interface PagedResponse<T> {
   success: boolean;

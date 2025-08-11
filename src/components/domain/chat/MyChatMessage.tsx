@@ -17,7 +17,10 @@ const MyChatMessage: React.FC<MyChatMessageProps> = ({
 }) => {
   if (!imageUrl && (!message || message.trim() === '')) return null;
   return (
-    <div className="flex items-end justify-end space-x-2 mb-4" data-user-id={userId}>
+    <div
+      className="flex items-end justify-end space-x-2 mb-4"
+      data-user-id={userId}
+    >
       <div className="flex flex-col items-end space-y-1">
         <div className="text-xs text-gray-500">{timestamp}</div>
       </div>

@@ -22,7 +22,9 @@ const ChatRoom: React.FC = () => {
   const chatRoomIdNum = Number(chatRoomId);
 
   const accessToken = localStorage.getItem('accessToken');
-  const currentUserId = accessToken ? Number(getUserIdFromToken(accessToken)) : null;
+  const currentUserId = accessToken
+    ? Number(getUserIdFromToken(accessToken))
+    : null;
 
   const [chatRoomName, setChatRoomName] = useState<string>('');
   const [messages, setMessages] = useState<ChatMessageDto[]>([]);
@@ -32,7 +34,10 @@ const ChatRoom: React.FC = () => {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
 
-  const { messages: liveMessages, sendMessage } = useChatSocket(chatRoomIdNum, currentUserId!);
+  const { messages: liveMessages, sendMessage } = useChatSocket(
+    chatRoomIdNum,
+    currentUserId!,
+  );
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -69,7 +74,9 @@ const ChatRoom: React.FC = () => {
   }, [messages]);
 
   if (!accessToken || !currentUserId || isNaN(currentUserId)) {
-    return <div className="p-4 text-center text-red-500">로그인이 필요합니다.</div>;
+    return (
+      <div className="p-4 text-center text-red-500">로그인이 필요합니다.</div>
+    );
   }
 
   const handleSend = async (e: React.FormEvent) => {
@@ -114,9 +121,14 @@ const ChatRoom: React.FC = () => {
       setMessages(prev =>
         prev.map(m =>
           m.messageId === messageId
-            ? { ...m, text: '(삭제된 메세지입니다.)', imageUrl: '', deleted: true }
-            : m
-        )
+            ? {
+                ...m,
+                text: '(삭제된 메세지입니다.)',
+                imageUrl: '',
+                deleted: true,
+              }
+            : m,
+        ),
       );
     } catch (err) {
       alert('메시지 삭제에 실패했습니다.');
@@ -144,7 +156,8 @@ const ChatRoom: React.FC = () => {
           !error &&
           messages.map((m, idx) => {
             const isMine = Number(m.senderId) === currentUserId;
-            const showProfile = idx === 0 || messages[idx - 1].senderId !== m.senderId;
+            const showProfile =
+              idx === 0 || messages[idx - 1].senderId !== m.senderId;
 
             const messageComponent = isMine ? (
               <MyChatMessage
@@ -170,7 +183,7 @@ const ChatRoom: React.FC = () => {
               <div
                 key={m.messageId}
                 className={`w-full flex ${isMine ? 'justify-end' : 'justify-start'}`}
-                onContextMenu={(e) => {
+                onContextMenu={e => {
                   e.preventDefault();
                   if (isMine && !m.deleted) handleDeleteMessage(m.messageId);
                 }}
@@ -185,7 +198,10 @@ const ChatRoom: React.FC = () => {
 
       {/* 입력창 */}
       <div className="px-2 sm:px-4 py-2 sm:py-3 border-t bg-white">
-        <form className="flex flex-col space-y-2 w-full max-w-full" onSubmit={handleSend}>
+        <form
+          className="flex flex-col space-y-2 w-full max-w-full"
+          onSubmit={handleSend}
+        >
           {imagePreview && (
             <div className="flex items-center justify-between">
               <img
@@ -220,7 +236,7 @@ const ChatRoom: React.FC = () => {
             <input
               type="text"
               value={text}
-              onChange={(e) => setText(e.target.value)}
+              onChange={e => setText(e.target.value)}
               placeholder="메시지를 입력하세요"
               className="flex-1 min-w-0 px-3 py-1.5 sm:px-4 sm:py-2 border rounded-full text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />

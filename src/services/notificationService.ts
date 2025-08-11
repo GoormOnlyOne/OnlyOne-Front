@@ -26,7 +26,8 @@ export interface HeartbeatEvent extends SSEEvent {
 export class NotificationService {
   private eventSource: EventSource | null = null;
   private userId: number | null = null;
-  private listeners: Map<SSEEventType, Set<(event: SSEEvent) => void>> = new Map();
+  private listeners: Map<SSEEventType, Set<(event: SSEEvent) => void>> =
+    new Map();
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 5;
   private reconnectDelay = 1000;
@@ -41,19 +42,25 @@ export class NotificationService {
 
   async connect(userId: number): Promise<void> {
     // 이미 연결 중이거나 연결되어 있으면 중복 방지
-    if (this.isConnecting || this.eventSource?.readyState === EventSource.OPEN) {
+    if (
+      this.isConnecting ||
+      this.eventSource?.readyState === EventSource.OPEN
+    ) {
       console.log('🔄 SSE 연결 이미 존재 또는 진행 중 - 생략', {
         isConnecting: this.isConnecting,
         readyState: this.eventSource?.readyState,
-        userId
+        userId,
       });
       return;
     }
 
-    console.log('🔄 NotificationService SSE 연결 시작', { userId, timestamp: new Date().toISOString() });
+    console.log('🔄 NotificationService SSE 연결 시작', {
+      userId,
+      timestamp: new Date().toISOString(),
+    });
     this.isConnecting = true;
     this.userId = userId;
-    
+
     try {
       // 기존 연결이 있으면 정리
       if (this.eventSource) {
@@ -61,7 +68,7 @@ export class NotificationService {
         this.eventSource.close();
         this.eventSource = null;
       }
-      
+
       // SSE 연결
       console.log('🌐 새로운 SSE 연결 생성 시작', { userId });
       this.eventSource = createSSEConnection(userId);
@@ -78,9 +85,9 @@ export class NotificationService {
       isConnected: this.isConnected(),
       userId: this.userId,
       reconnectAttempts: this.reconnectAttempts,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
-    
+
     this.isConnecting = false;
     if (this.eventSource) {
       this.eventSource.close();
@@ -92,7 +99,7 @@ export class NotificationService {
 
   addEventListener<T extends SSEEventType>(
     type: T,
-    listener: (event: SSEEvent) => void
+    listener: (event: SSEEvent) => void,
   ): void {
     const listeners = this.listeners.get(type);
     if (listeners) {
@@ -102,7 +109,7 @@ export class NotificationService {
 
   removeEventListener<T extends SSEEventType>(
     type: T,
-    listener: (event: SSEEvent) => void
+    listener: (event: SSEEvent) => void,
   ): void {
     const listeners = this.listeners.get(type);
     if (listeners) {
@@ -113,12 +120,12 @@ export class NotificationService {
   private setupEventListeners(): void {
     if (!this.eventSource) return;
 
-    this.eventSource.addEventListener('notification', (event) => {
+    this.eventSource.addEventListener('notification', event => {
       try {
         console.log('📢 알림 이벤트 수신:', {
           data: event.data.substring(0, 100) + '...',
           lastEventId: event.lastEventId,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
         const data = JSON.parse(event.data);
         this.emitEvent('notification', data);
@@ -127,11 +134,11 @@ export class NotificationService {
       }
     });
 
-    this.eventSource.addEventListener('unread-count', (event) => {
+    this.eventSource.addEventListener('unread-count', event => {
       try {
         console.log('📊 안읽은 알림 수 이벤트 수신:', {
           data: event.data,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
         const data = JSON.parse(event.data);
         this.emitEvent('unread-count', data);
@@ -140,7 +147,7 @@ export class NotificationService {
       }
     });
 
-    this.eventSource.addEventListener('heartbeat', (event) => {
+    this.eventSource.addEventListener('heartbeat', event => {
       try {
         // heartbeat는 단순 문자열일 수 있으므로 JSON 파싱을 시도하되, 실패하면 문자열 그대로 사용
         let data;
@@ -155,7 +162,7 @@ export class NotificationService {
         if (!this.lastHeartbeatLog || now - this.lastHeartbeatLog > 5000) {
           console.log('💚 SSE Heartbeat 확인:', {
             data: event.data,
-            timestamp: new Date().toISOString()
+            timestamp: new Date().toISOString(),
           });
           this.lastHeartbeatLog = now;
         }
@@ -170,19 +177,19 @@ export class NotificationService {
         userId: this.userId,
         readyState: this.eventSource?.readyState,
         reconnectAttempts: this.reconnectAttempts,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
       this.reconnectAttempts = 0;
       this.isConnecting = false; // 연결 완료
     };
 
-    this.eventSource.onerror = (error) => {
+    this.eventSource.onerror = error => {
       console.error('❌ NotificationService SSE 연결 에러:', {
         error,
         userId: this.userId,
         readyState: this.eventSource?.readyState,
         reconnectAttempts: this.reconnectAttempts,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
       this.isConnecting = false; // 연결 실패
       this.handleReconnect();
@@ -202,7 +209,7 @@ export class NotificationService {
       console.error('🚫 NotificationService 최대 재연결 시도 횟수 도달', {
         maxAttempts: this.maxReconnectAttempts,
         userId: this.userId,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
       return;
     }
@@ -214,12 +221,14 @@ export class NotificationService {
       delay: `${delay}ms`,
       attempt: `${this.reconnectAttempts}/${this.maxReconnectAttempts}`,
       userId: this.userId,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
 
     setTimeout(async () => {
       if (this.userId) {
-        console.log('🔄 NotificationService 재연결 시도 실행', { userId: this.userId });
+        console.log('🔄 NotificationService 재연결 시도 실행', {
+          userId: this.userId,
+        });
         this.disconnect();
         await this.connect(this.userId);
       }

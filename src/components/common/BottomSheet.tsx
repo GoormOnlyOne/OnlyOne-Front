@@ -10,14 +10,14 @@ interface BottomSheetProps {
   scrollRef?: React.RefObject<HTMLDivElement>;
 }
 
-export const BottomSheet = ({ 
-  isOpen, 
-  onClose, 
-  title, 
-  children, 
+export const BottomSheet = ({
+  isOpen,
+  onClose,
+  title,
+  children,
   showCloseButton = true,
-  maxHeight = "60vh",
-  scrollRef
+  maxHeight = '60vh',
+  scrollRef,
 }: BottomSheetProps) => {
   const sheetRef = useRef<HTMLDivElement>(null);
 
@@ -44,13 +44,13 @@ export const BottomSheet = ({
   return (
     <div className="fixed inset-0 z-[60]">
       {/* 백드롭 */}
-      <div 
+      <div
         className="absolute inset-0 bg-black/50 backdrop-blur-sm"
         onClick={handleBackdropClick}
       />
-      
+
       {/* 바텀시트 */}
-      <div 
+      <div
         ref={sheetRef}
         className="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl overflow-hidden animate-slide-up flex flex-col"
         style={{ maxHeight }}

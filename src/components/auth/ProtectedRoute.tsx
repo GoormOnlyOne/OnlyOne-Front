@@ -7,7 +7,10 @@ interface ProtectedRouteProps {
   requireActive?: boolean; // ACTIVE 상태만 허용할지 여부
 }
 
-const ProtectedRoute = ({ children, requireActive = true }: ProtectedRouteProps) => {
+const ProtectedRoute = ({
+  children,
+  requireActive = true,
+}: ProtectedRouteProps) => {
   const { isAuthenticated, user, isLoading, isGuest } = useAuth();
   const navigate = useNavigate();
 

@@ -4,7 +4,10 @@ import { fetchChatRoomList } from '../../api/chat';
 import type { ChatRoomSummary } from '../../types/chat/chat.types';
 import Loading from '../../components/common/Loading';
 
-const getLastMessagePreview = (text?: string | null, imageUrl?: string | null) => {
+const getLastMessagePreview = (
+  text?: string | null,
+  imageUrl?: string | null,
+) => {
   const t = (text ?? '').trim();
 
   // 1) 서버가 imageUrl을 따로 주는 경우
@@ -44,17 +47,17 @@ const ChatRoomList = () => {
             lastMessageText: getLastMessagePreview(
               r.lastMessageText,
               // 백엔드가 이미지 URL을 따로 주는 경우(없으면 undefined)
-              r.lastMessageImageUrl ?? r.imageUrl
+              r.lastMessageImageUrl ?? r.imageUrl,
             ),
           }));
           setRooms(processed);
         } else {
-          console.warn("❗ 예상과 다른 응답 형식:", res);
+          console.warn('❗ 예상과 다른 응답 형식:', res);
           setRooms([]);
         }
       })
       .catch(err => {
-        console.error("❌ API 에러:", err);
+        console.error('❌ API 에러:', err);
         setRooms([]);
       })
       .finally(() => setLoading(false));
@@ -65,20 +68,21 @@ const ChatRoomList = () => {
   };
 
   return (
-    <div className="p-4 relative" aria-busy={loading}> {/* ★ 변경: relative + aria-busy */}
-      {loading && <Loading overlay text="불러오는 중..." />} {/* ★ 변경: 공통 로딩 오버레이 */}
-
+    <div className="p-4 relative" aria-busy={loading}>
+      {' '}
+      {/* ★ 변경: relative + aria-busy */}
+      {loading && <Loading overlay text="불러오는 중..." />}{' '}
+      {/* ★ 변경: 공통 로딩 오버레이 */}
       <h2 className="text-xl font-bold mb-4">채팅방 목록</h2>
-
       {/* ★ 변경: 기존 텍스트 로더 제거 */}
-
       {!loading && rooms.length === 0 && (
         <div className="flex flex-col items-center justify-center py-12">
           <i className="ri-chat-3-line text-4xl text-gray-400 mb-4"></i>
-          <p className="text-gray-500 text-sm">아직 참여중인 채팅방이 없습니다.</p>
+          <p className="text-gray-500 text-sm">
+            아직 참여중인 채팅방이 없습니다.
+          </p>
         </div>
       )}
-
       {!loading && rooms.length > 0 && (
         <div className="bg-white">
           {rooms.map(room => (
@@ -109,10 +113,13 @@ const ChatRoomList = () => {
                   </h3>
                   <span className="text-xs text-gray-400 ml-2">
                     {room.lastMessageTime &&
-                      new Date(room.lastMessageTime).toLocaleTimeString('ko-KR', {
-                        hour: '2-digit',
-                        minute: '2-digit',
-                      })}
+                      new Date(room.lastMessageTime).toLocaleTimeString(
+                        'ko-KR',
+                        {
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        },
+                      )}
                   </span>
                 </div>
 

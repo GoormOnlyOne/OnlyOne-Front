@@ -45,7 +45,6 @@ import ChatRoom from '../pages/Chat/ChatRoom';
 import FeedList from '../pages/Feed/FeedList.tsx';
 
 export const router = createBrowserRouter([
-
   // [기본] 레이아웃이 적용되는 라우트들
   {
     path: '/',
@@ -99,83 +98,83 @@ export const router = createBrowserRouter([
         path: 'mypage',
         element: <Mypage />,
       },
-			{
-				path: 'mypage/my-meetings',
-				element: <MyMeeting />,
-			},
-			{
-				path: 'mypage/interest',
-				element: <Interest />,
-			},
-			{
-				path: 'mypage/profile',
-				element: <Profile />,
-			},
-			{
-				path: 'mypage/wallet',
-				element: <Wallet />,
-			},
-			{
-				path: 'notice',
-				element: <Notice />,
-			},
-			{
-				path: 'meeting/:id',
-				element: <MeetingDetail />,
-			},
-			{
-				path: 'meeting/:meetingId/schedule/:scheduleId/participation',
-				element: <ParticipationStatus />,
-			},
-			{
-				path: 'meeting/create',
-				element: <MeetingCreate />,
-			},
-			{
-				path: 'meeting/:id/edit',
-				element: <MeetingEdit />,
-			},
-			{
-				path: 'meeting/:id/schedule/create',
-				element: <MeetingScheduleCrate />,
-			},
-			{
-				path: 'meeting/:meetingId/schedule/:scheduleId/edit',
-				element: <MeetingScheduleEdit />,
-			},
-			{
-				path: 'meeting/:meetingId/feed/create',
-				element: <MeetingFeedCreate />,
-			},
-			{
-				path: 'meeting/:meetingId/feed/:feedId/edit',
-				element: <MeetingFeedEdit />,
-			},
-			{
-				path: 'meeting/:meetingId/feed/:feedId',
-				element: <MeetingFeedDetail />,
-			},
-			{
-				path: 'settlementHistory',
-				element: <SettlementHistory />,
-			},
-			{
-				path: 'payment',
-				element: <Checkout />,
-			},
-			{
-				path: 'payment/charge',
-				element: <PointCharge />,
-			},
-			{
-				path: 'success',
-				element: <Success />,
-			},
+      {
+        path: 'mypage/my-meetings',
+        element: <MyMeeting />,
+      },
+      {
+        path: 'mypage/interest',
+        element: <Interest />,
+      },
+      {
+        path: 'mypage/profile',
+        element: <Profile />,
+      },
+      {
+        path: 'mypage/wallet',
+        element: <Wallet />,
+      },
+      {
+        path: 'notice',
+        element: <Notice />,
+      },
+      {
+        path: 'meeting/:id',
+        element: <MeetingDetail />,
+      },
+      {
+        path: 'meeting/:meetingId/schedule/:scheduleId/participation',
+        element: <ParticipationStatus />,
+      },
+      {
+        path: 'meeting/create',
+        element: <MeetingCreate />,
+      },
+      {
+        path: 'meeting/:id/edit',
+        element: <MeetingEdit />,
+      },
+      {
+        path: 'meeting/:id/schedule/create',
+        element: <MeetingScheduleCrate />,
+      },
+      {
+        path: 'meeting/:meetingId/schedule/:scheduleId/edit',
+        element: <MeetingScheduleEdit />,
+      },
+      {
+        path: 'meeting/:meetingId/feed/create',
+        element: <MeetingFeedCreate />,
+      },
+      {
+        path: 'meeting/:meetingId/feed/:feedId/edit',
+        element: <MeetingFeedEdit />,
+      },
+      {
+        path: 'meeting/:meetingId/feed/:feedId',
+        element: <MeetingFeedDetail />,
+      },
+      {
+        path: 'settlementHistory',
+        element: <SettlementHistory />,
+      },
+      {
+        path: 'payment',
+        element: <Checkout />,
+      },
+      {
+        path: 'payment/charge',
+        element: <PointCharge />,
+      },
+      {
+        path: 'success',
+        element: <Success />,
+      },
       {
         path: 'chat/:chatRoomId/messages',
         element: <ChatRoom />,
       },
-			{
+      {
         path: 'clubs/:clubId/chat',
         element: <ChatRoomList />,
       },
@@ -183,20 +182,20 @@ export const router = createBrowserRouter([
         path: 'chat/:chatRoomId/messages',
         element: <ChatRoom />,
       },
-			{
-				path: 'partner-meetings',
-				element: <PartnerMeetings />,
-			},
-			{
-				path: 'recommended-meetings',
-				element: <RecommendedMeetings />,
-			},
-			{
-				path: 'feed',
-				element: <FeedList />,
-			},
-		],
-	},
+      {
+        path: 'partner-meetings',
+        element: <PartnerMeetings />,
+      },
+      {
+        path: 'recommended-meetings',
+        element: <RecommendedMeetings />,
+      },
+      {
+        path: 'feed',
+        element: <FeedList />,
+      },
+    ],
+  },
 
   // 레이아웃이 적용되지 않는 라우트들
   {

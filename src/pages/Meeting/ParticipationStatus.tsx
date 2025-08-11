@@ -109,7 +109,7 @@ export const ParticipationStatus: React.FC = () => {
       </div>
     );
   }
-  
+
   if (error) {
     return <div className="p-4 text-red-500">오류: {error}</div>;
   }

@@ -60,13 +60,13 @@ export const ProfileImageUpload: React.FC<ProfileImageUploadProps> = ({
 
       setIsUploading(true);
       console.log('file:', file);
-      
+
       try {
         // 실제 서버에 업로드
         const uploadedUrl = await uploadImage(file, 'user');
 
         console.log('이미지 업로드 성공:', uploadedUrl);
-        
+
         const profileImage: ProfileImage = {
           file,
           url: uploadedUrl,
@@ -112,10 +112,13 @@ export const ProfileImageUpload: React.FC<ProfileImageUploadProps> = ({
   };
 
   // 선택된 이미지가 있으면 해당 이미지, 없으면 기본 이미지 사용
-  const displayImage = selectedImage?.url || defaultImage || defaultProfileImage;
+  const displayImage =
+    selectedImage?.url || defaultImage || defaultProfileImage;
   const hasImage = selectedImage !== null || defaultImage !== undefined;
   // 사용자가 직접 업로드한 이미지 또는 defaultImage로 전달받은 사용자 이미지 체크
-  const hasCustomImage = selectedImage !== null || (defaultImage && defaultImage !== defaultProfileImage);
+  const hasCustomImage =
+    selectedImage !== null ||
+    (defaultImage && defaultImage !== defaultProfileImage);
 
   return (
     <div className="flex justify-center w-full max-w-md mx-auto">
@@ -150,7 +153,7 @@ export const ProfileImageUpload: React.FC<ProfileImageUploadProps> = ({
             <i className="ri-camera-fill text-xs text-white" />
           </div>
         )}
-        
+
         {/* 업로드 로딩 표시 */}
         {isUploading && (
           <div className="absolute inset-0 rounded-full bg-black/50 flex items-center justify-center">
