@@ -30,19 +30,11 @@ export const useNotifications = ({ userId, pageSize = 20 }: UseNotificationsProp
       setLoading(true);
       setError(null);
 
-      console.log('🔍 알림 API 호출 시작:', {
-        userId,
-        cursor: reset ? undefined : cursor || undefined,
-        size: pageSize
-      });
-
       const response = await getNotifications({
         userId,
         cursor: reset ? undefined : cursor || undefined,
         size: pageSize,
       });
-
-      console.log('✅ 알림 API 응답:', response);
 
       const newNotifications = response.notifications;
       
@@ -52,14 +44,8 @@ export const useNotifications = ({ userId, pageSize = 20 }: UseNotificationsProp
       setCursor(response.nextCursor);
       setHasMore(response.hasNext);
       setUnreadCount(response.unreadCount);
-    } catch (err) {
+    } catch {
       setError('알림을 불러오는데 실패했습니다.');
-      console.error('Failed to load notifications - 상세 에러:', err);
-      console.error('API 호출 파라미터:', {
-        userId,
-        cursor: reset ? undefined : cursor || undefined,
-        size: pageSize
-      });
     } finally {
       setLoading(false);
     }
@@ -74,8 +60,8 @@ export const useNotifications = ({ userId, pageSize = 20 }: UseNotificationsProp
         );
         setUnreadCount(0);
       }
-    } catch (err) {
-      console.error('Failed to mark all as read:', err);
+    } catch {
+      // 모든 알림 읽음 처리 실패 무시
     }
   }, [userId]);
 
@@ -90,8 +76,8 @@ export const useNotifications = ({ userId, pageSize = 20 }: UseNotificationsProp
       setNotifications(prev => 
         prev.filter(notification => notification.notificationId !== notificationId)
       );
-    } catch (err) {
-      console.error('Failed to delete notification:', err);
+    } catch {
+      // 알림 삭제 실패 무시
     }
   }, [userId]);
 
@@ -100,7 +86,6 @@ export const useNotifications = ({ userId, pageSize = 20 }: UseNotificationsProp
       const response = await apiCreateNotification(data);
       return response;
     } catch (err) {
-      console.error('Failed to create notification:', err);
       throw err;
     }
   }, []);
@@ -112,13 +97,11 @@ export const useNotifications = ({ userId, pageSize = 20 }: UseNotificationsProp
   // SSE 이벤트 리스너 추가
   useEffect(() => {
     const handleNotificationReceived = (event: CustomEvent) => {
-      console.log('SSE notification received:', event.detail);
       setNotifications(prev => [event.detail, ...prev]);
       setUnreadCount(prev => prev + 1);
     };
 
     const handleUnreadCountUpdated = (event: CustomEvent) => {
-      console.log('Unread count updated:', event.detail);
       setUnreadCount(event.detail.count);
     };
 
@@ -152,11 +135,10 @@ export const useSSENotifications = (userId: number) => {
 
   const connect = useCallback(() => {
     // SSE 연결 로직은 별도 서비스에서 처리
-    console.log('SSE connection logic should be implemented in SSE service');
   }, [userId]);
 
   const disconnect = useCallback(() => {
-    console.log('SSE disconnection logic should be implemented in SSE service');
+    // SSE 연결 해제 로직은 별도 서비스에서 처리
   }, []);
 
   return {
