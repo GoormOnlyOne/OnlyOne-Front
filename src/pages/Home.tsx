@@ -5,14 +5,14 @@ import ScrollToTopButton from '../components/common/ScrollToTopButton';
 
 export const Home = () => {
   return (
-    <div className="flex flex-col bg-gray-50">
+    <div className="flex flex-col bg-neutral-50">
       {/* 카테고리 섹션 */}
       <div className="px-4 py-6">
         <CategorySection mode="navigation" />
       </div>
 
       {/* 모임 만들기 카드 */}
-      <div className="px-4 pb-4">
+      <div className="px-4 pb-6">
         <CreateMeetingCard />
       </div>
 

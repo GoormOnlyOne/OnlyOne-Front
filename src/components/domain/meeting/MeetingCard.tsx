@@ -80,7 +80,7 @@ export default function MeetingCard({
           alt={meeting.name}
           className="w-full h-48 object-cover"
         />
-        <span className="absolute top-3 left-3 bg-blue-600 text-white px-3 py-1 rounded-full text-xs font-medium">
+        <span className="absolute top-3 left-3 bg-gradient-to-br from-brand-primary to-brand-secondary text-white px-3 py-1 rounded-full text-xs font-medium">
           {meeting.interest}
         </span>
         {/* <button
@@ -104,12 +104,12 @@ export default function MeetingCard({
         <div className="flex items-center justify-between">
           <div className="space-y-1">
             <div className="flex items-center text-sm text-gray-600">
-              <i className="ri-map-pin-line mr-2"></i>
+              <i className="ri-map-pin-line mr-2 text-[#EF7C30]"></i>
               <span>{meeting.district}</span>
             </div>
 
             <div className="flex items-center text-sm text-gray-600">
-              <i className="ri-group-line mr-2"></i>
+              <i className="ri-group-line mr-2 text-[#EF7C30]"></i>
               <span>멤버 {meeting.memberCount}명</span>
             </div>
           </div>
@@ -118,7 +118,7 @@ export default function MeetingCard({
             <button
               onClick={handleJoinClick}
               disabled={isJoining}
-              className="bg-blue-600 text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-blue-700 transition-colors hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-gradient-to-br from-brand-primary to-brand-secondary text-white px-4 py-2 rounded-full text-sm font-medium hover:from-brand-secondary hover:to-brand-primary transition-all duration-200 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isJoining ? '가입중...' : '가입하기'}
             </button>

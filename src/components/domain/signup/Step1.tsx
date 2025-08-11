@@ -21,7 +21,7 @@ const Step1 = ({
         최소 1개에서 최대 {maxSelection}개까지 선택할 수 있습니다.
       </p>
       {safeSelectedCategories.length > 0 && (
-        <p className="text-blue-600 text-center mb-6 font-medium">
+        <p className="text-brand-primary text-center mb-6 font-medium">
           {safeSelectedCategories.length}개 선택됨
         </p>
       )}
