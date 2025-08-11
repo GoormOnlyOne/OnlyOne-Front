@@ -165,7 +165,7 @@ export const Signup = () => {
                 transition-all duration-300
                 ${
                   currentStep >= step
-                    ? 'bg-blue-600 text-white'
+                    ? 'bg-brand-primary text-white'
                     : 'bg-gray-200 text-gray-500'
                 }
               `}
@@ -176,7 +176,7 @@ export const Signup = () => {
               <div
                 className={`
                   w-16 h-1 mx-2 transition-all duration-300
-                  ${currentStep > step ? 'bg-blue-600' : 'bg-gray-200'}
+                  ${currentStep > step ? 'bg-brand-primary' : 'bg-gray-200'}
                 `}
               />
             )}
@@ -240,10 +240,10 @@ export const Signup = () => {
               ${
                 currentStep === totalSteps
                   ? 'bg-blue-600 text-white hover:bg-blue-700'
-                  : 'bg-gray-800 text-white hover:bg-gray-900'
+                  : 'bg-brand-primary text-white hover:brand-secondary'
               }
               disabled:opacity-50 disabled:cursor-not-allowed
-              ${(!isStepValid() || isSubmitting) ? 'cursor-not-allowed' : 'cursor-pointer'}
+              ${(!isStepValid() || isSubmitting) ? 'cursor-not-allowed !important' : 'cursor-pointer'}
             `}
           >
             {isSubmitting 

@@ -22,7 +22,7 @@ export const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-blue-50 to-white px-4 overflow-hidden">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b bg-neutral-50 px-4 overflow-hidden">
       {/* 로고 + 문구 */}
       <div
         className={`w-full max-w-sm text-center transition-all duration-700 ${

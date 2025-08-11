@@ -31,3 +31,11 @@
   --color-neutral-800: #4A3F35;
   --color-neutral-900: #2D241C;
 }
+
+/* 모든 버튼에 포인터 커서 적용 */
+button {
+  cursor: pointer;
+}
+button:disabled {
+  cursor: not-allowed;
+}

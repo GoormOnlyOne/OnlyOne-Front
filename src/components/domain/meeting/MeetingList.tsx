@@ -132,7 +132,7 @@ export default function MeetingList({ mode = 'home', apiEndpoint, showHomeSpecia
 						{/* 맞춤 추천 모임 섹션 */}
 						<div>
 							<h2 className="text-base font-semibold text-gray-800 leading-snug mb-4">
-								내게 딱 맞는 모임을 찾아보세요!
+								📍 내게 딱 맞는 모임을 찾아보세요!
 							</h2>
 							<div className="space-y-4">
 								{meetings.map(meeting => (
@@ -144,9 +144,9 @@ export default function MeetingList({ mode = 'home', apiEndpoint, showHomeSpecia
 							<div className="flex justify-center mt-6 mb-8">
 								<button
 									onClick={handleViewMoreRecommended}
-									className="px-6 py-3 bg-white border border-gray-200 rounded-full text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+									className="px-6 py-3 bg-white border-2 border-brand-primary rounded-full text-sm font-medium text-brand-primary hover:bg-brand-light hover:border-brand-secondary transition-colors"
 								>
-									더보기 →
+									더보기 <span className="text-brand-primary">→</span>
 								</button>
 							</div>
 						</div>
@@ -154,7 +154,7 @@ export default function MeetingList({ mode = 'home', apiEndpoint, showHomeSpecia
 						{/* 함께하는 사람들의 모임 섹션 */}
 						<div className="mb-8">
 							<h2 className="text-base font-semibold text-gray-800 leading-snug mb-4">
-								모임 친구들은 이런 활동도 해요!
+								⚽ 모임 친구들은 이런 활동도 해요!
 							</h2>
 
 							<div className="space-y-4">
@@ -167,9 +167,9 @@ export default function MeetingList({ mode = 'home', apiEndpoint, showHomeSpecia
 							<div className="flex justify-center mt-6">
 								<button
 									onClick={handleViewMore}
-									className="px-6 py-3 bg-white border border-gray-200 rounded-full text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+									className="px-6 py-3 bg-white border-2 border-brand-primary rounded-full text-sm font-medium text-brand-primary hover:bg-brand-light hover:border-brand-secondary transition-colors"
 								>
-									더보기 →
+									더보기 <span className="text-brand-primary">→</span>
 								</button>
 							</div>
 						</div>

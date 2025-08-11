@@ -8,7 +8,7 @@ export default function CreateMeetingCard() {
   };
 
   return (
-    <div className="bg-gradient-to-br from-[#F5921F] via-[#EF7C30] to-[#FFAE00] rounded-2xl p-4 text-center shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 relative overflow-hidden">
+    <div className="bg-gradient-to-br from-[#F5921F] via-[#EF7C30] to-[#FFAE00] rounded-2xl p-4 text-center shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.015] relative overflow-hidden">
       {/* 배경 장식 애니메이션 */}
       <div className="absolute -top-1 -right-1 w-12 h-12 bg-white/20 rounded-full blur-md animate-pulse"></div>
       <div
@@ -25,7 +25,7 @@ export default function CreateMeetingCard() {
           벗킷에서 당신만의 모임을 만들어보세요
         </p>
         <button
-          className="bg-white text-[#F5921F] text-sm font-bold px-4 py-2 rounded-xl hover:bg-gray-100 transform hover:scale-105 transition-all duration-200 shadow-md"
+          className="bg-white text-[#F5921F] text-sm font-bold px-4 py-2 rounded-xl hover:bg-gray-100 transform hover:scale-[1.015] transition-all duration-200 shadow-md"
           onClick={createMeeting}
         >
           ✨ 모임 만들기
