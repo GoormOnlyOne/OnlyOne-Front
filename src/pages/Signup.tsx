@@ -1,16 +1,21 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import Step1 from '../components/domain/signup/Step1';
 import Step2 from '../components/domain/signup/Step2';
 import Step3 from '../components/domain/signup/Step3';
 import SignupComplete from '../components/domain/signup/Complete';
 import type { AddressData } from '../components/common/AddressSelector';
+import { signup } from '../api/auth';
+import type { SignupRequest } from '../api/auth';
 
 export const Signup = () => {
   const navigate = useNavigate();
+  const { refreshUser } = useAuth();
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedAddress, setSelectedAddress] = useState<AddressData | undefined>();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     categories: [] as string[],
     nickname: '',
@@ -29,25 +34,32 @@ export const Signup = () => {
         // Step 1: 카테고리가 1개 이상 선택되어야 함
         return selectedCategories.length >= 1;
       case 2:
-        // Step 2: 지역 선택
+        // Step 2: 지역 선택 (도시와 구/군이 모두 선택되어야 함)
         return (
           selectedAddress !== undefined &&
-          Object.keys(selectedAddress).length > 0
+          selectedAddress.city !== '' &&
+          selectedAddress.district !== '' &&
+          selectedAddress.isComplete === true
         );
-      case 3:
-        // Step 3: 모든 필드가 채워져야 함
+      case 3: {
+        // Step 3: 모든 필드가 채워져야 하고 닉네임은 2자 이상 10자 이하, 특수문자 제외
+        const nicknameRegex = /^[가-힣a-zA-Z0-9]{2,10}$/;
         return (
           formData.nickname !== '' &&
+          formData.nickname.trim().length >= 2 &&
+          formData.nickname.length <= 10 &&
+          nicknameRegex.test(formData.nickname.trim()) &&
           formData.gender !== '' &&
           formData.birth !== ''
         );
+      }
       default:
         return false;
     }
   };
 
   // 다음 버튼
-  const handleNext = () => {
+  const handleNext = async () => {
     if (currentStep < totalSteps) {
       // 각 Step에서 다음으로 넘어갈 때 데이터 저장
       if (currentStep === 1) {
@@ -64,15 +76,36 @@ export const Signup = () => {
       setCurrentStep(prev => prev + 1);
     } else {
       // 회원가입 완료 처리
-      const finalData = {
-        ...formData,
-        categories: selectedCategories,
-        address: selectedAddress,
-      };
-      console.log('회원가입 데이터:', finalData);
+      await handleSignupSubmit();
+    }
+  };
 
-      // TODO: API 호출하여 회원가입 처리
-      // setCurrentStep(4); // 완료 화면
+  // 회원가입 API 호출
+  const handleSignupSubmit = async () => {
+    if (isSubmitting) return;
+    
+    setIsSubmitting(true);
+    try {
+      const signupData: SignupRequest = {
+        nickname: formData.nickname,
+        birth: formData.birth,
+        gender: formData.gender as 'MALE' | 'FEMALE',
+        profileImage: formData.profileImage || undefined,
+        city: selectedAddress?.city || '',
+        district: selectedAddress?.district || '',
+        categories: selectedCategories,
+      };
+      
+      const response = await signup(signupData);
+      
+      if (response.success) {
+        setCurrentStep(4); // 완료 화면
+      }
+    } catch (error) {
+      console.error('회원가입 오류:', error);
+      alert('회원가입 중 오류가 발생했습니다. 다시 시도해주세요.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -112,7 +145,9 @@ export const Signup = () => {
   };
 
   // 회원가입 완료 핸들러
-  const handleSignupComplete = () => {
+  const handleSignupComplete = async () => {
+    // 사용자 정보를 갱신하여 최신 상태(ACTIVE)를 가져온 후 메인 페이지로 이동
+    await refreshUser();
     navigate('/');
   };
 
@@ -199,7 +234,7 @@ export const Signup = () => {
 
           <button
             onClick={handleNext}
-            disabled={!isStepValid()}
+            disabled={!isStepValid() || isSubmitting}
             className={`
               flex-1 px-6 py-3 rounded-lg font-medium transition-colors
               ${
@@ -208,10 +243,15 @@ export const Signup = () => {
                   : 'bg-gray-800 text-white hover:bg-gray-900'
               }
               disabled:opacity-50 disabled:cursor-not-allowed
-              ${!isStepValid() ? 'cursor-not-allowed' : 'cursor-pointer'}
+              ${(!isStepValid() || isSubmitting) ? 'cursor-not-allowed' : 'cursor-pointer'}
             `}
           >
-            {currentStep === totalSteps ? '가입완료' : '다음'}
+            {isSubmitting 
+              ? '가입 중...' 
+              : currentStep === totalSteps 
+                ? '가입완료' 
+                : '다음'
+            }
           </button>
         </div>
       )}

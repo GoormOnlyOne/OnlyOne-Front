@@ -258,7 +258,7 @@ const confirmLeave = async () => {
         isOut: false,
       };
       break;
-
+      
     default:
       headerProps = null; // 헤더 표시 안 함
   }

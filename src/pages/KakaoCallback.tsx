@@ -70,6 +70,15 @@ const KakaoCallback: React.FC = () => {
         }
       } catch (error: any) {
         console.error('카카오 로그인 실패:', error);
+        
+        // 탈퇴한 사용자 에러 처리
+        if (error.status === 403) {
+          setLoading(false);
+          alert('탈퇴한 계정입니다. 탈퇴하면 다시 로그인할 수 없습니다.');
+          navigate('/login');
+          return;
+        }
+        
         setError(error.message || '카카오 로그인 처리 중 오류가 발생했습니다.');
         setTimeout(() => navigate('/login'), 2000);
       } finally {

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import ScrollToTopButton from '../../components/common/ScrollToTopButton';
 import { BottomSheet } from '../../components/common/BottomSheet';
 import userProfile from '../../assets/user_profile.jpg';
@@ -27,8 +27,32 @@ interface FeedData {
   liked: boolean;
   feedMine: boolean;
   isRepost?: boolean;
-  originalFeed?: FeedData;
-  repostComment?: string;
+  parentFeed?: {
+    feedId: number;
+    content: string;
+    imageUrls: string[];
+    likeCount: number;
+    commentCount: number;
+    userId: number;
+    nickname: string;
+    profileImage: string;
+    updatedAt: string;
+    liked: boolean;
+    feedMine: boolean;
+  };
+  rootFeed?: {
+    feedId: number;
+    content: string;
+    imageUrls: string[];
+    likeCount: number;
+    commentCount: number;
+    userId: number;
+    nickname: string;
+    profileImage: string;
+    updatedAt: string;
+    liked: boolean;
+    feedMine: boolean;
+  };
 }
 
 interface FeedItemProps {
@@ -36,38 +60,11 @@ interface FeedItemProps {
   onCommentClick: (feedId: number) => void;
 }
 
-// 가장 원본 피드를 찾는 함수 (플래튼)
-const findOriginalFeed = (feed: FeedData): FeedData => {
-  if (!feed.originalFeed || !feed.originalFeed.isRepost) {
-    return feed.originalFeed || feed;
-  }
-  return findOriginalFeed(feed.originalFeed);
-};
-
-// 리피드 체인 생성 함수 (A → B → C 형태로)
-const getRepostChain = (feed: FeedData): string[] => {
-  const chain: string[] = [];
-  let currentFeed: FeedData | undefined = feed;
-  
-  while (currentFeed && currentFeed.isRepost && currentFeed.originalFeed) {
-    chain.push(currentFeed.nickname);
-    currentFeed = currentFeed.originalFeed;
-  }
-  
-  if (currentFeed) {
-    chain.push(currentFeed.nickname); // 마지막 원본 작성자
-  }
-  
-  return chain;
-};
+// 복잡한 재귀 함수들 제거 - 새로운 구조에서는 필요 없음
 
 const FeedItem = ({ feed, onCommentClick }: FeedItemProps) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [originalFeedImageIndex, setOriginalFeedImageIndex] = useState(0);
-  
-  // 플래튼된 원본 피드와 리피드 체인 가져오기
-  const actualOriginalFeed = feed.isRepost ? findOriginalFeed(feed) : null;
-  const repostChain = feed.isRepost ? getRepostChain(feed) : [];
+  const [rootFeedImageIndex, setRootFeedImageIndex] = useState(0);
 
   const handlePrevImage = () => {
     setCurrentImageIndex(prev =>
@@ -81,17 +78,17 @@ const FeedItem = ({ feed, onCommentClick }: FeedItemProps) => {
     );
   };
 
-  const handlePrevOriginalImage = () => {
-    if (!actualOriginalFeed) return;
-    setOriginalFeedImageIndex(prev =>
-      prev > 0 ? prev - 1 : actualOriginalFeed.imageUrls.length - 1,
+  const handlePrevRootFeedImage = () => {
+    if (!feed.rootFeed) return;
+    setRootFeedImageIndex(prev =>
+      prev > 0 ? prev - 1 : feed.rootFeed!.imageUrls.length - 1,
     );
   };
 
-  const handleNextOriginalImage = () => {
-    if (!actualOriginalFeed) return;
-    setOriginalFeedImageIndex(prev =>
-      prev < actualOriginalFeed.imageUrls.length - 1 ? prev + 1 : 0,
+  const handleNextRootFeedImage = () => {
+    if (!feed.rootFeed) return;
+    setRootFeedImageIndex(prev =>
+      prev < feed.rootFeed!.imageUrls.length - 1 ? prev + 1 : 0,
     );
   };
 
@@ -173,117 +170,285 @@ const FeedItem = ({ feed, onCommentClick }: FeedItemProps) => {
           </div>
         )}
 
-        {/* 리피드: 플래튼된 원본 피드 표시 */}
-        {feed.isRepost && actualOriginalFeed && (
-          <div className="border border-gray-200 rounded-lg overflow-hidden bg-white">
-            {/* 원본 작성자 정보 */}
-            <div className="flex items-center justify-between p-4 border-b border-gray-100">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
-                  <img src={userProfile} className="w-8 h-8 rounded-full" alt="프로필" />
+        {/* 리피드 카드 표시 */}
+        {feed.isRepost && feed.parentFeed && (
+          <div className="border border-gray-200 rounded-lg overflow-hidden bg-gray-100">
+            {/* 2depth 리피드인 경우: PARENT FEED 정보가 ROOT FEED를 감쌈 */}
+            {feed.rootFeed && feed.rootFeed.feedId !== feed.parentFeed.feedId && (
+              <>
+                {/* Parent Feed 헤더 */}
+                <div className="bg-gray-100 border-b border-gray-200 p-3">
+                  <div className="flex items-center gap-1 text-xs text-gray-600 mb-2">
+                    <i className="ri-share-forward-line"></i>
+                    <span>이 피드를 리피드함</span>
+                  </div>
+                  
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
+                      <img src={userProfile} className="w-8 h-8 rounded-full" alt="프로필" />
+                    </div>
+                    <div>
+                      <div className="text-sm font-medium text-gray-700">{feed.parentFeed.nickname}</div>
+                      <div className="text-xs text-gray-500">
+                        {new Date(feed.parentFeed.updatedAt)
+                          .toLocaleDateString('ko-KR', {
+                            month: '2-digit',
+                            day: '2-digit',
+                          })
+                          .replace(/\./g, '/')
+                          .replace(/\/$/, '')
+                          .replace(/\s/g, '')}{' '}
+                        {new Date(feed.parentFeed.updatedAt).toLocaleTimeString('ko-KR', {
+                          hour: '2-digit',
+                          minute: '2-digit',
+                          hour12: false,
+                        })}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Parent Feed 코멘트 */}
+                  {feed.parentFeed.content && (
+                    <div className="mt-2.5">
+                      <p className="text-sm text-gray-700 italic">"{feed.parentFeed.content}"</p>
+                    </div>
+                  )}
                 </div>
-                <div>
-                  <div className="text-sm font-medium">{actualOriginalFeed.nickname}</div>
-                  <div className="text-xs text-gray-500">
-                    {new Date(actualOriginalFeed.updatedAt)
-                      .toLocaleDateString('ko-KR', {
-                        month: '2-digit',
-                        day: '2-digit',
-                      })
-                      .replace(/\./g, '/')
-                      .replace(/\/$/, '')
-                      .replace(/\s/g, '')}{' '}
-                    {new Date(actualOriginalFeed.updatedAt).toLocaleTimeString('ko-KR', {
-                      hour: '2-digit',
-                      minute: '2-digit',
-                      hour12: false,
-                    })}
+
+                {/* ROOT FEED (깔끔한 스타일) */}
+                <div className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm mx-3 mb-3">
+                  {/* rootFeed 작성자 정보 */}
+                  <div className="flex items-center justify-between p-4 border-b border-gray-100">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
+                        <img src={userProfile} className="w-10 h-10 rounded-full" alt="프로필" />
+                      </div>
+                      <div>
+                        <div className="text-sm font-medium">{feed.rootFeed.nickname}</div>
+                        <div className="text-xs text-gray-500">
+                          {new Date(feed.rootFeed.updatedAt)
+                            .toLocaleDateString('ko-KR', {
+                              month: '2-digit',
+                              day: '2-digit',
+                            })
+                            .replace(/\./g, '/')
+                            .replace(/\/$/, '')
+                            .replace(/\s/g, '')}{' '}
+                          {new Date(feed.rootFeed.updatedAt).toLocaleTimeString('ko-KR', {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            hour12: false,
+                          })}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                    
+                  {/* rootFeed 이미지 */}
+                  <div className="relative">
+                    <div 
+                      className="aspect-square bg-gray-200 flex items-center justify-center overflow-hidden"
+                      onTouchStart={e => {
+                        const touch = e.touches[0];
+                        e.currentTarget.dataset.startX = touch.clientX.toString();
+                      }}
+                      onTouchEnd={e => {
+                        const startX = parseFloat(e.currentTarget.dataset.startX || '0');
+                        const endX = e.changedTouches[0].clientX;
+                        const diff = startX - endX;
+
+                        if (Math.abs(diff) > 50) {
+                          if (diff > 0) {
+                            handleNextRootFeedImage();
+                          } else {
+                            handlePrevRootFeedImage();
+                          }
+                        }
+                      }}
+                    >
+                      {feed.rootFeed.imageUrls.length > 0 ? (
+                        <img
+                          src={feed.rootFeed.imageUrls[rootFeedImageIndex]}
+                          alt={`rootFeed 이미지 ${rootFeedImageIndex + 1}`}
+                          className="w-full h-full object-cover"
+                          onError={e => {
+                            e.currentTarget.src = '/placeholder-image.jpg';
+                          }}
+                        />
+                      ) : (
+                        <span className="text-gray-500">사진이 들어갑니다.</span>
+                      )}
+                    </div>
+
+                    {/* rootFeed 이미지 카운터 */}
+                    {feed.rootFeed.imageUrls.length > 1 && (
+                      <div className="absolute top-4 right-4 bg-black bg-opacity-50 text-white px-2 py-1 rounded text-sm">
+                        {rootFeedImageIndex + 1}/{feed.rootFeed.imageUrls.length}
+                      </div>
+                    )}
+
+                    {/* rootFeed 이미지 좌우 화살표 버튼 */}
+                    {feed.rootFeed.imageUrls.length > 1 && (
+                      <>
+                        <button
+                          onClick={handlePrevRootFeedImage}
+                          className="absolute left-4 top-1/2 -translate-y-1/2 w-8 h-8 bg-black bg-opacity-50 text-white rounded-full flex items-center justify-center hover:bg-opacity-70"
+                        >
+                          <i className="ri-arrow-left-wide-line"></i>
+                        </button>
+                        <button
+                          onClick={handleNextRootFeedImage}
+                          className="absolute right-4 top-1/2 -translate-y-1/2 w-8 h-8 bg-black bg-opacity-50 text-white rounded-full flex items-center justify-center hover:bg-opacity-70"
+                        >
+                          <i className="ri-arrow-right-wide-line"></i>
+                        </button>
+                      </>
+                    )}
+
+                    {/* rootFeed 이미지 네비게이션 점들 */}
+                    {feed.rootFeed.imageUrls.length > 1 && (
+                      <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
+                        {feed.rootFeed.imageUrls.map((_, index) => (
+                          <button
+                            key={index}
+                            onClick={() => setRootFeedImageIndex(index)}
+                            className={`w-1.5 h-1.5 rounded-full ${
+                              index === rootFeedImageIndex ? 'bg-white' : 'bg-white bg-opacity-50'
+                            }`}
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* rootFeed 내용 */}
+                  <div className="px-4 py-3">
+                    <p className="text-sm">{feed.rootFeed.content}</p>
                   </div>
                 </div>
-              </div>
-            </div>
+              </>
+            )}
 
-            {/* 원본 이미지 */}
-            <div className="relative">
-              <div 
-                className="aspect-square bg-gray-200 flex items-center justify-center overflow-hidden"
-                onTouchStart={e => {
-                  const touch = e.touches[0];
-                  e.currentTarget.dataset.startX = touch.clientX.toString();
-                }}
-                onTouchEnd={e => {
-                  const startX = parseFloat(e.currentTarget.dataset.startX || '0');
-                  const endX = e.changedTouches[0].clientX;
-                  const diff = startX - endX;
+            {/* 1depth 리피드인 경우: parentFeed가 rootFeed와 동일하므로 이미지와 내용 표시 */}
+            {(!feed.rootFeed || feed.rootFeed.feedId === feed.parentFeed.feedId) && (
+              <>
+                {/* 1depth 리피드 Parent Feed 정보 */}
+                <div className="bg-gray-100 p-3">
+                  <div className="flex items-center gap-1 text-xs text-gray-600 mb-2">
+                    <i className="ri-share-forward-line"></i>
+                    <span>이 피드를 리피드함</span>
+                  </div>
+                  
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
+                      <img src={userProfile} className="w-8 h-8 rounded-full" alt="프로필" />
+                    </div>
+                    <div>
+                      <div className="text-sm font-medium text-gray-700">{feed.parentFeed.nickname}</div>
+                      <div className="text-xs text-gray-500">
+                        {new Date(feed.parentFeed.updatedAt)
+                          .toLocaleDateString('ko-KR', {
+                            month: '2-digit',
+                            day: '2-digit',
+                          })
+                          .replace(/\./g, '/')
+                          .replace(/\/$/, '')
+                          .replace(/\s/g, '')}{' '}
+                        {new Date(feed.parentFeed.updatedAt).toLocaleTimeString('ko-KR', {
+                          hour: '2-digit',
+                          minute: '2-digit',
+                          hour12: false,
+                        })}
+                      </div>
+                    </div>
+                  </div>
 
-                  if (Math.abs(diff) > 50) {
-                    if (diff > 0) {
-                      handleNextOriginalImage();
-                    } else {
-                      handlePrevOriginalImage();
-                    }
-                  }
-                }}
-              >
-                {actualOriginalFeed.imageUrls.length > 0 ? (
-                  <img
-                    src={actualOriginalFeed.imageUrls[originalFeedImageIndex]}
-                    alt={`원본 피드 이미지 ${originalFeedImageIndex + 1}`}
-                    className="w-full h-full object-cover"
-                    onError={e => {
-                      e.currentTarget.src = '/placeholder-image.jpg';
+                  {/* Parent Feed 코멘트 */}
+                  {feed.parentFeed.content && (
+                    <div className="mt-2.5">
+                      <p className="text-sm text-gray-700 italic">"{feed.parentFeed.content}"</p>
+                    </div>
+                  )}
+                </div>
+
+                {/* parentFeed 이미지 */}
+                <div className="relative">
+                  <div 
+                    className="aspect-square bg-gray-200 flex items-center justify-center overflow-hidden"
+                    onTouchStart={e => {
+                      const touch = e.touches[0];
+                      e.currentTarget.dataset.startX = touch.clientX.toString();
                     }}
-                  />
-                ) : (
-                  <span className="text-gray-500">사진이 들어갑니다.</span>
-                )}
-              </div>
+                    onTouchEnd={e => {
+                      const startX = parseFloat(e.currentTarget.dataset.startX || '0');
+                      const endX = e.changedTouches[0].clientX;
+                      const diff = startX - endX;
 
-              {/* 원본 이미지 카운터 */}
-              {actualOriginalFeed.imageUrls.length > 1 && (
-                <div className="absolute top-4 right-4 bg-black bg-opacity-50 text-white px-2 py-1 rounded text-sm">
-                  {originalFeedImageIndex + 1}/{actualOriginalFeed.imageUrls.length}
-                </div>
-              )}
-
-              {/* 원본 이미지 좌우 화살표 버튼 */}
-              {actualOriginalFeed.imageUrls.length > 1 && (
-                <>
-                  <button
-                    onClick={handlePrevOriginalImage}
-                    className="absolute left-4 top-1/2 -translate-y-1/2 w-8 h-8 bg-black bg-opacity-50 text-white rounded-full flex items-center justify-center hover:bg-opacity-70"
+                      if (Math.abs(diff) > 50) {
+                        if (diff > 0) {
+                          handleNextRootFeedImage();
+                        } else {
+                          handlePrevRootFeedImage();
+                        }
+                      }
+                    }}
                   >
-                    <i className="ri-arrow-left-wide-line"></i>
-                  </button>
-                  <button
-                    onClick={handleNextOriginalImage}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 w-8 h-8 bg-black bg-opacity-50 text-white rounded-full flex items-center justify-center hover:bg-opacity-70"
-                  >
-                    <i className="ri-arrow-right-wide-line"></i>
-                  </button>
-                </>
-              )}
+                    {feed.parentFeed.imageUrls.length > 0 ? (
+                      <img
+                        src={feed.parentFeed.imageUrls[rootFeedImageIndex]}
+                        alt={`parentFeed 이미지 ${rootFeedImageIndex + 1}`}
+                        className="w-full h-full object-cover"
+                        onError={e => {
+                          e.currentTarget.src = '/placeholder-image.jpg';
+                        }}
+                      />
+                    ) : (
+                      <span className="text-gray-500">사진이 들어갑니다.</span>
+                    )}
+                  </div>
 
-              {/* 원본 이미지 네비게이션 점들 */}
-              {actualOriginalFeed.imageUrls.length > 1 && (
-                <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
-                  {actualOriginalFeed.imageUrls.map((_, index) => (
-                    <button
-                      key={index}
-                      onClick={() => setOriginalFeedImageIndex(index)}
-                      className={`w-1.5 h-1.5 rounded-full ${
-                        index === originalFeedImageIndex ? 'bg-white' : 'bg-white bg-opacity-50'
-                      }`}
-                    />
-                  ))}
+                  {/* parentFeed 이미지 카운터 */}
+                  {feed.parentFeed.imageUrls.length > 1 && (
+                    <div className="absolute top-4 right-4 bg-black bg-opacity-50 text-white px-2 py-1 rounded text-sm">
+                      {rootFeedImageIndex + 1}/{feed.parentFeed.imageUrls.length}
+                    </div>
+                  )}
+
+                  {/* parentFeed 이미지 좌우 화살표 버튼 */}
+                  {feed.parentFeed.imageUrls.length > 1 && (
+                    <>
+                      <button
+                        onClick={handlePrevRootFeedImage}
+                        className="absolute left-4 top-1/2 -translate-y-1/2 w-8 h-8 bg-black bg-opacity-50 text-white rounded-full flex items-center justify-center hover:bg-opacity-70"
+                      >
+                        <i className="ri-arrow-left-wide-line"></i>
+                      </button>
+                      <button
+                        onClick={handleNextRootFeedImage}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 w-8 h-8 bg-black bg-opacity-50 text-white rounded-full flex items-center justify-center hover:bg-opacity-70"
+                      >
+                        <i className="ri-arrow-right-wide-line"></i>
+                      </button>
+                    </>
+                  )}
+
+                  {/* parentFeed 이미지 네비게이션 점들 */}
+                  {feed.parentFeed.imageUrls.length > 1 && (
+                    <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
+                      {feed.parentFeed.imageUrls.map((_, index) => (
+                        <button
+                          key={index}
+                          onClick={() => setRootFeedImageIndex(index)}
+                          className={`w-1.5 h-1.5 rounded-full ${
+                            index === rootFeedImageIndex ? 'bg-white' : 'bg-white bg-opacity-50'
+                          }`}
+                        />
+                      ))}
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
-
-            {/* 원본 내용 */}
-            <div className="px-4 py-3">
-              <p className="text-sm">{actualOriginalFeed.content}</p>
-            </div>      
+              </>
+            )}
           </div>
         )}
 
@@ -330,16 +495,9 @@ const FeedItem = ({ feed, onCommentClick }: FeedItemProps) => {
 
       {/* 피드 내용 */}
       <div className="px-4 py-3">
-        {/* 리피드 표시 - 직접 리피드한 대상과 원본 작성자 */}
-        {feed.isRepost && feed.originalFeed && (
+        {/* 리피드 표시 */}
+        {feed.isRepost && feed.parentFeed && (
           <div className="flex items-center gap-1 text-xs text-gray-500 mb-2">
-            <i className="ri-repeat-line"></i>
-            <span>
-              {feed.nickname}님이 {feed.originalFeed.nickname}님의 {feed.originalFeed.isRepost ? '리피드를' : '피드를'} 리피드함
-              {actualOriginalFeed && actualOriginalFeed.nickname !== feed.originalFeed.nickname && 
-                ` (원본: ${actualOriginalFeed.nickname}님)`
-              }
-            </span>
           </div>
         )}
         <p className="text-sm">{feed.content}</p>
@@ -453,7 +611,7 @@ export const FeedList = () => {
         liked: true,
         feedMine: false,
         isRepost: true,
-        originalFeed: {
+        parentFeed: {
           feedId: 1,
           content: '오늘 정말 즐거운 모임이었어요! 다들 너무 재미있게 보내신 것 같아서 기뻐요 😊',
           imageUrls: [
@@ -467,7 +625,6 @@ export const FeedList = () => {
           nickname: 'Alice',
           profileImage: 'alice.png',
           updatedAt: '2025-07-31T17:07:13.287214',
-          comments: [],
           liked: true,
           feedMine: true,
         },
@@ -496,7 +653,7 @@ export const FeedList = () => {
         liked: false,
         feedMine: false,
         isRepost: true,
-        originalFeed: {
+        parentFeed: {
           feedId: 2,
           content: '새로운 카페에서 모임을 가졌는데 분위기가 정말 좋네요. 다음에도 여기서 만나면 좋을 것 같아요!',
           imageUrls: [
@@ -508,7 +665,6 @@ export const FeedList = () => {
           nickname: 'Bob',
           profileImage: 'bob.png',
           updatedAt: '2025-07-30T15:30:00.000000',
-          comments: [],
           liked: false,
           feedMine: false,
         },
@@ -537,7 +693,7 @@ export const FeedList = () => {
         liked: false,
         feedMine: false,
         isRepost: true,
-        originalFeed: {
+        parentFeed: {
           feedId: 3,
           content: '이 피드 너무 공감되네요! 저도 비슷한 경험이 있어서 공유하고 싶어요.',
           imageUrls: [],
@@ -547,28 +703,25 @@ export const FeedList = () => {
           nickname: 'Charlie',
           profileImage: 'charlie.png',
           updatedAt: '2025-07-29T14:20:00.000000',
-          comments: [],
           liked: true,
           feedMine: false,
-          isRepost: true,
-          originalFeed: {
-            feedId: 1,
-            content: '오늘 정말 즐거운 모임이었어요! 다들 너무 재미있게 보내신 것 같아서 기뻐요 😊',
-            imageUrls: [
-              'https://d1c3fg3ti7m8cn.cloudfront.net/user/2e18a659-cd67-4f5e-b12a-65c6f34a2541',
-              'https://d1c3fg3ti7m8cn.cloudfront.net/user/6cb9a365-3352-443f-b208-6f7c538d0d41',
-              'https://d1c3fg3ti7m8cn.cloudfront.net/user/c29188ec-a9ca-4562-a959-8574b2703b0c',
-            ],
-            likeCount: 15,
-            commentCount: 8,
-            userId: 1,
-            nickname: 'Alice',
-            profileImage: 'alice.png',
-            updatedAt: '2025-07-31T17:07:13.287214',
-            comments: [],
-            liked: true,
-            feedMine: true,
-          },
+        },
+        rootFeed: {
+          feedId: 1,
+          content: '오늘 정말 즐거운 모임이었어요! 다들 너무 재미있게 보내신 것 같아서 기뻐요 😊',
+          imageUrls: [
+            'https://d1c3fg3ti7m8cn.cloudfront.net/user/2e18a659-cd67-4f5e-b12a-65c6f34a2541',
+            'https://d1c3fg3ti7m8cn.cloudfront.net/user/6cb9a365-3352-443f-b208-6f7c538d0d41',
+            'https://d1c3fg3ti7m8cn.cloudfront.net/user/c29188ec-a9ca-4562-a959-8574b2703b0c',
+          ],
+          likeCount: 15,
+          commentCount: 8,
+          userId: 1,
+          nickname: 'Alice',
+          profileImage: 'alice.png',
+          updatedAt: '2025-07-31T17:07:13.287214',
+          liked: true,
+          feedMine: true,
         },
       },
     ];

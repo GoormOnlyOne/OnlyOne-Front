@@ -20,11 +20,11 @@ export default function Navigation() {
       href: '/category',
     },
     {
-      id: 'meeting',
-      label: '모임',
-      icon: 'ri-group-line',
-      activeIcon: 'ri-group-fill',
-      href: '/meeting',
+      id: 'feed',
+      label: '피드',
+      icon: 'ri-gallery-line',
+      activeIcon: 'ri-gallery-fill',
+      href: '/feed',
     },
     {
       id: 'mypage',
