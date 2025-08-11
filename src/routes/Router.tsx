@@ -174,11 +174,11 @@ export const router = createBrowserRouter([
         element: <ChatRoom />,
       },
 			{
-        path: '/clubs/:clubId/chat',
+        path: 'clubs/:clubId/chat',
         element: <ChatRoomList />,
       },
       {
-        path: '/chat/:chatRoomId/messages',
+        path: 'chat/:chatRoomId/messages',
         element: <ChatRoom />,
       },
 			{
