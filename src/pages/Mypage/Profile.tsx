@@ -5,9 +5,11 @@ import Step2 from '../../components/domain/signup/Step2';
 import Step3 from '../../components/domain/signup/Step3';
 import type { AddressData } from '../../components/common/AddressSelector';
 import { getUserProfile, updateUserProfile } from '../../api/user';
-import type { ProfileResponse, ProfileUpdateRequest } from '../../types/endpoints/user.api';
+import type {
+  ProfileResponse,
+  ProfileUpdateRequest,
+} from '../../types/endpoints/user.api';
 import { useToast } from '../../components/common/Toast/ToastContext';
-
 
 export const Profile = () => {
   const navigate = useNavigate();
@@ -39,19 +41,21 @@ export const Profile = () => {
     if (!interests || !Array.isArray(interests)) {
       return [];
     }
-    
+
     const interestMap: { [key: string]: string } = {
-      'culture': 'CULTURE',
-      'exercise': 'EXERCISE', 
-      'travel': 'TRAVEL',
-      'music': 'MUSIC',
-      'craft': 'CRAFT',
-      'social': 'SOCIAL',
-      'language': 'LANGUAGE',
-      'finance': 'FINANCE',
+      culture: 'CULTURE',
+      exercise: 'EXERCISE',
+      travel: 'TRAVEL',
+      music: 'MUSIC',
+      craft: 'CRAFT',
+      social: 'SOCIAL',
+      language: 'LANGUAGE',
+      finance: 'FINANCE',
     };
-    
-    return interests.map(interest => interestMap[interest.toLowerCase()] || interest.toUpperCase());
+
+    return interests.map(
+      interest => interestMap[interest.toLowerCase()] || interest.toUpperCase(),
+    );
   };
 
   // 대문자 카테고리를 소문자로 변환하는 함수 (저장 시 사용)
@@ -59,19 +63,21 @@ export const Profile = () => {
     if (!categories || !Array.isArray(categories)) {
       return [];
     }
-    
+
     const categoryMap: { [key: string]: string } = {
-      'CULTURE': 'culture',
-      'EXERCISE': 'exercise',
-      'TRAVEL': 'travel', 
-      'MUSIC': 'music',
-      'CRAFT': 'craft',
-      'SOCIAL': 'social',
-      'LANGUAGE': 'language',
-      'FINANCE': 'finance',
+      CULTURE: 'culture',
+      EXERCISE: 'exercise',
+      TRAVEL: 'travel',
+      MUSIC: 'music',
+      CRAFT: 'craft',
+      SOCIAL: 'social',
+      LANGUAGE: 'language',
+      FINANCE: 'finance',
     };
-    
-    return categories.map(category => categoryMap[category.toUpperCase()] || category.toLowerCase());
+
+    return categories.map(
+      category => categoryMap[category.toUpperCase()] || category.toLowerCase(),
+    );
   };
 
   // 프로필 데이터 로드
@@ -81,17 +87,19 @@ export const Profile = () => {
         setLoading(true);
         const profile = await getUserProfile();
         setProfileData(profile);
-        
+
         // 폼 데이터 초기화
         const address = {
           city: profile.city,
           district: profile.district,
           isComplete: true,
         };
-        
+
         // 소문자 관심사를 대문자 카테고리로 변환
-        const mappedCategories = mapInterestsToCategories(profile.interestsList);
-        
+        const mappedCategories = mapInterestsToCategories(
+          profile.interestsList,
+        );
+
         setSelectedCategories(mappedCategories);
         setSelectedAddress(address);
         setFormData({
@@ -345,7 +353,11 @@ export const Profile = () => {
             ${!isStepValid() || loading ? 'cursor-not-allowed' : 'cursor-pointer'}
           `}
         >
-          {loading ? '처리 중...' : (currentStep === totalSteps ? '수정완료' : '다음')}
+          {loading
+            ? '처리 중...'
+            : currentStep === totalSteps
+              ? '수정완료'
+              : '다음'}
         </button>
       </div>
     </div>

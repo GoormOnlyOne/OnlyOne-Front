@@ -20,7 +20,9 @@ export interface SignupResponse {
 }
 
 // 회원가입 API 호출
-export const signup = async (signupData: SignupRequest): Promise<ApiResponse<SignupResponse>> => {
+export const signup = async (
+  signupData: SignupRequest,
+): Promise<ApiResponse<SignupResponse>> => {
   return await apiClient.post<SignupResponse>('/auth/signup', signupData);
 };
 
@@ -32,13 +34,15 @@ export const logoutUser = async (): Promise<ApiResponse<null>> => {
 type UserStatus = 'GUEST' | 'ACTIVE' | 'INACTIVE';
 
 // 현재 사용자 정보 조회 API 호출
-export const getCurrentUser = async (): Promise<ApiResponse<{
-  userId: number;
-  kakaoId: number;
-  nickname: string;
-  status: UserStatus;
-  profileImage: string;
-}>> => {
+export const getCurrentUser = async (): Promise<
+  ApiResponse<{
+    userId: number;
+    kakaoId: number;
+    nickname: string;
+    status: UserStatus;
+    profileImage: string;
+  }>
+> => {
   return apiClient.get<{
     userId: number;
     kakaoId: number;

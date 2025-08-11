@@ -41,18 +41,20 @@ const KakaoCallback: React.FC = () => {
         console.log('카카오 인증 코드:', code);
 
         // 백엔드로 인증 코드 전송
-        const response = await apiClient.post<KakaoLoginResponse>(`/auth/kakao/callback?code=${code}`);
+        const response = await apiClient.post<KakaoLoginResponse>(
+          `/auth/kakao/callback?code=${code}`,
+        );
 
         console.log('백엔드 응답:', response);
 
         // 로그인 성공 처리
         if (response.success && response.data.accessToken) {
           const { accessToken, refreshToken } = response.data;
-          
+
           // 토큰들을 localStorage에 저장
           localStorage.setItem('accessToken', accessToken);
           localStorage.setItem('refreshToken', refreshToken);
-          
+
           // AuthContext를 통해 로그인 상태 업데이트
           login(accessToken);
 
@@ -60,18 +62,21 @@ const KakaoCallback: React.FC = () => {
           console.log('Refresh Token:', refreshToken);
 
           // 신규 사용자인 경우 회원가입 페이지로, 아니면 홈으로
-          if (response.data.newUser) { // backend에서 newUser 필드가 true인 경우
+          if (response.data.newUser) {
+            // backend에서 newUser 필드가 true인 경우
             navigate('/signup');
           } else {
             navigate('/');
           }
         } else {
-          setError(response.data.error || '로그인 처리 중 오류가 발생했습니다.');
+          setError(
+            response.data.error || '로그인 처리 중 오류가 발생했습니다.',
+          );
           setTimeout(() => navigate('/login'), 2000);
         }
       } catch (error: any) {
         console.error('카카오 로그인 실패:', error);
-        
+
         // 탈퇴한 사용자 에러 처리
         if (error.status === 403) {
           setLoading(false);
@@ -79,7 +84,7 @@ const KakaoCallback: React.FC = () => {
           navigate('/login');
           return;
         }
-        
+
         setError(error.message || '카카오 로그인 처리 중 오류가 발생했습니다.');
         setTimeout(() => navigate('/login'), 2000);
       } finally {
@@ -92,9 +97,7 @@ const KakaoCallback: React.FC = () => {
 
   return (
     <div className="flex flex-col justify-center items-center h-screen px-5">
-      {loading && (
-        <Loading text="카카오 로그인 처리 중..." />
-      )}
+      {loading && <Loading text="카카오 로그인 처리 중..." />}
 
       {error && (
         <div className="text-red-600 text-center p-5 bg-red-50 border border-red-200 rounded-lg max-w-md">

@@ -24,31 +24,37 @@ export class SSEService {
   connect(userId: number): Promise<void> {
     return new Promise((resolve, reject) => {
       try {
-        console.log('🔄 SSE 연결 시도 시작', { userId, timestamp: new Date().toISOString() });
+        console.log('🔄 SSE 연결 시도 시작', {
+          userId,
+          timestamp: new Date().toISOString(),
+        });
         this.userId = userId;
-        this.eventSource = createSSEConnection(userId, this.lastEventId || undefined);
+        this.eventSource = createSSEConnection(
+          userId,
+          this.lastEventId || undefined,
+        );
 
         this.eventSource.onopen = () => {
-          console.log('✅ SSE 연결 성공!', { 
-            userId, 
+          console.log('✅ SSE 연결 성공!', {
+            userId,
             readyState: this.eventSource?.readyState,
             timestamp: new Date().toISOString(),
-            reconnectAttempts: this.reconnectAttempts
+            reconnectAttempts: this.reconnectAttempts,
           });
           this.reconnectAttempts = 0;
           resolve();
         };
 
-        this.eventSource.onmessage = (event) => {
+        this.eventSource.onmessage = event => {
           console.log('📨 SSE 기본 메시지 수신:', {
             data: event.data,
             lastEventId: event.lastEventId,
-            timestamp: new Date().toISOString()
+            timestamp: new Date().toISOString(),
           });
           this.handleMessage(event);
         };
 
-        this.eventSource.onerror = (error) => {
+        this.eventSource.onerror = error => {
           console.error('❌ SSE 연결 에러 발생:', {
             error,
             errorType: error.type,
@@ -56,24 +62,25 @@ export class SSEService {
             readyState: this.eventSource?.readyState,
             url: this.eventSource?.url,
             reconnectAttempts: this.reconnectAttempts,
-            timestamp: new Date().toISOString()
+            timestamp: new Date().toISOString(),
           });
-          
+
           // readyState에 따른 상세 에러 정보
           if (this.eventSource) {
-            const readyStateText = {
-              0: 'CONNECTING',
-              1: 'OPEN', 
-              2: 'CLOSED'
-            }[this.eventSource.readyState] || 'UNKNOWN';
-            
+            const readyStateText =
+              {
+                0: 'CONNECTING',
+                1: 'OPEN',
+                2: 'CLOSED',
+              }[this.eventSource.readyState] || 'UNKNOWN';
+
             console.error('🔍 SSE 상태 상세:', {
               readyState: this.eventSource.readyState,
               readyStateText,
-              url: this.eventSource.url
+              url: this.eventSource.url,
             });
           }
-          
+
           if (this.reconnectAttempts === 0) {
             reject(new Error('Failed to establish SSE connection'));
           }
@@ -81,13 +88,18 @@ export class SSEService {
         };
 
         // 커스텀 이벤트 리스너들 추가
-        const eventTypes = ['notification', 'chat', 'settlement', 'like', 'comment'];
+        const eventTypes = [
+          'notification',
+          'chat',
+          'settlement',
+          'like',
+          'comment',
+        ];
         eventTypes.forEach(type => {
-          this.eventSource?.addEventListener(type, (event) => {
+          this.eventSource?.addEventListener(type, event => {
             this.handleMessage(event as MessageEvent, type);
           });
         });
-
       } catch (error) {
         console.error('Failed to create SSE connection:', error);
         reject(error);
@@ -102,7 +114,7 @@ export class SSEService {
         id: event.lastEventId || undefined,
         type: eventType || 'message',
         data,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       };
 
       // Last-Event-ID 저장
@@ -116,9 +128,9 @@ export class SSEService {
         dataPreview: JSON.stringify(data).substring(0, 100) + '...',
         listenersCount: {
           specific: (this.listeners.get(sseEvent.type) || []).length,
-          all: (this.listeners.get('*') || []).length
+          all: (this.listeners.get('*') || []).length,
         },
-        timestamp: new Date(sseEvent.timestamp).toISOString()
+        timestamp: new Date(sseEvent.timestamp).toISOString(),
       });
 
       // 등록된 리스너들에게 이벤트 전달
@@ -128,7 +140,6 @@ export class SSEService {
       // 전체 이벤트 리스너에게도 전달
       const allListeners = this.listeners.get('*') || [];
       allListeners.forEach(listener => listener(sseEvent));
-
     } catch (error) {
       console.error('Failed to parse SSE message:', error);
     }
@@ -139,7 +150,7 @@ export class SSEService {
       console.error('🚫 SSE 최대 재연결 시도 횟수 도달', {
         maxAttempts: this.maxReconnectAttempts,
         userId: this.userId,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
       return;
     }
@@ -151,7 +162,7 @@ export class SSEService {
       delay: `${delay}ms`,
       attempt: `${this.reconnectAttempts}/${this.maxReconnectAttempts}`,
       userId: this.userId,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
 
     this.reconnectTimeout = setTimeout(() => {
@@ -169,7 +180,7 @@ export class SSEService {
     if (document.hidden) {
       console.log('👁️ 페이지 숨김 - SSE 재연결 시도 중단', {
         currentState: this.getConnectionState(),
-        hasReconnectTimeout: !!this.reconnectTimeout
+        hasReconnectTimeout: !!this.reconnectTimeout,
       });
       // 페이지가 숨겨졌을 때는 연결을 유지하되, 재연결 시도는 중단
       if (this.reconnectTimeout) {
@@ -180,10 +191,17 @@ export class SSEService {
       console.log('👁️ 페이지 표시 - SSE 연결 상태 확인', {
         currentState: this.getConnectionState(),
         userId: this.userId,
-        needsReconnect: this.userId && (!this.eventSource || this.eventSource.readyState === EventSource.CLOSED)
+        needsReconnect:
+          this.userId &&
+          (!this.eventSource ||
+            this.eventSource.readyState === EventSource.CLOSED),
       });
-      
-      if (this.userId && (!this.eventSource || this.eventSource.readyState === EventSource.CLOSED)) {
+
+      if (
+        this.userId &&
+        (!this.eventSource ||
+          this.eventSource.readyState === EventSource.CLOSED)
+      ) {
         // 페이지가 다시 보여졌을 때 연결이 끊어져 있으면 재연결
         console.log('🔄 페이지 복귀 후 SSE 재연결 시작');
         this.connect(this.userId).catch(error => {
@@ -215,26 +233,26 @@ export class SSEService {
       currentState: this.getConnectionState(),
       userId: this.userId,
       reconnectAttempts: this.reconnectAttempts,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
-    
+
     if (this.eventSource) {
       this.eventSource.close();
       this.eventSource = null;
     }
-    
+
     if (this.reconnectTimeout) {
       clearTimeout(this.reconnectTimeout);
       this.reconnectTimeout = null;
     }
-    
+
     this.reconnectAttempts = 0;
     console.log('✅ SSE 연결 종료 완료');
   }
 
   getConnectionState(): 'CONNECTING' | 'OPEN' | 'CLOSED' {
     if (!this.eventSource) return 'CLOSED';
-    
+
     switch (this.eventSource.readyState) {
       case EventSource.CONNECTING:
         return 'CONNECTING';
@@ -250,7 +268,10 @@ export class SSEService {
   destroy() {
     this.disconnect();
     this.listeners.clear();
-    document.removeEventListener('visibilitychange', this.handleVisibilityChange);
+    document.removeEventListener(
+      'visibilitychange',
+      this.handleVisibilityChange,
+    );
   }
 }
 
