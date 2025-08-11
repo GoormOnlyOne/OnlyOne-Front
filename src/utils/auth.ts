@@ -1,13 +1,48 @@
 // 인증 관련 유틸리티 함수들
 
 /**
+ * JWT base64url을 base64로 변환하고 디코딩
+ * @param base64url base64url 인코딩된 문자열
+ * @returns 디코딩된 문자열
+ */
+const base64UrlDecode = (base64url: string): string => {
+  // base64url을 base64로 변환
+  let base64 = base64url
+    .replace(/-/g, '+')
+    .replace(/_/g, '/');
+  
+  // 패딩 추가
+  const padding = base64.length % 4;
+  if (padding) {
+    base64 += '='.repeat(4 - padding);
+  }
+  
+  return atob(base64);
+};
+
+/**
+ * JWT 토큰의 페이로드 파싱
+ * @param token JWT 토큰
+ * @returns 파싱된 페이로드 객체
+ */
+const parseJwtPayload = (token: string): any => {
+  const segments = token.split('.');
+  if (segments.length !== 3) {
+    throw new Error('Invalid JWT format');
+  }
+  
+  const payload = base64UrlDecode(segments[1]);
+  return JSON.parse(payload);
+};
+
+/**
  * 토큰이 만료되었는지 확인
  * @param token JWT 토큰
  * @returns 만료 여부
  */
 export const isTokenExpired = (token: string): boolean => {
   try {
-    const payload = JSON.parse(atob(token.split('.')[1]));
+    const payload = parseJwtPayload(token);
     const currentTime = Date.now() / 1000;
     return payload.exp < currentTime;
   } catch (error) {
@@ -23,7 +58,7 @@ export const isTokenExpired = (token: string): boolean => {
  */
 export const getUserIdFromToken = (token: string): number | null => {
   try {
-    const payload = JSON.parse(atob(token.split('.')[1]));
+    const payload = parseJwtPayload(token);
     return payload.sub ? parseInt(payload.sub) : null;
   } catch (error) {
     console.error('토큰에서 사용자 ID 추출 오류:', error);
@@ -38,7 +73,7 @@ export const getUserIdFromToken = (token: string): number | null => {
  */
 export const getTokenExpirationTime = (token: string): Date | null => {
   try {
-    const payload = JSON.parse(atob(token.split('.')[1]));
+    const payload = parseJwtPayload(token);
     return payload.exp ? new Date(payload.exp * 1000) : null;
   } catch (error) {
     console.error('토큰 만료 시간 추출 오류:', error);
