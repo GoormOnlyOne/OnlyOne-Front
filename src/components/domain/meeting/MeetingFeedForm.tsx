@@ -265,14 +265,16 @@ const MeetingFeedForm = ({
               : 'bg-blue-500 text-white hover:bg-blue-600'
           }`}
           type="button"
-          >
+        >
           {loading ? (
             <span className="inline-flex items-center gap-2 justify-center">
               <Loading size="sm" />
               로딩 중...
             </span>
+          ) : mode === 'edit' ? (
+            '수정 완료'
           ) : (
-            mode === 'edit' ? '수정 완료' : '완료'
+            '완료'
           )}
         </button>
 

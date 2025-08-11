@@ -1,6 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 import SockJS from 'sockjs-client';
-import { CompatClient, Stomp, type IMessage, type StompSubscription } from '@stomp/stompjs';
+import {
+  CompatClient,
+  Stomp,
+  type IMessage,
+  type StompSubscription,
+} from '@stomp/stompjs';
 import type { ChatMessageDto } from '../types/chat/chat.types';
 
 type ChatMessagePayload = { text: string; imageUrl: string | null };
@@ -8,7 +13,9 @@ type ChatMessagePayload = { text: string; imageUrl: string | null };
 const IMAGE_PREFIX = 'IMAGE::';
 
 // 1) WS 엔드포인트: 환경변수 필수, 기본값 제거
-const WS_ENDPOINT = (import.meta.env.VITE_WS_ENDPOINT as string | undefined)?.replace(/\/$/, '');
+const WS_ENDPOINT = (
+  import.meta.env.VITE_WS_ENDPOINT as string | undefined
+)?.replace(/\/$/, '');
 
 // 재시도 설정
 const MAX_RETRY = 5;
@@ -66,13 +73,13 @@ export const useChatSocket = (chatRoomId: number, currentUserId: number) => {
       client.heartbeatOutgoing = 20000; // 20s
       client.heartbeatIncoming = 0;
 
-      client.onWebSocketClose = (evt) => {
+      client.onWebSocketClose = evt => {
         if (!isMountedRef.current) return;
         setIsConnected(false);
         scheduleReconnect(`WebSocket closed: code=${evt.code}`);
       };
 
-      client.onStompError = (frame) => {
+      client.onStompError = frame => {
         if (!isMountedRef.current) return;
         setLastError(frame.headers['message'] || 'STOMP error frame');
       };
@@ -97,7 +104,7 @@ export const useChatSocket = (chatRoomId: number, currentUserId: number) => {
           setIsConnected(false);
           setLastError(getErrorMessage(error));
           scheduleReconnect('connect() failed');
-        }
+        },
       );
     };
 
@@ -110,7 +117,7 @@ export const useChatSocket = (chatRoomId: number, currentUserId: number) => {
             const body = JSON.parse(message.body);
             // 최신 방만 반영
             if (roomRef.current !== roomId) return;
-            setMessages((prev) => [...prev, body]);
+            setMessages(prev => [...prev, body]);
           } catch (e) {
             console.warn('⚠️ 메시지 처리 실패:', e);
           }
@@ -134,7 +141,10 @@ export const useChatSocket = (chatRoomId: number, currentUserId: number) => {
         return;
       }
       retryCountRef.current = attempt;
-      const delay = Math.min(MAX_DELAY_MS, BASE_DELAY_MS * Math.pow(2, attempt - 1));
+      const delay = Math.min(
+        MAX_DELAY_MS,
+        BASE_DELAY_MS * Math.pow(2, attempt - 1),
+      );
       const jitter = Math.floor(Math.random() * 300);
       const wait = delay + jitter;
 
@@ -205,7 +215,7 @@ export const useChatSocket = (chatRoomId: number, currentUserId: number) => {
       client.send(
         `/pub/chat/${roomRef.current}/messages`,
         {},
-        JSON.stringify({ userId: currentUserId, text: payloadText })
+        JSON.stringify({ userId: currentUserId, text: payloadText }),
       );
     } catch (e) {
       console.error('❌ 메시지 전송 실패:', e);
@@ -214,7 +224,7 @@ export const useChatSocket = (chatRoomId: number, currentUserId: number) => {
 
   // 내부에서 재구독에 접근해야 하므로 함수 노출
   function trySubscribe(client: CompatClient, roomId: number) {
-    (useChatSocket as any); // 타입 억제용 no-op
+    useChatSocket as any; // 타입 억제용 no-op
     // 실제 구현은 위 useEffect 내부 정의를 사용합니다.
     (trySubscribe as any).ref?.(client, roomId);
   }

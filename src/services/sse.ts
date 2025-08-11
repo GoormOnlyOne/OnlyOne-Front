@@ -25,7 +25,10 @@ export class SSEService {
     return new Promise((resolve, reject) => {
       try {
         this.userId = userId;
-        this.eventSource = createSSEConnection(userId, this.lastEventId || undefined);
+        this.eventSource = createSSEConnection(
+          userId,
+          this.lastEventId || undefined,
+        );
 
         this.eventSource.onopen = () => {
           this.reconnectAttempts = 0;
@@ -44,13 +47,18 @@ export class SSEService {
         };
 
         // 커스텀 이벤트 리스너들 추가
-        const eventTypes = ['notification', 'chat', 'settlement', 'like', 'comment'];
+        const eventTypes = [
+          'notification',
+          'chat',
+          'settlement',
+          'like',
+          'comment',
+        ];
         eventTypes.forEach(type => {
-          this.eventSource?.addEventListener(type, (event) => {
+          this.eventSource?.addEventListener(type, event => {
             this.handleMessage(event as MessageEvent, type);
           });
         });
-
       } catch (error) {
         reject(error);
       }
@@ -64,14 +72,13 @@ export class SSEService {
         id: event.lastEventId || undefined,
         type: eventType || 'message',
         data,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       };
 
       // Last-Event-ID 저장
       if (event.lastEventId) {
         this.lastEventId = event.lastEventId;
       }
-
 
       // 등록된 리스너들에게 이벤트 전달
       const listeners = this.listeners.get(sseEvent.type) || [];
@@ -80,7 +87,7 @@ export class SSEService {
       // 전체 이벤트 리스너에게도 전달
       const allListeners = this.listeners.get('*') || [];
       allListeners.forEach(listener => listener(sseEvent));
-
+      
       // 알림 관련 이벤트를 window에 dispatch
       if (sseEvent.type === 'notification') {
         // 새 알림 수신 이벤트
@@ -95,7 +102,6 @@ export class SSEService {
           }));
         }
       }
-
     } catch {
       // SSE 메시지 파싱 실패 무시
     }
@@ -158,18 +164,18 @@ export class SSEService {
       this.eventSource.close();
       this.eventSource = null;
     }
-    
+
     if (this.reconnectTimeout) {
       clearTimeout(this.reconnectTimeout);
       this.reconnectTimeout = null;
     }
-    
+
     this.reconnectAttempts = 0;
   }
 
   getConnectionState(): 'CONNECTING' | 'OPEN' | 'CLOSED' {
     if (!this.eventSource) return 'CLOSED';
-    
+
     switch (this.eventSource.readyState) {
       case EventSource.CONNECTING:
         return 'CONNECTING';
@@ -185,7 +191,10 @@ export class SSEService {
   destroy() {
     this.disconnect();
     this.listeners.clear();
-    document.removeEventListener('visibilitychange', this.handleVisibilityChange);
+    document.removeEventListener(
+      'visibilitychange',
+      this.handleVisibilityChange,
+    );
   }
 }
 

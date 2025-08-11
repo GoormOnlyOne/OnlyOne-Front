@@ -11,7 +11,7 @@ export default function DefaultLayout() {
       </div>
 
       {/* 스크롤 가능한 메인 영역 */}
-      <main className="flex-1 overflow-y-auto bg-gray-50">
+      <main className="flex-1 overflow-y-auto bg-neutral-50">
         <Outlet />
       </main>
 

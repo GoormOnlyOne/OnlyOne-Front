@@ -1,7 +1,10 @@
 import { useEffect } from 'react';
 import { RouterProvider } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
-import { ToastProvider, useToast } from './components/common/Toast/ToastContext';
+import {
+  ToastProvider,
+  useToast,
+} from './components/common/Toast/ToastContext';
 import { setGlobalToastFunction } from './components/common/Toast/ToastProvider';
 import { router } from './routes/Router';
 import fcmService from './services/fcmService';
@@ -15,13 +18,17 @@ function AppContent() {
     const toastWrapper = (
       message: string,
       type?: 'success' | 'error' | 'warning' | 'info' | 'default',
-      durationMs?: number
+      durationMs?: number,
     ) => {
       // 'default'를 'info'로 매핑하거나 필터링
       const mappedType = type === 'default' ? 'info' : type;
-      showToast(message, mappedType as 'success' | 'error' | 'warning' | 'info', durationMs);
+      showToast(
+        message,
+        mappedType as 'success' | 'error' | 'warning' | 'info',
+        durationMs,
+      );
     };
-    
+
     setGlobalToastFunction(toastWrapper);
   }, [showToast]);
 
@@ -39,7 +46,7 @@ function AppContent() {
     const initializeFCM = async () => {
       try {
         const fcmInitialized = await fcmService.initialize();
-        
+
         if (fcmInitialized) {
           await fcmService.sendTokenToBackend();
         }

@@ -1,13 +1,13 @@
 import { useState, useEffect, useCallback } from 'react';
-import { 
-  getNotifications, 
+import {
+  getNotifications,
   markAllAsRead as apiMarkAllAsRead,
   deleteNotification as apiDeleteNotification,
   createNotification as apiCreateNotification,
 } from '../api/notification';
-import type { 
-  Notification,   
-  CreateNotificationRequest 
+import type {
+  Notification,
+  CreateNotificationRequest,
 } from '../types/notification';
 
 interface UseNotificationsProps {
@@ -15,7 +15,10 @@ interface UseNotificationsProps {
   pageSize?: number;
 }
 
-export const useNotifications = ({ userId, pageSize = 20 }: UseNotificationsProps) => {
+export const useNotifications = ({
+  userId,
+  pageSize = 20,
+}: UseNotificationsProps) => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [cursor, setCursor] = useState<number | null>(null);
   const [hasMore, setHasMore] = useState(true);
@@ -23,40 +26,43 @@ export const useNotifications = ({ userId, pageSize = 20 }: UseNotificationsProp
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const loadNotifications = useCallback(async (reset = false) => {
-    if (loading) return;
-    
-    try {
-      setLoading(true);
-      setError(null);
+  const loadNotifications = useCallback(
+    async (reset = false) => {
+      if (loading) return;
 
-      const response = await getNotifications({
-        userId,
-        cursor: reset ? undefined : cursor || undefined,
-        size: pageSize,
-      });
+      try {
+        setLoading(true);
+        setError(null);
 
-      const newNotifications = response.notifications;
-      
-      setNotifications(prev => 
-        reset ? newNotifications : [...prev, ...newNotifications]
-      );
-      setCursor(response.nextCursor);
-      setHasMore(response.hasNext);
-      setUnreadCount(response.unreadCount);
-    } catch {
-      setError('알림을 불러오는데 실패했습니다.');
-    } finally {
-      setLoading(false);
-    }
-  }, [userId, cursor, pageSize, loading]);
+        const response = await getNotifications({
+          userId,
+          cursor: reset ? undefined : cursor || undefined,
+          size: pageSize,
+        });
+
+        const newNotifications = response.notifications;
+        
+        setNotifications(prev => 
+          reset ? newNotifications : [...prev, ...newNotifications]
+        );
+        setCursor(response.nextCursor);
+        setHasMore(response.hasNext);
+        setUnreadCount(response.unreadCount);
+      } catch {
+        setError('알림을 불러오는데 실패했습니다.');
+      } finally {
+        setLoading(false);
+      }
+    },
+    [userId, cursor, pageSize, loading],
+  );
 
   const markAllAsRead = useCallback(async () => {
     try {
       const response = await apiMarkAllAsRead(userId);
       if (response.success) {
-        setNotifications(prev => 
-          prev.map(notification => ({ ...notification, isRead: true }))
+        setNotifications(prev =>
+          prev.map(notification => ({ ...notification, isRead: true })),
         );
         setUnreadCount(0);
       }
@@ -92,7 +98,7 @@ export const useNotifications = ({ userId, pageSize = 20 }: UseNotificationsProp
 
   useEffect(() => {
     void loadNotifications(true);
-  }, [userId, loadNotifications]); 
+  }, [userId, loadNotifications]);
 
   // SSE 이벤트 리스너 추가
   useEffect(() => {
@@ -105,12 +111,24 @@ export const useNotifications = ({ userId, pageSize = 20 }: UseNotificationsProp
       setUnreadCount(event.detail.count);
     };
 
-    window.addEventListener('notification-received', handleNotificationReceived as EventListener);
-    window.addEventListener('unread-count-updated', handleUnreadCountUpdated as EventListener);
+    window.addEventListener(
+      'notification-received',
+      handleNotificationReceived as EventListener,
+    );
+    window.addEventListener(
+      'unread-count-updated',
+      handleUnreadCountUpdated as EventListener,
+    );
 
     return () => {
-      window.removeEventListener('notification-received', handleNotificationReceived as EventListener);
-      window.removeEventListener('unread-count-updated', handleUnreadCountUpdated as EventListener);
+      window.removeEventListener(
+        'notification-received',
+        handleNotificationReceived as EventListener,
+      );
+      window.removeEventListener(
+        'unread-count-updated',
+        handleUnreadCountUpdated as EventListener,
+      );
     };
   }, []);
 

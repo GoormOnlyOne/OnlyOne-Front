@@ -3,12 +3,12 @@ import { createSSEConnection } from '../api/notification';
 
 export const testSSEConnection = (userId: number = 1) => {
   const eventSource = createSSEConnection(userId);
-  
+
   // 연결 성공
   eventSource.onopen = () => {
     // Connection successful
   };
-  
+
   // 메시지 수신
   eventSource.onmessage = (event) => {
     try {
@@ -18,7 +18,7 @@ export const testSSEConnection = (userId: number = 1) => {
       // Raw text data received
     }
   };
-  
+
   // 특정 이벤트 타입 처리
   eventSource.addEventListener('notification', (event) => {
     try {
@@ -28,28 +28,28 @@ export const testSSEConnection = (userId: number = 1) => {
       // Notification data parsing error
     }
   });
-  
+
   // 하트비트 이벤트 처리
   eventSource.addEventListener('heartbeat', (event) => {
     // Heartbeat received
   });
-  
+
   // 연결 에러
   eventSource.onerror = (error) => {
     // Connection error - auto reconnection will be attempted
   };
-  
+
   // 10초 후 연결 상태 체크
   setTimeout(() => {
     // Connection status checked
   }, 10000);
-  
+
   // 연결 종료 함수 반환
   return {
     close: () => {
       eventSource.close();
     },
-    eventSource
+    eventSource,
   };
 };
 

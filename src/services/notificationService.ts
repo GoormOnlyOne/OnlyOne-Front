@@ -26,7 +26,8 @@ export interface HeartbeatEvent extends SSEEvent {
 export class NotificationService {
   private eventSource: EventSource | null = null;
   private userId: number | null = null;
-  private listeners: Map<SSEEventType, Set<(event: SSEEvent) => void>> = new Map();
+  private listeners: Map<SSEEventType, Set<(event: SSEEvent) => void>> =
+    new Map();
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 5;
   private reconnectDelay = 1000;
@@ -46,14 +47,14 @@ export class NotificationService {
 
     this.isConnecting = true;
     this.userId = userId;
-    
+
     try {
       // 기존 연결이 있으면 정리
       if (this.eventSource) {
         this.eventSource.close();
         this.eventSource = null;
       }
-      
+
       // SSE 연결
       this.eventSource = createSSEConnection(userId);
       this.setupEventListeners();
@@ -64,7 +65,6 @@ export class NotificationService {
   }
 
   disconnect(): void {
-    
     this.isConnecting = false;
     if (this.eventSource) {
       this.eventSource.close();
@@ -75,7 +75,7 @@ export class NotificationService {
 
   addEventListener<T extends SSEEventType>(
     type: T,
-    listener: (event: SSEEvent) => void
+    listener: (event: SSEEvent) => void,
   ): void {
     const listeners = this.listeners.get(type);
     if (listeners) {
@@ -85,7 +85,7 @@ export class NotificationService {
 
   removeEventListener<T extends SSEEventType>(
     type: T,
-    listener: (event: SSEEvent) => void
+    listener: (event: SSEEvent) => void,
   ): void {
     const listeners = this.listeners.get(type);
     if (listeners) {
@@ -96,7 +96,7 @@ export class NotificationService {
   private setupEventListeners(): void {
     if (!this.eventSource) return;
 
-    this.eventSource.addEventListener('notification', (event) => {
+    this.eventSource.addEventListener('notification', event => {
       try {
         const data = JSON.parse(event.data);
         this.emitEvent('notification', data);
@@ -105,7 +105,7 @@ export class NotificationService {
       }
     });
 
-    this.eventSource.addEventListener('unread-count', (event) => {
+    this.eventSource.addEventListener('unread-count', event => {
       try {
         const data = JSON.parse(event.data);
         this.emitEvent('unread-count', data);
@@ -114,7 +114,7 @@ export class NotificationService {
       }
     });
 
-    this.eventSource.addEventListener('heartbeat', (event) => {
+    this.eventSource.addEventListener('heartbeat', event => {
       try {
         // heartbeat는 단순 문자열일 수 있으므로 JSON 파싱을 시도하되, 실패하면 문자열 그대로 사용
         let data;
@@ -156,7 +156,6 @@ export class NotificationService {
 
     this.reconnectAttempts++;
     const delay = this.reconnectDelay * Math.pow(2, this.reconnectAttempts - 1);
-
 
     setTimeout(async () => {
       if (this.userId) {

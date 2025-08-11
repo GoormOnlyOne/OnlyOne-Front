@@ -9,7 +9,7 @@ const firebaseConfig = {
   storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
   messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
-  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
 };
 
 // Firebase 앱 초기화
@@ -22,12 +22,12 @@ export const messaging = getMessaging(app);
 export const generateFCMToken = async (): Promise<string | null> => {
   try {
     const permission = await Notification.requestPermission();
-    
+
     if (permission === 'granted') {
       const token = await getToken(messaging, {
-        vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY
+        vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY,
       });
-      
+
       if (token) {
         return token;
       } else {
@@ -46,7 +46,7 @@ export const setupForegroundMessageListener = () => {
   onMessage(messaging, (payload) => {
     if (payload.notification) {
       const { title, body } = payload.notification;
-      
+
       // 브라우저 알림 표시
       if (Notification.permission === 'granted') {
         new Notification(title || '알림', {

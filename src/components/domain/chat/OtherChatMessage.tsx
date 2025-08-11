@@ -13,7 +13,7 @@ interface OtherChatMessageProps {
 const OtherChatMessage: React.FC<OtherChatMessageProps> = ({
   profileImage = '/default-avatar.png',
   username = '사용자',
-  message, 
+  message,
   imageUrl,
   timestamp,
   showProfile = true,
@@ -50,7 +50,9 @@ const OtherChatMessage: React.FC<OtherChatMessageProps> = ({
       {/* 메시지 */}
       <div className="flex-1 max-w-xs sm:max-w-md">
         {showProfile && (
-          <div className="text-sm font-medium text-gray-700 mb-1">{username}</div>
+          <div className="text-sm font-medium text-gray-700 mb-1">
+            {username}
+          </div>
         )}
         <div className="flex items-end space-x-2">
           {imageUrl ? (

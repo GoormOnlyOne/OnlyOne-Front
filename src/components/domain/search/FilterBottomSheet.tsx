@@ -34,23 +34,26 @@ interface FilterBottomSheetProps {
 }
 
 const getCities = () => {
-  return Object.entries((koreanRegions as KoreanRegions).korea_administrative_divisions).map(([city, data]) => ({
+  return Object.entries(
+    (koreanRegions as KoreanRegions).korea_administrative_divisions,
+  ).map(([city, data]) => ({
     name: city,
-    districts: data.districts
+    districts: data.districts,
   }));
 };
 
 const getDistrictsForCity = (cityName: string): string[] => {
-  const cityData = (koreanRegions as KoreanRegions).korea_administrative_divisions[cityName];
+  const cityData = (koreanRegions as KoreanRegions)
+    .korea_administrative_divisions[cityName];
   return cityData ? cityData.districts : [];
 };
 
-export const FilterBottomSheet = ({ 
-  isOpen, 
-  onClose, 
-  filters, 
-  onApplyFilters, 
-  interests 
+export const FilterBottomSheet = ({
+  isOpen,
+  onClose,
+  filters,
+  onApplyFilters,
+  interests,
 }: FilterBottomSheetProps) => {
   const [tempFilters, setTempFilters] = useState<SearchFilters>(filters);
   const [availableDistricts, setAvailableDistricts] = useState<string[]>([]);
@@ -67,16 +70,22 @@ export const FilterBottomSheet = ({
     }
   }, [tempFilters.city]);
 
-  const handleFilterChange = (key: keyof SearchFilters, value: string | number | null) => {
+  const handleFilterChange = (
+    key: keyof SearchFilters,
+    value: string | number | null,
+  ) => {
     let newFilters = { ...tempFilters, [key]: value };
-    
+
     if (key === 'city' && value) {
       const districts = getDistrictsForCity(value as string);
-      newFilters = { ...newFilters, district: districts.length > 0 ? districts[0] : '' };
+      newFilters = {
+        ...newFilters,
+        district: districts.length > 0 ? districts[0] : '',
+      };
     } else if (key === 'city' && !value) {
       newFilters = { ...newFilters, district: '' };
     }
-    
+
     setTempFilters(newFilters);
   };
 
@@ -90,17 +99,24 @@ export const FilterBottomSheet = ({
       city: '',
       district: '',
       interestId: null,
-      sortBy: 'MEMBER_COUNT' as const
+      sortBy: 'MEMBER_COUNT' as const,
     };
     setTempFilters(resetFilters);
   };
 
   return (
-    <BottomSheet isOpen={isOpen} onClose={onClose} title="필터" showCloseButton={false}>
+    <BottomSheet
+      isOpen={isOpen}
+      onClose={onClose}
+      title="필터"
+      showCloseButton={false}
+    >
       <div className="px-6 pb-6 space-y-6">
         {/* 정렬 */}
         <div className="space-y-3">
-          <label className="block text-sm font-semibold text-gray-900">정렬</label>
+          <label className="block text-sm font-semibold text-gray-900">
+            정렬
+          </label>
           <div className="flex gap-2">
             <button
               onClick={() => handleFilterChange('sortBy', 'MEMBER_COUNT')}
@@ -127,27 +143,33 @@ export const FilterBottomSheet = ({
 
         {/* 지역 */}
         <div className="space-y-3">
-          <label className="block text-sm font-semibold text-gray-900">지역</label>
+          <label className="block text-sm font-semibold text-gray-900">
+            지역
+          </label>
           <div className="space-y-3">
             <select
               value={tempFilters.city}
-              onChange={(e) => handleFilterChange('city', e.target.value)}
+              onChange={e => handleFilterChange('city', e.target.value)}
               className="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="">전체 지역</option>
               {getCities().map(city => (
-                <option key={city.name} value={city.name}>{city.name}</option>
+                <option key={city.name} value={city.name}>
+                  {city.name}
+                </option>
               ))}
             </select>
-            
+
             {tempFilters.city && (
               <select
                 value={tempFilters.district}
-                onChange={(e) => handleFilterChange('district', e.target.value)}
+                onChange={e => handleFilterChange('district', e.target.value)}
                 className="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 {availableDistricts.map(district => (
-                  <option key={district} value={district}>{district}</option>
+                  <option key={district} value={district}>
+                    {district}
+                  </option>
                 ))}
               </select>
             )}
@@ -156,10 +178,17 @@ export const FilterBottomSheet = ({
 
         {/* 관심사 */}
         <div className="space-y-3">
-          <label className="block text-sm font-semibold text-gray-900">관심사</label>
+          <label className="block text-sm font-semibold text-gray-900">
+            관심사
+          </label>
           <select
             value={tempFilters.interestId || ''}
-            onChange={(e) => handleFilterChange('interestId', e.target.value ? Number(e.target.value) : null)}
+            onChange={e =>
+              handleFilterChange(
+                'interestId',
+                e.target.value ? Number(e.target.value) : null,
+              )
+            }
             className="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
             <option value="">전체 관심사</option>

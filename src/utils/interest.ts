@@ -10,19 +10,67 @@ export interface InterestInfo {
 const normalizeKey = (s: string) => (s ?? '').trim().toUpperCase();
 
 export const INTEREST_DATA: Record<string, InterestInfo> = Object.freeze({
-  CULTURE: { label: '문화', icon: 'ri-palette-line', activeIcon: 'ri-palette-fill', bgColor: 'bg-purple-100', textColor: 'text-purple-700' },
-  EXERCISE: { label: '운동', icon: 'ri-run-line', activeIcon: 'ri-run-fill', bgColor: 'bg-orange-100', textColor: 'text-orange-700' },
-  TRAVEL: { label: '여행', icon: 'ri-plane-line', activeIcon: 'ri-plane-fill', bgColor: 'bg-blue-100', textColor: 'text-blue-700' },
-  MUSIC: { label: '음악', icon: 'ri-music-2-line', activeIcon: 'ri-music-2-fill', bgColor: 'bg-pink-100', textColor: 'text-pink-700' },
-  CRAFT: { label: '공예', icon: 'ri-scissors-cut-line', activeIcon: 'ri-scissors-cut-fill', bgColor: 'bg-amber-100', textColor: 'text-amber-700' },
-  SOCIAL: { label: '사교', icon: 'ri-team-line', activeIcon: 'ri-team-fill', bgColor: 'bg-green-100', textColor: 'text-green-700' },
-  LANGUAGE: { label: '외국어', icon: 'ri-translate-2', activeIcon: 'ri-translate', bgColor: 'bg-indigo-100', textColor: 'text-indigo-700' },
-  FINANCE: { label: '재테크', icon: 'ri-money-dollar-circle-line', activeIcon: 'ri-money-dollar-circle-fill', bgColor: 'bg-emerald-100', textColor: 'text-emerald-700' },
+  CULTURE: {
+    label: '문화',
+    icon: 'ri-palette-line',
+    activeIcon: 'ri-palette-fill',
+    bgColor: 'bg-purple-100',
+    textColor: 'text-purple-700',
+  },
+  EXERCISE: {
+    label: '운동',
+    icon: 'ri-run-line',
+    activeIcon: 'ri-run-fill',
+    bgColor: 'bg-orange-100',
+    textColor: 'text-orange-700',
+  },
+  TRAVEL: {
+    label: '여행',
+    icon: 'ri-plane-line',
+    activeIcon: 'ri-plane-fill',
+    bgColor: 'bg-blue-100',
+    textColor: 'text-blue-700',
+  },
+  MUSIC: {
+    label: '음악',
+    icon: 'ri-music-2-line',
+    activeIcon: 'ri-music-2-fill',
+    bgColor: 'bg-pink-100',
+    textColor: 'text-pink-700',
+  },
+  CRAFT: {
+    label: '공예',
+    icon: 'ri-scissors-cut-line',
+    activeIcon: 'ri-scissors-cut-fill',
+    bgColor: 'bg-amber-100',
+    textColor: 'text-amber-700',
+  },
+  SOCIAL: {
+    label: '사교',
+    icon: 'ri-team-line',
+    activeIcon: 'ri-team-fill',
+    bgColor: 'bg-green-100',
+    textColor: 'text-green-700',
+  },
+  LANGUAGE: {
+    label: '외국어',
+    icon: 'ri-translate-2',
+    activeIcon: 'ri-translate',
+    bgColor: 'bg-indigo-100',
+    textColor: 'text-indigo-700',
+  },
+  FINANCE: {
+    label: '재테크',
+    icon: 'ri-money-dollar-circle-line',
+    activeIcon: 'ri-money-dollar-circle-fill',
+    bgColor: 'bg-emerald-100',
+    textColor: 'text-emerald-700',
+  },
 });
 
 // 하위 호환성을 위한 기존 함수들
 export const INTEREST_TRANSLATIONS: Record<string, string> = Object.fromEntries(
-  Object.entries(INTEREST_DATA).map(([key, value]) => [key, value.label])
+  Object.entries(INTEREST_DATA).map(([key, value]) => [key, value.label]),
 );
 
 /**
@@ -51,13 +99,15 @@ export const translateInterests = (englishKeywords: string[]): string[] => {
  */
 export const getInterestInfo = (englishKeyword: string): InterestInfo => {
   const normalizedKey = normalizeKey(englishKeyword);
-  return INTEREST_DATA[normalizedKey] || {
-    label: englishKeyword,
-    icon: 'ri-hashtag',
-    activeIcon: 'ri-hashtag',
-    bgColor: 'bg-gray-100',
-    textColor: 'text-gray-700',
-  };
+  return (
+    INTEREST_DATA[normalizedKey] || {
+      label: englishKeyword,
+      icon: 'ri-hashtag',
+      activeIcon: 'ri-hashtag',
+      bgColor: 'bg-gray-100',
+      textColor: 'text-gray-700',
+    }
+  );
 };
 
 /**

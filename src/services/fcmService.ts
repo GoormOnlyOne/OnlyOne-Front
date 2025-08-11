@@ -1,4 +1,7 @@
-import { generateFCMToken, setupForegroundMessageListener } from '../config/firebase';
+import {
+  generateFCMToken,
+  setupForegroundMessageListener,
+} from '../config/firebase';
 
 export class FCMService {
   private fcmToken: string | null = null;
@@ -24,10 +27,10 @@ export class FCMService {
       
       // 서비스 워커 등록
       await this.registerServiceWorker();
-      
+
       // FCM 토큰 발급
       this.fcmToken = await generateFCMToken();
-      
+
       if (this.fcmToken) {
         this.isInitialized = true;
         return true;
@@ -81,21 +84,25 @@ export class FCMService {
 
     try {
 
-      const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/';
-      const url = new URL(`users/fcm-token?fcmToken=${encodeURIComponent(this.fcmToken)}`, baseUrl).toString();
-      
+      const baseUrl =
+        import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/';
+      const url = new URL(
+        `users/fcm-token?fcmToken=${encodeURIComponent(this.fcmToken)}`,
+        baseUrl,
+      ).toString();
+
       const token = localStorage.getItem('accessToken');
       const headers: Record<string, string> = {
         'Content-Type': 'application/json',
       };
-      
+
       if (token) {
         headers.Authorization = `Bearer ${token}`;
       }
-      
+
       const response = await fetch(url, {
         method: 'PUT',
-        headers
+        headers,
       });
 
       if (response.ok) {
@@ -112,7 +119,9 @@ export class FCMService {
    * 알림 권한 상태 확인
    */
   getNotificationPermission(): NotificationPermission {
-    return typeof Notification !== 'undefined' ? Notification.permission : 'denied';
+    return typeof Notification !== 'undefined'
+      ? Notification.permission
+      : 'denied';
   }
 
   /**
@@ -123,7 +132,7 @@ export class FCMService {
       if (typeof Notification === 'undefined') {
         return 'denied';
       }
-      
+
       const permission = await Notification.requestPermission();
       return permission;
     } catch (error) {
@@ -144,11 +153,11 @@ export class FCMService {
   async refreshToken(): Promise<string | null> {
     try {
       this.fcmToken = await generateFCMToken();
-      
+
       if (this.fcmToken) {
       } else {
       }
-      
+
       return this.fcmToken;
     } catch (error) {
       return null;
