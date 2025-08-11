@@ -168,7 +168,7 @@ export default function CategorySection({
               </div>
 
               <span
-                className={`${selected ? 'text-white font-semibold drop-shadow-sm' : selectable ? 'text-brand-deepest group-hover:text-white font-medium' : 'text-neutral-400'} text-[10px] sm:text-xs transition-all duration-300`}
+                className={`${selected ? 'text-white font-semibold drop-shadow-sm' : selectable ? 'text-brand-deepest group-hover:text-white font-medium' : 'text-neutral-400'} text-xs sm:text-sm transition-all duration-300`}
               >
                 {label}
               </span>

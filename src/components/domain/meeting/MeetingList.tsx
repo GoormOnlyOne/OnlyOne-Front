@@ -136,15 +136,15 @@ export default function MeetingList({
   // 홈 모드 렌더링
   if (mode === 'home') {
     return (
-      <div className="px-4 pb-20 mt-10">
+      <div className="px-4 pb-20">
         {showHomeSpecialSections && (
           <>
             {/* 맞춤 추천 모임 섹션 */}
             <div>
-              <h1 className="text-2xl font-semibold text-gray-800 leading-snug mb-1">
+              <h1 className="text-base font-semibold text-gray-800 leading-snug mb-1">
                 📍 내게 딱 맞는 모임을 찾아보세요!
               </h1>
-              <h2 className="text-lg text-gray-400">
+              <h2 className="text-sm text-gray-400">
                 내 취향{' '}
                 <span className="text-[#EF7C30] font-semibold">맞춤 모임</span>
                 을 소개해드려요.
@@ -159,15 +159,7 @@ export default function MeetingList({
               <div className="flex justify-center mt-6 mb-8">
                 <button
                   onClick={handleViewMoreRecommended}
-                  className="
-    bg-[#F5921F] text-white text-base font-bold
-    px-6 py-2.5 rounded-full
-    border-2 border-[#F5921F]
-    hover:bg-[#EF7C30]
-    transform hover:scale-105
-    transition-all duration-200
-    focus:outline-none focus:ring-2 focus:ring-[#F5921F]/40
-  "
+                  className="bg-gradient-to-br from-brand-primary to-brand-secondary text-white px-4 py-2 rounded-full text-sm font-medium hover:from-brand-secondary hover:to-brand-primary transition-all duration-200 hover:shadow-md"
                 >
                   더보기 →
                 </button>
@@ -176,10 +168,10 @@ export default function MeetingList({
 
             {/* 함께하는 사람들의 모임 섹션 */}
             <div className="mb-8">
-              <h1 className="text-2xl font-semibold text-gray-800 leading-snug mb-1">
+              <h1 className="text-base font-semibold text-gray-800 leading-snug mb-1">
                 ⚽ 모임 친구들은 이런 활동도 해요!
               </h1>
-              <h2 className="text-lg text-gray-400">
+              <h2 className="text-sm text-gray-400">
                 함께하는 멤버들의{' '}
                 <span className="text-[#EF7C30] font-semibold">다른 모임</span>
                 도 구경해 보세요.
@@ -194,15 +186,7 @@ export default function MeetingList({
               <div className="flex justify-center mt-6">
                 <button
                   onClick={handleViewMoreRecommended}
-                  className="
-    bg-[#F5921F] text-white text-base font-bold
-    px-6 py-2.5 rounded-full
-    border-2 border-[#F5921F]
-    hover:bg-[#EF7C30]
-    transform hover:scale-105
-    transition-all duration-200
-    focus:outline-none focus:ring-2 focus:ring-[#F5921F]/40
-  "
+                  className="bg-gradient-to-br from-brand-primary to-brand-secondary text-white px-4 py-2 rounded-full text-sm font-medium hover:from-brand-secondary hover:to-brand-primary transition-all duration-200 hover:shadow-md"
                 >
                   더보기 →
                 </button>
