@@ -36,6 +36,9 @@ import { Checkout } from '../pages/Payment/Checkout.tsx';
 import PartnerMeetings from '../pages/PartnerMeetings.tsx';
 import RecommendedMeetings from '../pages/RecommendedMeetings.tsx';
 import MyMeeting from '../pages/Meeting/MyMeeting.tsx';
+
+import ChatRoomList from '../pages/Chat/ChatRoomList';
+import ChatRoom from '../pages/Chat/ChatRoom';
 import FeedList from '../pages/Meeting/FeedList.tsx';
 
 export const router = createBrowserRouter([
@@ -159,6 +162,15 @@ export const router = createBrowserRouter([
 			{
 				path: '/recommended-meetings',
 				element: <RecommendedMeetings />,
+			},
+       {
+        path: '/clubs/:clubId/chat',
+        element: <ChatRoomList />,
+      },
+      {
+        path: '/chat/:chatRoomId/messages',
+        element: <ChatRoom />,
+      },
 			},
 			{
 				path: '/feeds',

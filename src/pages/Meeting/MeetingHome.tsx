@@ -5,6 +5,7 @@ import { showToast as globalToast } from '../../components/common/Toast/ToastPro
 import ScheduleList from '../../components/domain/meeting/ScheduleList';
 import apiClient from '../../api/client';
 import Modal from '../../components/common/Modal';
+import { Settings, Plus, MapPin, Users, Tag } from 'lucide-react';
 
 // API 응답 타입
 interface ClubDetailResponse {
@@ -37,11 +38,8 @@ const MeetingHome: React.FC = () => {
   const [meeting, setMeeting] = useState<Meeting | null>(null);
   const [loading, setLoading] = useState(true);
   const [showCTA, setShowCTA] = useState(false);
-
-  // Modal state for join confirmation
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // 1) 모임 정보 Fetch
   useEffect(() => {
     if (!meetingId) return;
 
@@ -54,7 +52,6 @@ const MeetingHome: React.FC = () => {
 
         if (response.success) {
           const data = response.data;
-          // 현재 코드를 다음과 같이 수정:
           setMeeting({
             id: data.clubId,
             title: data.name,
@@ -77,7 +74,7 @@ const MeetingHome: React.FC = () => {
     fetchMeetingDetail();
   }, [meetingId, navigate]);
 
-  // 2) GUEST용 Sticky CTA 애니메이션
+  // GUEST용 가입하기 버튼
   useEffect(() => {
     if (meeting?.role === 'GUEST') {
       const timer = setTimeout(() => setShowCTA(true), 400);
@@ -96,8 +93,7 @@ const MeetingHome: React.FC = () => {
       return;
     }
     try {
-      // TODO: post로 수정 (프&백 둘다)
-      const res = await apiClient.get<{ success: boolean }>(
+      const res = await apiClient.post<{ success: boolean }>(
         `/clubs/${meetingId}/join`,
       );
       if (res.success) {
@@ -126,7 +122,7 @@ const MeetingHome: React.FC = () => {
   return (
     <div className="px-4 pb-20">
       {/* 대표 이미지 */}
-      <div className="w-full h-48 bg-gray-400 rounded-lg mb-6 overflow-hidden">
+      <div className="w-full h-48 bg-gray-400 rounded-2xl mb-6 overflow-hidden shadow-sm">
         {meeting.image ? (
           <img
             src={meeting.image}
@@ -134,38 +130,66 @@ const MeetingHome: React.FC = () => {
             className="w-full h-full object-cover"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <span className="text-white text-lg">사진이 들어갑니다..</span>
+          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-300 to-gray-400">
+            <span className="text-white text-lg font-medium">
+              사진이 들어갑니다
+            </span>
           </div>
         )}
       </div>
 
       {/* 모임 정보 */}
-      <h2 className="text-lg font-bold mb-2">{meeting.title}</h2>
-      <p className="text-sm text-gray-600 mb-4">
-        {meeting.location} · {meeting.category} · 멤버{' '}
-        {meeting.participantCount}명
-      </p>
       <div className="mb-6">
-        <h3 className="text-base font-medium mb-3">모임 소개</h3>
-        <p className="text-sm text-gray-700">{meeting.description}</p>
+        <h2 className="text-xl font-bold mb-3 text-gray-900">
+          {meeting.title}
+        </h2>
+
+        {/* 모임 메타 정보 */}
+        <div className="space-y-2 mb-4">
+          <div className="flex items-center gap-2 text-sm text-gray-600">
+            <MapPin className="w-4 h-4" />
+            <span>{meeting.location}</span>
+          </div>
+          <div className="flex items-center gap-2 text-sm text-gray-600">
+            <Tag className="w-4 h-4" />
+            <span>{meeting.category}</span>
+          </div>
+          <div className="flex items-center gap-2 text-sm text-gray-600">
+            <Users className="w-4 h-4" />
+            <span>멤버 {meeting.participantCount}명</span>
+          </div>
+        </div>
+
+        {/* 모임 소개 */}
+        <div className="bg-gray-50 rounded-xl p-4">
+          <h3 className="text-base font-semibold mb-2 text-gray-900">
+            모임 소개
+          </h3>
+          <p className="text-sm text-gray-700 leading-relaxed">
+            {meeting.description}
+          </p>
+        </div>
       </div>
 
       {/* 리더 전용 버튼 */}
       {meeting.role === 'LEADER' && (
-        <div className="flex gap-2 mb-6">
-          <button
-            onClick={() => navigate(`/meeting/${meeting.id}/edit`)}
-            className="bg-blue-500 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-600"
-          >
-            모임 정보 수정
-          </button>
-          <button
-            onClick={() => navigate(`/meeting/${meeting.id}/schedule/create`)}
-            className="bg-green-500 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-green-600"
-          >
-            정기모임 추가
-          </button>
+        <div className="mb-6">
+          <div className="flex gap-3">
+            <button
+              onClick={() => navigate(`/meeting/${meeting.id}/edit`)}
+              className="flex-1 flex items-center justify-center gap-2 bg-white border border-gray-200 text-gray-700 px-4 py-3 rounded-xl text-sm font-medium hover:bg-gray-50 transition-colors shadow-sm"
+            >
+              <Settings className="w-4 h-4" />
+              모임 정보 수정
+            </button>
+            <button
+              onClick={() => navigate(`/meeting/${meeting.id}/schedule/create`)}
+              className="flex-1 flex items-center justify-center gap-2 bg-[#F5921F] text-white px-4 py-3 rounded-xl text-sm font-medium hover:bg-[#EF7C30] transition-colors shadow-sm"
+            >
+              <Plus className="w-4 h-4" />
+              정기모임 추가
+            </button>
+          </div>
         </div>
       )}
 
@@ -188,9 +212,9 @@ const MeetingHome: React.FC = () => {
               onClick={handleModalOpen}
               className="
                 w-[90vw] max-w-md mb-6 py-4
-                bg-blue-600 text-white text-lg font-bold
+                bg-[#F5921F] text-white text-lg font-bold
                 rounded-xl shadow-lg
-                hover:bg-blue-700 active:scale-95
+                hover:bg-[#EF7C30] active:scale-95
                 transition-all duration-200
               "
             >

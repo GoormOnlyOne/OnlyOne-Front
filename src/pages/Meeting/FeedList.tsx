@@ -283,19 +283,7 @@ const FeedItem = ({ feed, onCommentClick }: FeedItemProps) => {
             {/* 원본 내용 */}
             <div className="px-4 py-3">
               <p className="text-sm">{actualOriginalFeed.content}</p>
-            </div>
-
-            {/* 원본 상호작용 수치 */}
-            <div className="flex items-center gap-4 px-4 py-3 border-t border-gray-100">
-              <div className="flex items-center gap-2">
-                <i className="ri-heart-line text-xl" />
-                <span className="text-sm">{actualOriginalFeed.likeCount}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <i className="ri-chat-3-line text-xl" />
-                <span className="text-sm">{actualOriginalFeed.commentCount}</span>
-              </div>
-            </div>
+            </div>      
           </div>
         )}
 
@@ -342,12 +330,15 @@ const FeedItem = ({ feed, onCommentClick }: FeedItemProps) => {
 
       {/* 피드 내용 */}
       <div className="px-4 py-3">
-        {/* 리피드 표시 - 직접 리피드한 대상 */}
+        {/* 리피드 표시 - 직접 리피드한 대상과 원본 작성자 */}
         {feed.isRepost && feed.originalFeed && (
           <div className="flex items-center gap-1 text-xs text-gray-500 mb-2">
             <i className="ri-repeat-line"></i>
             <span>
               {feed.nickname}님이 {feed.originalFeed.nickname}님의 {feed.originalFeed.isRepost ? '리피드를' : '피드를'} 리피드함
+              {actualOriginalFeed && actualOriginalFeed.nickname !== feed.originalFeed.nickname && 
+                ` (원본: ${actualOriginalFeed.nickname}님)`
+              }
             </span>
           </div>
         )}
