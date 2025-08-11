@@ -124,11 +124,11 @@ const ChatRoom: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-gray-50 overflow-hidden max-w-full w-full">
+    <div className="flex flex-col h-[calc(100dvh-56px)] bg-gray-50 overflow-hidden max-w-full w-full">
       {/* 채팅 메시지 영역 */}
       <div
-        className="flex-1 overflow-y-auto px-2 sm:px-4 py-3 space-y-2 w-full max-w-full relative" // ★ 변경: relative 추가
-        aria-busy={loading} // ★ 변경: 접근성
+        className="flex-1 min-h-0 overflow-y-auto no-scrollbar px-2 sm:px-4 py-3 space-y-2 w-full max-w-full relative"
+        aria-busy={loading}
       >
         {/* ★ 변경: 공통 로딩(오버레이) */}
         {loading && <Loading overlay text="메시지 불러오는 중..." />}
@@ -184,7 +184,7 @@ const ChatRoom: React.FC = () => {
       </div>
 
       {/* 입력창 */}
-      <div className="px-2 sm:px-4 py-2 sm:py-3 border-t bg-white">
+      <div className="px-2 sm:px-4 py-2 sm:py-3 border-t bg-white shrink-0">
         <form className="flex flex-col space-y-2 w-full max-w-full" onSubmit={handleSend}>
           {imagePreview && (
             <div className="flex items-center justify-between">
@@ -208,7 +208,8 @@ const ChatRoom: React.FC = () => {
           )}
 
           <div className="flex flex-wrap items-center gap-2 w-full">
-            <label className="cursor-pointer flex items-center text-blue-500 hover:text-blue-700">
+            {/* 이미지 아이콘 색상 변경 */}
+            <label className="cursor-pointer flex items-center text-[#FFAE00] hover:text-[#e89d00]">
               <Image className="w-5 h-5" />
               <input
                 type="file"
@@ -222,11 +223,12 @@ const ChatRoom: React.FC = () => {
               value={text}
               onChange={(e) => setText(e.target.value)}
               placeholder="메시지를 입력하세요"
-              className="flex-1 min-w-0 px-3 py-1.5 sm:px-4 sm:py-2 border rounded-full text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="flex-1 min-w-0 px-3 py-1.5 sm:px-4 sm:py-2 border rounded-full text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-[#FFAE00]"
             />
+            {/* 전송 버튼 색상 변경 */}
             <button
               type="submit"
-              className="px-3 sm:px-4 py-1.5 sm:py-2 bg-blue-500 text-white rounded-full text-xs sm:text-sm hover:bg-blue-600 disabled:opacity-50"
+              className="px-3 sm:px-4 py-1.5 sm:py-2 bg-[#FFAE00] text-white rounded-full text-xs sm:text-sm hover:bg-[#e89d00] disabled:opacity-50"
               disabled={!text.trim() && !imageFile}
             >
               전송
