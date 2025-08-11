@@ -65,3 +65,35 @@ export const deleteNotification = async (params: {
   );
   return response.data;
 };
+
+// SSE 연결 생성
+export const createSSEConnection = (userId: number, lastEventId?: string): EventSource => {
+  // 환경변수에서 API 베이스 URL 가져오기 (다른 API와 동일)
+  const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/';
+  const url = new URL(`sse/subscribe/${userId}`, baseUrl);
+  
+  // JWT 토큰이 있으면 쿼리 파라미터로 추가 (EventSource는 헤더 설정 불가)
+  const token = localStorage.getItem('accessToken');
+  if (token) {
+    url.searchParams.set('token', token);
+  }
+  
+  console.log('🌐 SSE EventSource 생성:', {
+    url: url.toString(),
+    userId,
+    lastEventId,
+    baseUrl,
+    timestamp: new Date().toISOString()
+  });
+  
+  // EventSource에 Last-Event-ID 헤더를 설정하려면 직접 설정할 수 없으므로
+  // 브라우저가 자동으로 처리하도록 합니다
+  const eventSource = new EventSource(url.toString());
+  
+  // Last-Event-ID가 있는 경우 로그로만 표시
+  if (lastEventId) {
+    console.log('📋 Last-Event-ID 설정됨:', lastEventId);
+  }
+  
+  return eventSource;
+};

@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import logo from '../../../assets/image.png';
 
 export default function Header() {
   return (
@@ -6,9 +7,16 @@ export default function Header() {
       <div className="h-full flex items-center justify-between px-4">
         <Link
           to="/"
-          className="text-xl font-bold text-blue-600"
+          className="inline-flex items-center h-12"
+          aria-label="홈으로"
         >
-          logo
+          <img
+            src={logo}
+            alt="서비스 로고"
+            className="h-10 w-auto block" // 높이만 정하고 가로는 비율 유지
+            decoding="async"
+            loading="eager"
+          />
         </Link>
 
         <div className="flex items-center space-x-3">
