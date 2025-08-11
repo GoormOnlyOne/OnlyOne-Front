@@ -402,7 +402,7 @@ export default function ScheduleList({ clubRole }: ScheduleListProps) {
   if (loading) {
     return (
       <div className="space-y-4">
-        <h2 className="font-bold">정기 모임</h2>
+        <h2 className="font-bold text-xl">정기 모임</h2>
         <div className="flex justify-center items-center h-32">
           <span className="text-gray-500">로딩 중...</span>
         </div>
@@ -413,7 +413,7 @@ export default function ScheduleList({ clubRole }: ScheduleListProps) {
   if (error) {
     return (
       <div className="space-y-4">
-        <h2 className="font-bold">정기 모임</h2>
+        <h2 className="font-bold text-xl">정기 모임</h2>
         <div className="text-red-500 text-center">{error}</div>
       </div>
     );
@@ -425,7 +425,7 @@ export default function ScheduleList({ clubRole }: ScheduleListProps) {
   return (
     <>
       <div className="space-y-4">
-        <h2 className="font-bold">정기 모임</h2>
+        <h2 className="font-bold text-xl">정기 모임</h2>
         {safeSchedules.length === 0 ? (
           <div className="text-center text-gray-500 py-8">
             등록된 정기모임이 없습니다.
