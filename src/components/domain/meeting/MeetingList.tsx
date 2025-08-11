@@ -141,10 +141,15 @@ export default function MeetingList({
           <>
             {/* 맞춤 추천 모임 섹션 */}
             <div>
-              <h1 className="text-2xl font-semibold text-gray-800 leading-snug mb-4">
+              <h1 className="text-2xl font-semibold text-gray-800 leading-snug mb-1">
                 내게 딱 맞는 모임을 찾아보세요!
               </h1>
-              <div className="space-y-4">
+              <h2 className="text-lg text-gray-400">
+                내 취향{' '}
+                <span className="text-[#EF7C30] font-semibold">맞춤 모임</span>
+                을 소개해드려요.
+              </h2>
+              <div className="space-y-4 mt-2">
                 {meetings.map(meeting => (
                   <MeetingCard key={meeting.clubId} meeting={meeting} />
                 ))}
@@ -171,11 +176,15 @@ export default function MeetingList({
 
             {/* 함께하는 사람들의 모임 섹션 */}
             <div className="mb-8">
-              <h1 className="text-2xl font-semibold text-gray-800 leading-snug mb-4">
+              <h1 className="text-2xl font-semibold text-gray-800 leading-snug mb-1">
                 모임 친구들은 이런 활동도 해요!
               </h1>
-
-              <div className="space-y-4">
+              <h2 className="text-lg text-gray-400">
+                함께하는 멤버들의{' '}
+                <span className="text-[#EF7C30] font-semibold">다른 모임</span>
+                도 구경해 보세요.
+              </h2>
+              <div className="space-y-4 mt-2">
                 {partnerMeetings.map(meeting => (
                   <MeetingCard key={meeting.clubId} meeting={meeting} />
                 ))}
