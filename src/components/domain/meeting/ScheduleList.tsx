@@ -109,17 +109,21 @@ export default function ScheduleList({ clubRole }: ScheduleListProps) {
   };
 
   const getStatusCard = (scheduleStatus: string) => {
-    const baseStyle =
-      'inline-flex items-center px-2.5 py-0.5 rounded-full text-medium font-medium';
+  const baseStyle =
+    'inline-flex items-center px-2.5 py-0.5 rounded-full text-medium font-medium';
     switch (scheduleStatus) {
-      case 'READY':
-        return `${baseStyle} bg-[#F5921F]/10 text-[#F5921F] ring-1 ring-[#F5921F]/20`;
-      case 'ENDED':
-        return `${baseStyle} bg-[#7E4805]/10 text-[#7E4805] ring-1 ring-[#7E4805]/20`;
-      case 'SETTLING':
-        return `${baseStyle} bg-[#FFAE00]/10 text-[#7E4805] ring-1 ring-[#FFAE00]/30`;
-      case 'CLOSED':
-        return `${baseStyle} bg-[#F4B187]/10 text-[#7E4805] ring-1 ring-[#F4B187]/30`;
+      case 'READY': // 모집중
+        return `${baseStyle} bg-[var(--color-brand-primary)]/10 text-[var(--color-brand-primary)] ring-1 ring-[var(--color-brand-primary)]/20`;
+
+      case 'ENDED': // 종료됨
+        return `${baseStyle} bg-red-500/10 text-red-600 ring-1 ring-red-500/20`;
+
+      case 'SETTLING': // 정산중
+        return `${baseStyle} bg-[var(--color-complement-blue)]/10 text-[var(--color-complement-blue)] ring-1 ring-[var(--color-complement-blue)]/20`;
+
+      case 'CLOSED': // 정산완료
+        return `${baseStyle} bg-[var(--color-complement-teal)]/10 text-[var(--color-complement-teal)] ring-1 ring-[var(--color-complement-teal)]/20`;
+
       default:
         return `${baseStyle} bg-gray-100 text-gray-600 ring-1 ring-gray-200`;
     }
@@ -292,7 +296,7 @@ export default function ScheduleList({ clubRole }: ScheduleListProps) {
           return (
             <button
               onClick={() => handleActionClick('참여하기', schedule)}
-              className="bg-[#F5921F] text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-[#EF7C30] transition-colors cursor-pointer"
+              className="bg-gradient-to-br from-brand-primary to-brand-secondary text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-[#EF7C30] transition-colors cursor-pointer"
             >
               참여하기
             </button>
@@ -434,7 +438,7 @@ export default function ScheduleList({ clubRole }: ScheduleListProps) {
           safeSchedules.map(schedule => (
             <div
               key={schedule.scheduleId}
-              className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow"
+              className="bg-white rounded-2xl border border-gray-200 overflow-hidden hover:shadow-md transition-shadow"
             >
               <div className="p-4">
                 <div className="flex items-start justify-between mb-3">
@@ -444,10 +448,10 @@ export default function ScheduleList({ clubRole }: ScheduleListProps) {
                       {schedule.name}
                     </h3>
                     <p className="text-sm text-gray-600 mb-1">
-                      {`일시 | ${formatDateTime(schedule.scheduleTime)}`}
+                      🗓️ {`일시 | ${formatDateTime(schedule.scheduleTime)}`}
                     </p>
                     <div className="text-sm text-gray-600">
-                      <span>{`인당 비용 | ${schedule.cost === 0 ? '무료' : `${schedule.cost.toLocaleString()}₩`}`}</span>
+                      <span>💰 {`인당 비용 | ${schedule.cost === 0 ? '무료' : `${schedule.cost.toLocaleString()}₩`}`}</span>
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
@@ -456,7 +460,7 @@ export default function ScheduleList({ clubRole }: ScheduleListProps) {
                       <div
                         className={`rounded-full ${getDdayDot(schedule.dday)}`}
                       ></div>
-                      <span className="text-lg font-medium text-gray-600">
+                      <span className="text-md font-medium text-gray-600">
                         {schedule.dday}
                       </span>
                     </div>

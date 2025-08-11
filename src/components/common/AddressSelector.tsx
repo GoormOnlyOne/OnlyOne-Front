@@ -179,10 +179,9 @@ const AddressSelector: React.FC<AddressSelectorProps> = ({
     >
       {/* 선택된 지역 표시 - 상단 고정 */}
       {(selectedCity || selectedDistrict) && (
-        <div className="bg-blue-50 border-b border-gray-300 px-4 py-3 sticky top-0 z-10">
-          <div className="text-sm font-medium text-blue-800">
-            선택된 지역: {selectedCity}
-            {selectedDistrict ? ` > ${selectedDistrict}` : ''}
+        <div className="bg-brand-light border-b border-gray-300 px-4 py-3 sticky top-0 z-10">
+          <div className="text-sm font-medium text-brand-deepest">
+            선택된 지역: {selectedCity}{selectedDistrict ? ` > ${selectedDistrict}` : ''}
           </div>
         </div>
       )}
@@ -198,7 +197,7 @@ const AddressSelector: React.FC<AddressSelectorProps> = ({
                 onClick={() => handleCityChange(city)}
                 className={`w-full text-left px-2 sm:px-3 md:px-4 py-2 md:py-3 hover:bg-gray-100 border-b border-gray-200 transition-colors text-xs sm:text-sm md:text-base ${
                   selectedCity === city
-                    ? 'bg-blue-50 text-blue-700 border-r-2 border-r-blue-500'
+                    ? 'bg-brand-light text-brand-deepest border-r-2 border-r-brand-primary'
                     : 'text-gray-700'
                 }`}
               >
@@ -226,7 +225,7 @@ const AddressSelector: React.FC<AddressSelectorProps> = ({
                   onClick={() => handleDistrictChange(district)}
                   className={`w-full text-left px-2 sm:px-3 md:px-4 py-2 md:py-3 hover:bg-gray-100 border-b border-gray-200 transition-colors text-xs sm:text-sm md:text-base ${
                     selectedDistrict === district
-                      ? 'bg-blue-50 text-blue-700'
+                      ? 'bg-brand-light text-brand-deepest'
                       : 'text-gray-700'
                   }`}
                 >

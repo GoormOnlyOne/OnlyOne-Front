@@ -341,9 +341,9 @@ export const MeetingForm = ({
                 type="button"
                 disabled={!isFormValid}
                 onClick={handleSubmit}
-                className={`w-full py-3 px-4 rounded-lg font-medium transition-colors focus:ring-2 focus:ring-offset-2 ${
+                className={`w-full py-3 px-4 rounded-lg font-medium transition-all duration-200 focus:ring-2 focus:ring-offset-2 ${
                   isFormValid
-                    ? 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500'
+                    ? 'bg-gradient-to-br from-brand-primary to-brand-secondary text-white hover:from-brand-secondary hover:to-brand-primary hover:shadow-md focus:ring-brand-primary/40'
                     : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                 }`}
               >

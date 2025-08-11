@@ -79,7 +79,7 @@ export default function SearchHeader({
         {/* 검색 버튼 */}
         <button
           onClick={handleSearch}
-          className="w-10 h-10 flex items-center justify-center rounded-full bg-blue-500 hover:bg-blue-600 transition-colors"
+          className="w-10 h-10 flex items-center justify-center rounded-full bg-neutral-50 hover:bg-neutral-100 transition-colors"
           aria-label="검색"
         >
           <i className="ri-search-line text-white text-lg"></i>

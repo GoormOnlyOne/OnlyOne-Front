@@ -45,10 +45,10 @@ export const Toast: React.FC<ToastProps> = ({
     };
 
     const typeStyles = {
-      success: 'bg-green-500 text-white',
-      error: 'bg-red-500 text-white',
-      warning: 'bg-yellow-500 text-amber-900',
-      info: 'bg-blue-500 text-white',
+      success: 'bg-[var(--color-complement-teal)] text-white',
+      error: 'bg-[var(--color-brand-deepest)] text-white',
+      warning: 'bg-[var(--color-brand-warm)] text-[var(--color-brand-deepest)]',
+      info: 'bg-[var(--color-complement-blue)] text-white',
     };
 
     return clsx(
