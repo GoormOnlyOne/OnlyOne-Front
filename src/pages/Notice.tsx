@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
-import { getNotifications } from '../api/notification';
+import { getNotifications, deleteNotification } from '../api/notification';
 import type { Notification as NotificationApi } from '../types/notification';
 
 export const Notice = () => {
   const [notifications, setNotifications] = useState<NotificationApi[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -14,6 +15,7 @@ export const Notice = () => {
         // 임시로 userId=1로 설정 (실제로는 로그인한 사용자 ID 사용)
         const response = await getNotifications({ userId: 1 });
         setNotifications(response.notifications);
+        setUnreadCount(response.unreadCount);
       } catch (err) {
         setError('알림을 불러오는데 실패했습니다.');
         console.error('알림 조회 실패:', err);
@@ -28,6 +30,30 @@ export const Notice = () => {
   const handleClick = (notification: NotificationApi) => {
     console.log('알림 클릭:', notification);
     // 알림 타입에 따른 라우팅 처리
+  };
+
+  const handleDelete = async (notification: NotificationApi, e: React.MouseEvent) => {
+    e.stopPropagation(); // 클릭 이벤트 전파 방지
+    
+    try {
+      await deleteNotification({ 
+        notificationId: notification.notificationId, 
+        userId: 1 // 임시로 userId=1 사용
+      });
+      
+      // 삭제할 알림이 읽지 않은 상태였다면 unreadCount 감소
+      if (!notification.isRead) {
+        setUnreadCount(prev => Math.max(0, prev - 1));
+      }
+      
+      // 알림 목록에서 제거
+      setNotifications(prev => 
+        prev.filter(n => n.notificationId !== notification.notificationId)
+      );
+    } catch (err) {
+      console.error('알림 삭제 실패:', err);
+      setError('알림 삭제에 실패했습니다.');
+    }
   };
 
   if (loading) {
@@ -56,6 +82,11 @@ export const Notice = () => {
 
   return (
     <div className="space-y-2">
+      {unreadCount > 0 && (
+        <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg mb-4">
+          <p className="text-sm text-blue-800">읽지 않은 알림이 {unreadCount}개 있습니다.</p>
+        </div>
+      )}
       {notifications.map(notification => (
         <div
           key={notification.notificationId}
@@ -74,9 +105,17 @@ export const Notice = () => {
             }`}>
               {notification.type}
             </span>
-            <span className="text-xs text-gray-500">
-              {new Date(notification.createdAt).toLocaleString('ko-KR')}
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-gray-500">
+                {new Date(notification.createdAt).toLocaleString('ko-KR')}
+              </span>
+              <button
+                onClick={(e) => handleDelete(notification, e)}
+                className="text-red-500 hover:text-red-700 text-sm font-medium"
+              >
+                삭제
+              </button>
+            </div>
           </div>
           <p className="text-sm text-gray-700">{notification.content}</p>
           {!notification.isRead && (
