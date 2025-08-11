@@ -4,7 +4,6 @@ import { AuthProvider } from './contexts/AuthContext';
 import { ToastProvider, useToast } from './components/common/Toast/ToastContext';
 import { setGlobalToastFunction } from './components/common/Toast/ToastProvider';
 import { router } from './routes/Router';
-import sseService from './services/sse';
 import { notificationService } from './services/notificationService';
 
 function AppContent() {
@@ -19,7 +18,7 @@ function AppContent() {
     ) => {
       // 'default'를 'info'로 매핑하거나 필터링
       const mappedType = type === 'default' ? 'info' : type;
-      showToast(message, mappedType as any, durationMs);
+      showToast(message, mappedType as 'success' | 'error' | 'warning' | 'info', durationMs);
     };
     
     setGlobalToastFunction(toastWrapper);
@@ -31,14 +30,10 @@ function AppContent() {
       try {
         console.log('🚀 SSE 연결 초기화 시작 (/sse/subscribe/{userId} 엔드포인트 사용)');
         
-        // 임시로 userId 1로 테스트 (실제로는 인증된 사용자 ID 사용)
-        const testUserId = 1;
+        // 환경변수나 AuthContext에서 userId 가져오기 (임시로 1 사용)
+        const testUserId = parseInt(import.meta.env.VITE_TEST_USER_ID || '1');
         
-        // SSEService 연결 시작
-        await sseService.connect(testUserId);
-        console.log('✅ SSE Service 연결 완료');
-        
-        // NotificationService 연결 시작
+        // SSE 연결은 NotificationService에서만 생성 (중복 방지)
         await notificationService.connect(testUserId);
         console.log('✅ Notification Service 연결 완료');
         
@@ -51,7 +46,6 @@ function AppContent() {
 
     // 컴포넌트 언마운트 시 연결 정리
     return () => {
-      sseService.disconnect();
       notificationService.disconnect();
       console.log('🔌 SSE 서비스 정리 완료');
     };
