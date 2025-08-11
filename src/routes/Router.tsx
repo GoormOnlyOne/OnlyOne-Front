@@ -171,7 +171,6 @@ export const router = createBrowserRouter([
         path: '/chat/:chatRoomId/messages',
         element: <ChatRoom />,
       },
-			},
 			{
 				path: '/feeds',
         element: <FeedList />
