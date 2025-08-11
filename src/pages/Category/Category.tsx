@@ -12,6 +12,7 @@ import AddressSelector, {
 } from '../../components/common/AddressSelector';
 import TabBar from '../../components/common/TabBar';
 import type { TabItem } from '../../components/common/TabBar';
+import Loading from '../../components/common/Loading';
 
 export const Category = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -19,7 +20,9 @@ export const Category = () => {
   const selectedCategoryFromUrl = searchParams.get('select'); // URL에서 'select' 파라미터 읽기
   const [activeTab, setActiveTab] = useState<string>('interest');
   // URL에서 카테고리가 전달되면 사용, 없으면 기본값 'CULTURE'
-  const [selectedInterest, setSelectedInterest] = useState<string | null>(selectedCategoryFromUrl || 'CULTURE');
+  const [selectedInterest, setSelectedInterest] = useState<string | null>(
+    selectedCategoryFromUrl || 'CULTURE',
+  );
   const [meetings, setMeetings] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [locationMeetings, setLocationMeetings] = useState<any[]>([]);
@@ -39,29 +42,30 @@ export const Category = () => {
   };
 
   const handleInterestChange = (categoryId: string | string[]) => {
-    const selectedId = typeof categoryId === 'string' ? categoryId : categoryId[0];
+    const selectedId =
+      typeof categoryId === 'string' ? categoryId : categoryId[0];
     setSelectedInterest(selectedId);
     console.log('선택된 관심사:', selectedId);
-    
+
     // URL에 선택된 카테고리 반영
     const newSearchParams = new URLSearchParams(searchParams);
     newSearchParams.set('select', selectedId);
     setSearchParams(newSearchParams);
-    
+
     loadMeetingsByCategory(selectedId);
   };
 
   // 카테고리 ID를 숫자로 변환하는 함수 (새로운 Category enum 대응)
   const getCategoryNumericId = (categoryId: string): number => {
     const categoryMap: { [key: string]: number } = {
-      'CULTURE': 1,
-      'EXERCISE': 2, 
-      'TRAVEL': 3,
-      'MUSIC': 4,
-      'CRAFT': 5,
-      'SOCIAL': 6,
-      'LANGUAGE': 7,
-      'FINANCE': 8
+      CULTURE: 1,
+      EXERCISE: 2,
+      TRAVEL: 3,
+      MUSIC: 4,
+      CRAFT: 5,
+      SOCIAL: 6,
+      LANGUAGE: 7,
+      FINANCE: 8,
     };
     return categoryMap[categoryId] || 1;
   };
@@ -71,7 +75,7 @@ export const Category = () => {
     try {
       const interestId = getCategoryNumericId(categoryId);
       const response = await apiClient.get(`/search/interests?${interestId}`, {
-        params: { interestId, page: 0, size: 20 }
+        params: { interestId, page: 0, size: 20 },
       });
       if (response.success) {
         setMeetings(response.data);
@@ -88,7 +92,7 @@ export const Category = () => {
     setLocationLoading(true);
     try {
       const response = await apiClient.get(`/search/locations`, {
-        params: { city, district, page: 0, size: 20 }
+        params: { city, district, page: 0, size: 20 },
       });
       console.log('지역별 모임 조회 응답:', response);
       if (response.success) {
@@ -135,16 +139,14 @@ export const Category = () => {
             <CategorySection
               mode="single-select"
               onCategoryChange={handleInterestChange}
-              initialValue={(selectedCategoryFromUrl as any) || "CULTURE"}
+              initialValue={(selectedCategoryFromUrl as any) || 'CULTURE'}
             />
           </div>
-          
+
           {/* 모임 리스트 */}
           <div className="px-4 py-6">
             {loading ? (
-              <div className="flex justify-center py-8">
-                <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-              </div>
+              <Loading overlay text="로딩 중..." />
             ) : meetings.length > 0 ? (
               <div className="space-y-4">
                 {meetings.map(meeting => (
@@ -175,13 +177,11 @@ export const Category = () => {
               className="mb-4"
             />
           </div>
-          
+
           {/* 지역별 모임 리스트 */}
           <div className="px-4 py-6">
             {locationLoading ? (
-              <div className="flex justify-center py-8">
-                <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-              </div>
+              <Loading overlay text="로딩 중..." />
             ) : locationMeetings.length > 0 ? (
               <div className="space-y-4">
                 {locationMeetings.map(meeting => (

@@ -6,6 +6,7 @@ import ScheduleList from '../../components/domain/meeting/ScheduleList';
 import apiClient from '../../api/client';
 import Modal from '../../components/common/Modal';
 import { Settings, Plus, MapPin, Users, Tag } from 'lucide-react';
+import Loading from '../../components/common/Loading';
 
 // API 응답 타입
 interface ClubDetailResponse {
@@ -112,9 +113,12 @@ const MeetingHome: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-64">로딩 중...</div>
+      <div className="relative min-h-[50vh]">
+        <Loading overlay text="로딩 중..." />
+      </div>
     );
   }
+
   if (!meeting) {
     return <div className="text-center">모임을 찾을 수 없습니다.</div>;
   }

@@ -27,4 +27,3 @@ export const MeetingFeed: React.FC = () => {
 };
 
 export { MeetingFeed as default } from './MeetingFeed';
-

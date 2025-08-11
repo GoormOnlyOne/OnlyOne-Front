@@ -10,6 +10,7 @@ import {
   showToast as globalToast,
 } from '../../components/common/Toast/ToastProvider';
 import apiClient from '../../api/client';
+import Loading from '../../components/common/Loading';
 
 export const MeetingScheduleEdit = () => {
   const navigate = useNavigate();
@@ -96,9 +97,10 @@ export const MeetingScheduleEdit = () => {
   };
 
   if (loading) {
+    // ★ 변경: 공통 로딩 컴포넌트 사용
     return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-        <div className="text-gray-500">로딩 중...</div>
+      <div className="relative min-h-[50vh]">
+        <Loading overlay text="로딩 중..." />
       </div>
     );
   }

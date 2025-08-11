@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { logoutUser, getCurrentUser } from '../api/auth';
+import Loading from '../components/common/Loading';
 
 // 사용자 타입 정의
 export interface User {
@@ -27,7 +28,9 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 // AuthProvider 컴포넌트
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [refreshToken, setRefreshToken] = useState<string | null>(null);
@@ -45,7 +48,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setAccessToken(storedAccessToken);
           setRefreshToken(storedRefreshToken);
           setIsAuthenticated(true);
-          
+
           // 사용자 정보 조회
           try {
             const userResponse = await getCurrentUser();
@@ -78,7 +81,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // 로그인 함수
   const login = async (newAccessToken: string) => {
     localStorage.setItem('accessToken', newAccessToken);
-    
+
     setAccessToken(newAccessToken);
     setIsAuthenticated(true);
 
@@ -96,7 +99,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // 로그아웃 함수
   const logout = async () => {
     console.log('로그아웃 실행 중...');
-    
+
     try {
       // 서버에 로그아웃 요청
       if (accessToken) {
@@ -107,12 +110,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.error('서버 로그아웃 실패:', error);
       // 서버 로그아웃 실패해도 클라이언트 로그아웃은 진행
     }
-    
+
     // 클라이언트 토큰 제거
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
     console.log('토큰 제거 완료');
-    
+
     setAccessToken(null);
     setRefreshToken(null);
     setUser(null);
@@ -122,7 +125,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // 사용자 정보 갱신 함수
   const refreshUser = async () => {
     if (!isAuthenticated || !accessToken) return;
-    
+
     try {
       const userResponse = await getCurrentUser();
       if (userResponse.success) {
@@ -147,7 +150,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   return (
     <AuthContext.Provider value={value}>
-      {children}
+      {isLoading ? (
+        <div className="min-h-screen flex items-center justify-center">
+          <Loading text="로그인 상태 확인 중..." />
+        </div>
+      ) : (
+        children
+      )}
     </AuthContext.Provider>
   );
 };

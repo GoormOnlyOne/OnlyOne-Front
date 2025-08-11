@@ -10,6 +10,7 @@ import { useChatSocket } from '../../hooks/useChatSocket';
 import type { ChatMessageDto } from '../../types/chat/chat.types';
 import { getUserIdFromToken } from '../../utils/auth';
 import { Image } from 'lucide-react';
+import Loading from '../../components/common/Loading';
 
 const formatChatTime = (iso: string) => {
   const d = new Date(iso);
@@ -21,7 +22,9 @@ const ChatRoom: React.FC = () => {
   const chatRoomIdNum = Number(chatRoomId);
 
   const accessToken = localStorage.getItem('accessToken');
-  const currentUserId = accessToken ? Number(getUserIdFromToken(accessToken)) : null;
+  const currentUserId = accessToken
+    ? Number(getUserIdFromToken(accessToken))
+    : null;
 
   const [chatRoomName, setChatRoomName] = useState<string>('');
   const [messages, setMessages] = useState<ChatMessageDto[]>([]);
@@ -31,7 +34,10 @@ const ChatRoom: React.FC = () => {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
 
-  const { messages: liveMessages, sendMessage } = useChatSocket(chatRoomIdNum, currentUserId!);
+  const { messages: liveMessages, sendMessage } = useChatSocket(
+    chatRoomIdNum,
+    currentUserId!,
+  );
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -68,7 +74,9 @@ const ChatRoom: React.FC = () => {
   }, [messages]);
 
   if (!accessToken || !currentUserId || isNaN(currentUserId)) {
-    return <div className="p-4 text-center text-red-500">로그인이 필요합니다.</div>;
+    return (
+      <div className="p-4 text-center text-red-500">로그인이 필요합니다.</div>
+    );
   }
 
   const handleSend = async (e: React.FormEvent) => {
@@ -113,9 +121,14 @@ const ChatRoom: React.FC = () => {
       setMessages(prev =>
         prev.map(m =>
           m.messageId === messageId
-            ? { ...m, text: '(삭제된 메세지입니다.)', imageUrl: '', deleted: true }
-            : m
-        )
+            ? {
+                ...m,
+                text: '(삭제된 메세지입니다.)',
+                imageUrl: '',
+                deleted: true,
+              }
+            : m,
+        ),
       );
     } catch (err) {
       alert('메시지 삭제에 실패했습니다.');
@@ -123,17 +136,28 @@ const ChatRoom: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-gray-50 overflow-hidden max-w-full w-full">
+    <div className="flex flex-col h-[calc(100dvh-56px)] bg-gray-50 overflow-hidden max-w-full w-full">
       {/* 채팅 메시지 영역 */}
-      <div className="flex-1 overflow-y-auto px-2 sm:px-4 py-3 space-y-2 w-full max-w-full">
-        {loading && <div className="text-gray-400 text-sm">불러오는 중...</div>}
-        {error && <div className="text-red-500 text-sm">{error}</div>}
+      <div
+        className="flex-1 min-h-0 overflow-y-auto no-scrollbar px-2 sm:px-4 py-3 space-y-2 w-full max-w-full relative"
+        aria-busy={loading}
+      >
+        {/* ★ 변경: 공통 로딩(오버레이) */}
+        {loading && <Loading overlay text="메시지 불러오는 중..." />}
+
+        {/* ★ 변경: 텍스트 로더 제거, 에러만 표시 */}
+        {error && (
+          <div className="text-red-600 bg-red-50 border border-red-200 rounded-md px-3 py-2 text-sm">
+            {error}
+          </div>
+        )}
 
         {!loading &&
           !error &&
           messages.map((m, idx) => {
             const isMine = Number(m.senderId) === currentUserId;
-            const showProfile = idx === 0 || messages[idx - 1].senderId !== m.senderId;
+            const showProfile =
+              idx === 0 || messages[idx - 1].senderId !== m.senderId;
 
             const messageComponent = isMine ? (
               <MyChatMessage
@@ -159,7 +183,7 @@ const ChatRoom: React.FC = () => {
               <div
                 key={m.messageId}
                 className={`w-full flex ${isMine ? 'justify-end' : 'justify-start'}`}
-                onContextMenu={(e) => {
+                onContextMenu={e => {
                   e.preventDefault();
                   if (isMine && !m.deleted) handleDeleteMessage(m.messageId);
                 }}
@@ -174,7 +198,10 @@ const ChatRoom: React.FC = () => {
 
       {/* 입력창 */}
       <div className="px-2 sm:px-4 py-2 sm:py-3 border-t bg-white">
-        <form className="flex flex-col space-y-2 w-full max-w-full" onSubmit={handleSend}>
+        <form
+          className="flex flex-col space-y-2 w-full max-w-full"
+          onSubmit={handleSend}
+        >
           {imagePreview && (
             <div className="flex items-center justify-between">
               <img
@@ -197,7 +224,8 @@ const ChatRoom: React.FC = () => {
           )}
 
           <div className="flex flex-wrap items-center gap-2 w-full">
-            <label className="cursor-pointer flex items-center text-blue-500 hover:text-blue-700">
+            {/* 이미지 아이콘 색상 변경 */}
+            <label className="cursor-pointer flex items-center text-[#FFAE00] hover:text-[#e89d00]">
               <Image className="w-5 h-5" />
               <input
                 type="file"
@@ -209,13 +237,14 @@ const ChatRoom: React.FC = () => {
             <input
               type="text"
               value={text}
-              onChange={(e) => setText(e.target.value)}
+              onChange={e => setText(e.target.value)}
               placeholder="메시지를 입력하세요"
-              className="flex-1 min-w-0 px-3 py-1.5 sm:px-4 sm:py-2 border rounded-full text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="flex-1 min-w-0 px-3 py-1.5 sm:px-4 sm:py-2 border rounded-full text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-[#FFAE00]"
             />
+            {/* 전송 버튼 색상 변경 */}
             <button
               type="submit"
-              className="px-3 sm:px-4 py-1.5 sm:py-2 bg-blue-500 text-white rounded-full text-xs sm:text-sm hover:bg-blue-600 disabled:opacity-50"
+              className="px-3 sm:px-4 py-1.5 sm:py-2 bg-[#FFAE00] text-white rounded-full text-xs sm:text-sm hover:bg-[#e89d00] disabled:opacity-50"
               disabled={!text.trim() && !imageFile}
             >
               전송

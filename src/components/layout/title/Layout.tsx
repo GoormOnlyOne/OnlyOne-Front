@@ -23,9 +23,9 @@ export default function TitleLayout() {
       const name = res?.data?.chatRoomName ?? null;
       setDynamicTitle(name || `채팅방 #${chatRoomId}`);
     } catch (error) {
-       console.error('채팅방 제목 불러오기 실패:', error);
-       setDynamicTitle(`채팅방`);
-      }
+      console.error('채팅방 제목 불러오기 실패:', error);
+      setDynamicTitle(`채팅방`);
+    }
   };
 
   useEffect(() => {
@@ -62,23 +62,27 @@ export default function TitleLayout() {
   };
 
   // 컴포넌트 내부 어딘가(함수들 밑) 추가
-const confirmLeave = async () => {
-  const meetingId = pathname.match(/\/meeting\/(\d+)/)?.[1];
-  if (!meetingId) return;
+  const confirmLeave = async () => {
+    const meetingId = pathname.match(/\/meeting\/(\d+)/)?.[1];
+    if (!meetingId) return;
 
-  try {
-    setLeaving(true);
-    await apiClient.delete(`/clubs/${meetingId}/leave`);
-    globalToast('모임에서 탈퇴하였습니다.', 'success', 2000);
-    // 화면은 그대로 유지 (navigate 없음)
-  } catch (e) {
-    console.error('모임 탈퇴 실패:', e);
-    globalToast('모임에 가입하지 않은 상태입니다. 잠시 후 다시 시도해주세요.', 'error', 2000);
-  } finally {
-    setLeaving(false);
-    setIsLeaveModalOpen(false);
-  }
-};
+    try {
+      setLeaving(true);
+      await apiClient.delete(`/clubs/${meetingId}/leave`);
+      globalToast('모임에서 탈퇴하였습니다.', 'success', 2000);
+      // 화면은 그대로 유지 (navigate 없음)
+    } catch (e) {
+      console.error('모임 탈퇴 실패:', e);
+      globalToast(
+        '모임에 가입하지 않은 상태입니다. 잠시 후 다시 시도해주세요.',
+        'error',
+        2000,
+      );
+    } finally {
+      setLeaving(false);
+      setIsLeaveModalOpen(false);
+    }
+  };
 
   let headerProps = null;
 
@@ -264,7 +268,16 @@ const confirmLeave = async () => {
         isOut: false,
       };
       break;
-      
+
+    case pathname === '/feed':
+      headerProps = {
+        isBack: false,
+        isTitle: true,
+        titleText: '피드 목록',
+        isLike: false,
+        isOut: false,
+      };
+      break;
     default:
       headerProps = null; // 헤더 표시 안 함
   }
@@ -285,7 +298,7 @@ const confirmLeave = async () => {
       </main>
 
       {/* 고정 푸터 - 높이를 명시적으로 설정 */}
-      {pathname === '/mypage' && (
+      {(pathname === '/mypage' || pathname === '/feed') && (
         <div className="h-16 flex-shrink-0">
           <Footer />
         </div>

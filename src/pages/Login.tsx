@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { kakaoLogin } from '../utils/kakaoAuth';
 import logo from '../assets/logo.png';
+import Loading from '../components/common/Loading';
 
 export const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -23,6 +24,7 @@ export const Login = () => {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b bg-neutral-50 px-4 overflow-hidden">
+      {isLoading && <Loading overlay text="카카오로 이동 중..." />}
       {/* 로고 + 문구 */}
       <div
         className={`w-full max-w-sm text-center transition-all duration-700 ${
@@ -55,7 +57,7 @@ export const Login = () => {
           className="w-full bg-[#FEE500] hover:bg-[#FDD835] active:bg-[#F9D71C] text-black font-medium py-4 px-6 rounded-xl flex items-center justify-center space-x-3 transition-all shadow-md hover:shadow-lg disabled:opacity-70 cursor-pointer disabled:cursor-not-allowed"
         >
           {isLoading ? (
-            <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin" />
+            <Loading size="sm" className="!text-black" />
           ) : (
             <>
               <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">

@@ -3,8 +3,11 @@ import sseService from '../../services/sse';
 import { notificationService } from '../../services/notificationService';
 
 export const SSEStatus = () => {
-  const [sseState, setSSEState] = useState<'CONNECTING' | 'OPEN' | 'CLOSED'>('CLOSED');
-  const [notificationServiceState, setNotificationServiceState] = useState(false);
+  const [sseState, setSSEState] = useState<'CONNECTING' | 'OPEN' | 'CLOSED'>(
+    'CLOSED',
+  );
+  const [notificationServiceState, setNotificationServiceState] =
+    useState(false);
   const [lastActivity, setLastActivity] = useState<Date | null>(null);
   const [showDetails, setShowDetails] = useState(false);
 
@@ -13,10 +16,10 @@ export const SSEStatus = () => {
     const interval = setInterval(() => {
       const newSSEState = sseService.getConnectionState();
       const newNotificationState = notificationService.isConnected();
-      
+
       setSSEState(newSSEState);
       setNotificationServiceState(newNotificationState);
-      
+
       if (newSSEState === 'OPEN' || newNotificationState) {
         setLastActivity(new Date());
       }
@@ -39,7 +42,7 @@ export const SSEStatus = () => {
 
   return (
     <div className="fixed top-4 right-4 z-50">
-      <div 
+      <div
         className="bg-white border rounded-lg shadow-lg p-2 cursor-pointer"
         onClick={() => setShowDetails(!showDetails)}
       >
@@ -47,17 +50,18 @@ export const SSEStatus = () => {
           <div className={`w-3 h-3 rounded-full ${getStatusColor()}`}></div>
           <span className="text-sm font-medium">{getStatusText()}</span>
         </div>
-        
+
         {showDetails && (
           <div className="mt-2 pt-2 border-t text-xs text-gray-600">
             <div>SSE Service: {sseState}</div>
-            <div>Notification Service: {notificationServiceState ? 'Connected' : 'Disconnected'}</div>
+            <div>
+              Notification Service:{' '}
+              {notificationServiceState ? 'Connected' : 'Disconnected'}
+            </div>
             {lastActivity && (
               <div>마지막 활동: {lastActivity.toLocaleTimeString()}</div>
             )}
-            <div className="mt-1 text-xs text-gray-400">
-              클릭하여 숨기기
-            </div>
+            <div className="mt-1 text-xs text-gray-400">클릭하여 숨기기</div>
           </div>
         )}
       </div>

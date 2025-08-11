@@ -13,7 +13,7 @@ const Step1 = ({
 }: Step1Props) => {
   // selectedCategories가 undefined일 경우 빈 배열로 초기화
   const safeSelectedCategories = selectedCategories || [];
-  
+
   return (
     <div className="animate-fade-in">
       <h2 className="text-2xl font-bold text-center mb-2">관심사 선택</h2>

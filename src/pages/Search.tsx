@@ -5,6 +5,8 @@ import apiClient from '../api/client';
 import { FilterBottomSheet } from '../components/domain/search/FilterBottomSheet';
 import { FilterChips } from '../components/domain/search/FilterChips';
 import MeetingCard from '../components/domain/meeting/MeetingCard';
+import Loading from '../components/common/Loading';
+import { useToast } from '../components/common/Toast/ToastContext';
 
 interface Meeting {
   clubId: number;
@@ -31,6 +33,7 @@ interface Interest {
 
 export const Search = () => {
   const { searchQuery } = useOutletContext<{ searchQuery: string }>();
+  const { showToast } = useToast();
   const [searchResults, setSearchResults] = useState<Meeting[]>([]);
   const [isSearched, setIsSearched] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -41,9 +44,12 @@ export const Search = () => {
     city: '',
     district: '',
     interestId: null,
-    sortBy: 'MEMBER_COUNT'
+    sortBy: 'MEMBER_COUNT',
   });
   const navigate = useNavigate();
+
+  const isInitialLoading = isLoading && page === 0;
+  const isNextPageLoading = isLoading && page > 0;
 
   // 정적 관심사 데이터
   const interests: Interest[] = [
@@ -54,74 +60,82 @@ export const Search = () => {
     { interestId: 5, category: '공예' },
     { interestId: 6, category: '사교' },
     { interestId: 7, category: '외국어' },
-    { interestId: 8, category: '재테크' }
+    { interestId: 8, category: '재테크' },
   ];
 
   const validateSearch = (query: string, searchFilters: SearchFilters) => {
     // 검색어가 있는데 2글자 미만인 경우
     if (query.trim() && query.trim().length < 2) {
-      alert('검색어는 2글자 이상 입력해주세요.');
+      showToast('검색어는 2글자 이상 입력해주세요.', 'warning');
       return false;
     }
     return true;
   };
 
-  const handleSearch = useCallback(async (query: string, searchFilters = filters, pageNum = 0, isNewSearch = false) => {
-    // 검색 유효성 검사
-    if (isNewSearch && !validateSearch(query, searchFilters)) {
-      return;
-    }
+  const handleSearch = useCallback(
+    async (
+      query: string,
+      searchFilters = filters,
+      pageNum = 0,
+      isNewSearch = false,
+    ) => {
+      // 검색 유효성 검사
+      if (isNewSearch && !validateSearch(query, searchFilters)) {
+        return;
+      }
 
-    setIsLoading(true);
-    if (isNewSearch) {
-      setIsSearched(true);
-      setPage(0);
-      setHasMore(true);
-    }
+      setIsLoading(true);
+      if (isNewSearch) {
+        setIsSearched(true);
+        setPage(0);
+        setHasMore(true);
+      }
 
-    try {
-      const trimmedQuery = query.trim();
-      
-      const params = {
-        // 키워드가 있으면 포함, 없으면 undefined
-        keyword: trimmedQuery || undefined,
-        city: searchFilters.city || undefined,
-        district: searchFilters.district || undefined,
-        interestId: searchFilters.interestId || undefined,
-        sortBy: searchFilters.sortBy,
-        page: pageNum,
-        size: 20
-      };
+      try {
+        const trimmedQuery = query.trim();
 
-      const response = await apiClient.get<Meeting[]>('/search', { params });
-			console.log(response);
-      if (response.success) {
-        const newResults = response.data;
-        
-        if (isNewSearch) {
-          setSearchResults(newResults);
+        const params = {
+          // 키워드가 있으면 포함, 없으면 undefined
+          keyword: trimmedQuery || undefined,
+          city: searchFilters.city || undefined,
+          district: searchFilters.district || undefined,
+          interestId: searchFilters.interestId || undefined,
+          sortBy: searchFilters.sortBy,
+          page: pageNum,
+          size: 20,
+        };
+
+        const response = await apiClient.get<Meeting[]>('/search', { params });
+        console.log(response);
+        if (response.success) {
+          const newResults = response.data;
+
+          if (isNewSearch) {
+            setSearchResults(newResults);
+          } else {
+            setSearchResults(prev => [...prev, ...newResults]);
+          }
+
+          // 더 이상 데이터가 없으면 hasMore를 false로 설정
+          if (newResults.length < 20) {
+            setHasMore(false);
+          }
         } else {
-          setSearchResults(prev => [...prev, ...newResults]);
+          if (isNewSearch) {
+            setSearchResults([]);
+          }
         }
-
-        // 더 이상 데이터가 없으면 hasMore를 false로 설정
-        if (newResults.length < 20) {
-          setHasMore(false);
-        }
-      } else {
+      } catch (error) {
+        console.error('검색 실패:', error);
         if (isNewSearch) {
           setSearchResults([]);
         }
+      } finally {
+        setIsLoading(false);
       }
-    } catch (error) {
-      console.error('검색 실패:', error);
-      if (isNewSearch) {
-        setSearchResults([]);
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  }, [filters]);
+    },
+    [filters],
+  );
 
   useEffect(() => {
     // 검색어가 있거나, 검색어가 없어도 검색이 실행되도록 변경
@@ -138,7 +152,11 @@ export const Search = () => {
       const scrollTop = document.documentElement.scrollTop;
       const clientHeight = document.documentElement.clientHeight;
 
-      if (scrollHeight - scrollTop - clientHeight < 100 && hasMore && !isLoading) {
+      if (
+        scrollHeight - scrollTop - clientHeight < 100 &&
+        hasMore &&
+        !isLoading
+      ) {
         const nextPage = page + 1;
         setPage(nextPage);
         handleSearch(searchQuery, filters, nextPage, false);
@@ -147,27 +165,35 @@ export const Search = () => {
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [page, hasMore, isLoading, isSearched, searchQuery, filters, handleSearch]);
+  }, [
+    page,
+    hasMore,
+    isLoading,
+    isSearched,
+    searchQuery,
+    filters,
+    handleSearch,
+  ]);
 
   const handleApplyFilters = (newFilters: SearchFilters) => {
     setFilters(newFilters);
-    
+
     // 필터가 적용되면 항상 검색 실행 (검색어 유무 관계없이)
     handleSearch(searchQuery, newFilters, 0, true);
   };
 
   const handleRemoveFilter = (key: keyof SearchFilters) => {
     const newFilters = { ...filters };
-    
+
     if (key === 'city') {
       newFilters.city = '';
       newFilters.district = '';
     } else if (key === 'interestId') {
       newFilters.interestId = null;
     }
-    
+
     setFilters(newFilters);
-    
+
     // 필터 제거 시에도 항상 검색 실행
     handleSearch(searchQuery, newFilters, 0, true);
   };
@@ -177,10 +203,10 @@ export const Search = () => {
       city: '',
       district: '',
       interestId: null,
-      sortBy: 'MEMBER_COUNT' as const
+      sortBy: 'MEMBER_COUNT' as const,
     };
     setFilters(defaultFilters);
-    
+
     // 전체 필터 초기화 시에도 항상 검색 실행
     handleSearch(searchQuery, defaultFilters, 0, true);
   };
@@ -191,12 +217,10 @@ export const Search = () => {
 
   const handleJoinSuccess = (clubId: number) => {
     // 가입 성공 시 해당 모임의 joined 상태를 업데이트
-    setSearchResults(prev => 
-      prev.map(meeting => 
-        meeting.clubId === clubId 
-          ? { ...meeting, joined: true }
-          : meeting
-      )
+    setSearchResults(prev =>
+      prev.map(meeting =>
+        meeting.clubId === clubId ? { ...meeting, joined: true } : meeting,
+      ),
     );
   };
 
@@ -219,7 +243,7 @@ export const Search = () => {
               <i className="ri-map-pin-line text-base"></i>
               지역
             </button>
-            
+
             {/* 관심사 필터 */}
             <button
               onClick={() => setShowFilterSheet(true)}
@@ -232,7 +256,7 @@ export const Search = () => {
               <i className="ri-heart-line text-base"></i>
               관심사
             </button>
-            
+
             {/* 정렬 필터 */}
             <button
               onClick={() => setShowFilterSheet(true)}
@@ -243,7 +267,7 @@ export const Search = () => {
               }`}
             >
               <i className="ri-sort-desc text-base"></i>
-							정렬
+              정렬
             </button>
           </div>
         </div>
@@ -280,42 +304,39 @@ export const Search = () => {
       )}
 
       {/* 로딩 상태 */}
-      {isLoading && (
-        <div className="flex flex-col justify-center items-center h-[60vh]">
-          <div className="w-12 h-12 border-3 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-          <p className="text-gray-600 mt-4">검색 중...</p>
-        </div>
-      )}
+      {isInitialLoading && <Loading overlay text="검색 중..." />}
 
       {/* 검색 결과 */}
-      {isSearched && !isLoading && (
+      {isSearched && (
         <>
           {searchResults.length > 0 ? (
             <div className="px-4 py-6">
               <div className="space-y-4">
                 {searchResults.map(meeting => (
-                  <MeetingCard 
-                    key={meeting.clubId} 
-                    meeting={meeting} 
+                  <MeetingCard
+                    key={meeting.clubId}
+                    meeting={meeting}
                     onJoinSuccess={handleJoinSuccess}
                   />
                 ))}
               </div>
 
-              {/* 무한스크롤 상태 표시 */}
-              {isLoading && (
+              {/* 다음 페이지 로딩 인라인 표시 */}
+              {isNextPageLoading && (
                 <div className="flex justify-center py-8">
-                  <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                  <Loading text="로딩 중..." />
                 </div>
               )}
             </div>
           ) : (
-            <EmptyState
-              title="검색 결과가 없습니다"
-              description={`'${searchQuery}'에 대한 모임을 찾을 수 없어요`}
-              image="https://readdy.ai/api/search-image?query=Empty%20state%20illustration%2C%20no%20search%20results%2C%20minimalist%20design%2C%20soft%20colors&width=200&height=200"
-              showCreateButton={true}
-            />
+            !isInitialLoading && ( // ★ 변경: 초기 로딩 중엔 빈 상태 숨김
+              <EmptyState
+                title="검색 결과가 없습니다"
+                description={`'${searchQuery}'에 대한 모임을 찾을 수 없어요`}
+                image="https://readdy.ai/api/search-image?query=Empty%20state%20illustration%2C%20no%20search%20results%2C%20minimalist%20design%2C%20soft%20colors&width=200&height=200"
+                showCreateButton={true}
+              />
+            )
           )}
         </>
       )}
