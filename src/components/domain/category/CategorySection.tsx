@@ -22,56 +22,47 @@ interface CategorySectionProps {
 const categories: {
   id: Category;
   label: string;
-  icon: string;
-  activeIcon: string;
+  emoji: string;
 }[] = [
   {
     id: 'CULTURE',
     label: '문화',
-    icon: 'ri-palette-line',
-    activeIcon: 'ri-palette-fill',
+    emoji: '🎨',
   },
   {
     id: 'EXERCISE',
     label: '운동',
-    icon: 'ri-run-line',
-    activeIcon: 'ri-run-fill',
+    emoji: '🏃🏻‍♂️',
   },
   {
     id: 'TRAVEL',
     label: '여행',
-    icon: 'ri-plane-line',
-    activeIcon: 'ri-plane-fill',
+    emoji: '✈️',
   },
   {
     id: 'MUSIC',
     label: '음악',
-    icon: 'ri-music-2-line',
-    activeIcon: 'ri-music-2-fill',
+    emoji: '🎵',
   },
   {
     id: 'CRAFT',
     label: '공예',
-    icon: 'ri-scissors-cut-line',
-    activeIcon: 'ri-scissors-cut-fill',
+    emoji: '✂️',
   },
   {
     id: 'SOCIAL',
     label: '사교',
-    icon: 'ri-team-line',
-    activeIcon: 'ri-team-fill',
+    emoji: '💁🏻',
   },
   {
     id: 'LANGUAGE',
     label: '외국어',
-    icon: 'ri-translate-2',
-    activeIcon: 'ri-translate',
+    emoji: '🌐',
   },
   {
     id: 'FINANCE',
     label: '재테크',
-    icon: 'ri-money-dollar-circle-line',
-    activeIcon: 'ri-money-dollar-circle-fill',
+    emoji: '💵',
   },
 ];
 
@@ -143,7 +134,7 @@ export default function CategorySection({
   return (
     <div className="w-full">
       <div className="grid grid-cols-4 gap-3 sm:gap-4">
-        {categories.map(({ id, label, icon, activeIcon }) => {
+        {categories.map(({ id, label, emoji }) => {
           const selected = isSelected(id);
           const selectable = isSelectable(id);
 
@@ -169,9 +160,11 @@ export default function CategorySection({
               <div
                 className={`w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center mb-1 sm:mb-2 rounded-xl transition-all duration-300 ${selected ? 'bg-white/20 backdrop-blur-sm' : 'bg-white/40'}`}
               >
-                <i
-                  className={`${selected ? activeIcon : icon} transition-all duration-300 ${selected ? 'text-white text-xl sm:text-2xl animate-bounce-once drop-shadow-sm' : selectable ? 'text-brand-deepest group-hover:text-white text-lg sm:text-xl' : 'text-neutral-400 text-lg sm:text-xl'}`}
-                ></i>
+                <span
+                  className={`transition-all duration-300 ${selected ? 'text-2xl sm:text-3xl animate-bounce-once drop-shadow-sm' : selectable ? 'text-xl sm:text-2xl group-hover:scale-110' : 'text-xl sm:text-2xl opacity-50'}`}
+                >
+                  {emoji}
+                </span>
               </div>
 
               <span
