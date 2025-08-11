@@ -1,13 +1,13 @@
 import { useState, useEffect, useCallback } from 'react';
-import { 
-  getNotifications, 
+import {
+  getNotifications,
   markAllAsRead as apiMarkAllAsRead,
   deleteNotification as apiDeleteNotification,
   createNotification as apiCreateNotification,
 } from '../api/notification';
-import type { 
-  Notification,   
-  CreateNotificationRequest 
+import type {
+  Notification,
+  CreateNotificationRequest,
 } from '../types/notification';
 
 interface UseNotificationsProps {
@@ -15,7 +15,10 @@ interface UseNotificationsProps {
   pageSize?: number;
 }
 
-export const useNotifications = ({ userId, pageSize = 20 }: UseNotificationsProps) => {
+export const useNotifications = ({
+  userId,
+  pageSize = 20,
+}: UseNotificationsProps) => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [cursor, setCursor] = useState<number | null>(null);
   const [hasMore, setHasMore] = useState(true);
@@ -23,54 +26,57 @@ export const useNotifications = ({ userId, pageSize = 20 }: UseNotificationsProp
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const loadNotifications = useCallback(async (reset = false) => {
-    if (loading) return;
-    
-    try {
-      setLoading(true);
-      setError(null);
+  const loadNotifications = useCallback(
+    async (reset = false) => {
+      if (loading) return;
 
-      console.log('🔍 알림 API 호출 시작:', {
-        userId,
-        cursor: reset ? undefined : cursor || undefined,
-        size: pageSize
-      });
+      try {
+        setLoading(true);
+        setError(null);
 
-      const response = await getNotifications({
-        userId,
-        cursor: reset ? undefined : cursor || undefined,
-        size: pageSize,
-      });
+        console.log('🔍 알림 API 호출 시작:', {
+          userId,
+          cursor: reset ? undefined : cursor || undefined,
+          size: pageSize,
+        });
 
-      console.log('✅ 알림 API 응답:', response);
+        const response = await getNotifications({
+          userId,
+          cursor: reset ? undefined : cursor || undefined,
+          size: pageSize,
+        });
 
-      const newNotifications = response.notifications;
-      
-      setNotifications(prev => 
-        reset ? newNotifications : [...prev, ...newNotifications]
-      );
-      setCursor(response.nextCursor);
-      setHasMore(response.hasNext);
-      setUnreadCount(response.unreadCount);
-    } catch (err) {
-      setError('알림을 불러오는데 실패했습니다.');
-      console.error('Failed to load notifications - 상세 에러:', err);
-      console.error('API 호출 파라미터:', {
-        userId,
-        cursor: reset ? undefined : cursor || undefined,
-        size: pageSize
-      });
-    } finally {
-      setLoading(false);
-    }
-  }, [userId, cursor, pageSize, loading]);
+        console.log('✅ 알림 API 응답:', response);
+
+        const newNotifications = response.notifications;
+
+        setNotifications(prev =>
+          reset ? newNotifications : [...prev, ...newNotifications],
+        );
+        setCursor(response.nextCursor);
+        setHasMore(response.hasNext);
+        setUnreadCount(response.unreadCount);
+      } catch (err) {
+        setError('알림을 불러오는데 실패했습니다.');
+        console.error('Failed to load notifications - 상세 에러:', err);
+        console.error('API 호출 파라미터:', {
+          userId,
+          cursor: reset ? undefined : cursor || undefined,
+          size: pageSize,
+        });
+      } finally {
+        setLoading(false);
+      }
+    },
+    [userId, cursor, pageSize, loading],
+  );
 
   const markAllAsRead = useCallback(async () => {
     try {
       const response = await apiMarkAllAsRead(userId);
       if (response.success) {
-        setNotifications(prev => 
-          prev.map(notification => ({ ...notification, isRead: true }))
+        setNotifications(prev =>
+          prev.map(notification => ({ ...notification, isRead: true })),
         );
         setUnreadCount(0);
       }
@@ -79,35 +85,43 @@ export const useNotifications = ({ userId, pageSize = 20 }: UseNotificationsProp
     }
   }, [userId]);
 
-  const deleteNotification = useCallback(async (notificationId: number) => {
-    try {
-      await apiDeleteNotification({
-        notificationId,
-        userId,
-      });
-      
-      // 삭제 성공시 UI에서 제거
-      setNotifications(prev => 
-        prev.filter(notification => notification.notificationId !== notificationId)
-      );
-    } catch (err) {
-      console.error('Failed to delete notification:', err);
-    }
-  }, [userId]);
+  const deleteNotification = useCallback(
+    async (notificationId: number) => {
+      try {
+        await apiDeleteNotification({
+          notificationId,
+          userId,
+        });
 
-  const createNotification = useCallback(async (data: CreateNotificationRequest) => {
-    try {
-      const response = await apiCreateNotification(data);
-      return response;
-    } catch (err) {
-      console.error('Failed to create notification:', err);
-      throw err;
-    }
-  }, []);
+        // 삭제 성공시 UI에서 제거
+        setNotifications(prev =>
+          prev.filter(
+            notification => notification.notificationId !== notificationId,
+          ),
+        );
+      } catch (err) {
+        console.error('Failed to delete notification:', err);
+      }
+    },
+    [userId],
+  );
+
+  const createNotification = useCallback(
+    async (data: CreateNotificationRequest) => {
+      try {
+        const response = await apiCreateNotification(data);
+        return response;
+      } catch (err) {
+        console.error('Failed to create notification:', err);
+        throw err;
+      }
+    },
+    [],
+  );
 
   useEffect(() => {
     void loadNotifications(true);
-  }, [userId, loadNotifications]); 
+  }, [userId, loadNotifications]);
 
   // SSE 이벤트 리스너 추가
   useEffect(() => {
@@ -122,12 +136,24 @@ export const useNotifications = ({ userId, pageSize = 20 }: UseNotificationsProp
       setUnreadCount(event.detail.count);
     };
 
-    window.addEventListener('notification-received', handleNotificationReceived as EventListener);
-    window.addEventListener('unread-count-updated', handleUnreadCountUpdated as EventListener);
+    window.addEventListener(
+      'notification-received',
+      handleNotificationReceived as EventListener,
+    );
+    window.addEventListener(
+      'unread-count-updated',
+      handleUnreadCountUpdated as EventListener,
+    );
 
     return () => {
-      window.removeEventListener('notification-received', handleNotificationReceived as EventListener);
-      window.removeEventListener('unread-count-updated', handleUnreadCountUpdated as EventListener);
+      window.removeEventListener(
+        'notification-received',
+        handleNotificationReceived as EventListener,
+      );
+      window.removeEventListener(
+        'unread-count-updated',
+        handleUnreadCountUpdated as EventListener,
+      );
     };
   }, []);
 

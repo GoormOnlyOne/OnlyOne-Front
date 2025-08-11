@@ -22,56 +22,47 @@ interface CategorySectionProps {
 const categories: {
   id: Category;
   label: string;
-  icon: string;
-  activeIcon: string;
+  emoji: string;
 }[] = [
   {
     id: 'CULTURE',
     label: '문화',
-    icon: 'ri-palette-line',
-    activeIcon: 'ri-palette-fill',
+    emoji: '🎨',
   },
   {
     id: 'EXERCISE',
     label: '운동',
-    icon: 'ri-run-line',
-    activeIcon: 'ri-run-fill',
+    emoji: '🏃🏻‍♂️',
   },
   {
     id: 'TRAVEL',
     label: '여행',
-    icon: 'ri-plane-line',
-    activeIcon: 'ri-plane-fill',
+    emoji: '✈️',
   },
   {
     id: 'MUSIC',
     label: '음악',
-    icon: 'ri-music-2-line',
-    activeIcon: 'ri-music-2-fill',
+    emoji: '🎵',
   },
   {
     id: 'CRAFT',
     label: '공예',
-    icon: 'ri-scissors-cut-line',
-    activeIcon: 'ri-scissors-cut-fill',
+    emoji: '✂️',
   },
   {
     id: 'SOCIAL',
     label: '사교',
-    icon: 'ri-team-line',
-    activeIcon: 'ri-team-fill',
+    emoji: '💁🏻',
   },
   {
     id: 'LANGUAGE',
     label: '외국어',
-    icon: 'ri-translate-2',
-    activeIcon: 'ri-translate',
+    emoji: '🌐',
   },
   {
     id: 'FINANCE',
     label: '재테크',
-    icon: 'ri-money-dollar-circle-line',
-    activeIcon: 'ri-money-dollar-circle-fill',
+    emoji: '💵',
   },
 ];
 
@@ -143,7 +134,7 @@ export default function CategorySection({
   return (
     <div className="w-full">
       <div className="grid grid-cols-4 gap-3 sm:gap-4">
-        {categories.map(({ id, label, icon, activeIcon }) => {
+        {categories.map(({ id, label, emoji }) => {
           const selected = isSelected(id);
           const selectable = isSelectable(id);
 
@@ -152,72 +143,44 @@ export default function CategorySection({
               key={id}
               onClick={() => handleCategoryClick(id)}
               disabled={!selectable && mode === 'multi-select'}
-              className={`
-                relative flex flex-col items-center justify-center aspect-square w-full p-3 sm:p-4 rounded-2xl 
-                transition-all duration-300 transform
+              className={`relative flex flex-col items-center justify-center aspect-square w-full p-2 sm:p-3 rounded-2xl transition-all duration-300 transform group
                 ${selectable ? 'cursor-pointer' : 'cursor-not-allowed'}
                 ${
                   selected
-                    ? 'bg-gradient-to-br from-[#F5921F] to-[#FFAE00] text-white shadow-2xl scale-105'
+                    ? 'bg-gradient-to-br from-brand-primary via-brand-secondary to-[#FFAE00] scale-105 shadow-lg shadow-brand-warm/30'
                     : selectable
-                      ? 'bg-white shadow-md hover:shadow-xl hover:scale-105 border border-[#F4B187]/30'
-                      : 'bg-gray-100 opacity-50'
+                      ? 'bg-gradient-to-br from-brand-light to-brand-soft hover:from-brand-primary/60 hover:via-brand-secondary/60 hover:to-[#FFAE00]/60 hover:scale-105 hover:shadow-md hover:shadow-brand-warm/20'
+                      : 'bg-neutral-100 opacity-50'
                 }
               `}
             >
-              {/* 아이콘을 더 크고 강조 */}
+              {selected && (
+                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/30 via-white/20 to-white/10 animate-pulse" />
+              )}
               <div
-                className={`
-                w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center rounded-xl mb-2 sm:mb-3 transition-all duration-300
-                ${
-                  selected
-                    ? 'bg-white/20 backdrop-blur-sm'
-                    : selectable
-                      ? 'bg-gradient-to-br from-[#F4B187]/20 to-[#FFAE00]/20 hover:from-[#F5921F]/20 hover:to-[#FFAE00]/30'
-                      : 'bg-gray-200'
-                }
-              `}
+                className={`w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center mb-1 sm:mb-2 rounded-xl transition-all duration-300 ${selected ? 'bg-white/20 backdrop-blur-sm' : 'bg-white/40'}`}
               >
-                <i
-                  className={`
-                  ${selected ? activeIcon : icon} text-2xl sm:text-3xl transition-all duration-300
-                  ${
-                    selected
-                      ? 'text-white'
-                      : selectable
-                        ? 'text-[#F5921F] hover:text-[#EF7C30]'
-                        : 'text-gray-400'
-                  }
-                `}
-                />
+                <span
+                  className={`transition-all duration-300 ${selected ? 'text-2xl sm:text-3xl animate-bounce-once drop-shadow-sm' : selectable ? 'text-xl sm:text-2xl group-hover:scale-110' : 'text-xl sm:text-2xl opacity-50'}`}
+                >
+                  {emoji}
+                </span>
               </div>
 
               <span
-                className={`
-                text-xs sm:text-lg font-semibold transition-colors duration-300
-                ${
-                  selected
-                    ? 'text-white'
-                    : selectable
-                      ? 'text-[#7E4805] hover:text-[#F5921F]'
-                      : 'text-gray-400'
-                }
-              `}
+                className={`${selected ? 'text-white font-semibold drop-shadow-sm' : selectable ? 'text-brand-deepest group-hover:text-white font-medium' : 'text-neutral-400'} text-xs sm:text-sm transition-all duration-300`}
               >
                 {label}
               </span>
 
-              {/* 다중 선택 체크 마크 */}
               {mode === 'multi-select' && selected && (
-                <div className="absolute -top-1 -right-1 w-6 h-6 bg-white rounded-full flex items-center justify-center shadow-lg">
-                  <span className="text-xs font-bold text-[#F5921F]">✓</span>
+                <div className="absolute -top-1 -right-1 w-5 h-5 bg-white rounded-full flex items-center justify-center shadow-sm">
+                  <span className="text-xs font-bold text-brand-primary drop-shadow-sm">✓</span>
                 </div>
               )}
-
-              {/* 선택 불가능 오버레이 */}
               {mode === 'multi-select' && !selectable && !selected && (
-                <div className="absolute inset-0 rounded-2xl bg-gray-900/20 flex items-center justify-center backdrop-blur-sm">
-                  <div className="bg-[#7E4805]/90 text-white text-[10px] px-2 py-1 rounded-full font-medium shadow-lg">
+                <div className="absolute inset-0 rounded-2xl bg-neutral-900/10 flex items-center justify-center">
+                  <div className="bg-neutral-600/90 text-white text-[10px] px-2 py-1 rounded-full shadow-sm">
                     최대 선택
                   </div>
                 </div>
@@ -227,17 +190,13 @@ export default function CategorySection({
         })}
       </div>
 
-      {/* 최대 선택 안내 메시지 */}
-      {mode === 'multi-select' &&
-        selectedCategories.length === maxSelection && (
-          <div className="mt-4 text-center">
-            <div className="bg-[#FFAE00]/20 border-2 border-[#FFAE00] rounded-2xl px-4 py-2 inline-block">
-              <p className="text-sm text-[#7E4805] font-semibold">
-                최대 {maxSelection}개까지 선택 가능합니다.
-              </p>
-            </div>
-          </div>
-        )}
+      {mode === 'multi-select' && selectedCategories.length === maxSelection && (
+        <div className="mt-4 text-center">
+          <p className="text-sm text-brand-primary font-semibold animate-fade-in bg-brand-light/50 py-2 px-4 rounded-full">
+            최대 {maxSelection}개까지 선택 가능합니다.
+          </p>
+        </div>
+      )}
     </div>
   );
 }

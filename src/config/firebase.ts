@@ -9,7 +9,7 @@ const firebaseConfig = {
   storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
   messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
-  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
 };
 
 // Firebase 앱 초기화
@@ -23,15 +23,15 @@ export const generateFCMToken = async (): Promise<string | null> => {
   try {
     // 알림 권한 요청
     const permission = await Notification.requestPermission();
-    
+
     if (permission === 'granted') {
       console.log('🔔 알림 권한이 허용되었습니다.');
-      
+
       // VAPID 키를 사용하여 토큰 발급
       const token = await getToken(messaging, {
-        vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY
+        vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY,
       });
-      
+
       if (token) {
         console.log('🔑 FCM 토큰 발급 성공:', token);
         return token;
@@ -51,22 +51,21 @@ export const generateFCMToken = async (): Promise<string | null> => {
 
 // 포그라운드 메시지 수신 처리
 export const setupForegroundMessageListener = () => {
-  onMessage(messaging, (payload) => {
+  onMessage(messaging, payload => {
     console.log('📱 포그라운드 FCM 메시지 수신:', payload);
-    
+
     // 커스텀 알림 표시 또는 SSE와 연동
     if (payload.notification) {
       const { title, body } = payload.notification;
-      
+
       // 브라우저 알림 표시
       if (Notification.permission === 'granted') {
         new Notification(title || '알림', {
           body: body,
           icon: '/favicon.ico', // 알림 아이콘
-          tag: 'fcm-notification'
+          tag: 'fcm-notification',
         });
       }
-      
       // SSE와 연동하여 상태 업데이트 (통일된 이벤트명 사용)
       window.dispatchEvent(new CustomEvent('notification-received', {
         detail: payload

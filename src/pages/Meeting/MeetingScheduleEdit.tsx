@@ -104,7 +104,7 @@ export const MeetingScheduleEdit = () => {
       </div>
     );
   }
-  
+
   if (!initialData) {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">

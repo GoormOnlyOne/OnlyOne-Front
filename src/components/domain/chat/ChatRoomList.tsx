@@ -68,10 +68,13 @@ const ChatRoomList: React.FC<ChatRoomListProps> = ({
               <div className="flex-shrink-0 ml-2">
                 <span className="text-xs text-gray-400">
                   {chatRoom.lastMessageTime
-                    ? new Date(chatRoom.lastMessageTime).toLocaleTimeString('ko-KR', {
-                        hour: '2-digit',
-                        minute: '2-digit',
-                      })
+                    ? new Date(chatRoom.lastMessageTime).toLocaleTimeString(
+                        'ko-KR',
+                        {
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        },
+                      )
                     : ''}
                 </span>
               </div>

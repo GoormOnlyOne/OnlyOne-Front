@@ -107,8 +107,8 @@ export const isProtectedRoute = (pathname: string): boolean => {
  * @returns 인증된 경우 true, 아닌 경우 로그인 페이지로 리다이렉트하고 false
  */
 export const requireAuth = (
-  isAuthenticated: boolean, 
-  navigate: (path: string) => void
+  isAuthenticated: boolean,
+  navigate: (path: string) => void,
 ): boolean => {
   if (!isAuthenticated) {
     navigate('/login');

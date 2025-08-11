@@ -89,21 +89,24 @@ const AddressSelector: React.FC<AddressSelectorProps> = ({
   }, []);
 
   // 선택된 항목으로 스크롤하는 함수
-  const scrollToElement = useCallback((container: HTMLDivElement | null, targetText: string) => {
-    if (!container) return;
-    
-    const buttons = container.querySelectorAll('button');
-    const targetButton = Array.from(buttons).find(button => 
-      button.textContent?.trim() === targetText
-    );
-    
-    if (targetButton) {
-      targetButton.scrollIntoView({
-        behavior: 'smooth',
-        block: 'start'
-      });
-    }
-  }, []);
+  const scrollToElement = useCallback(
+    (container: HTMLDivElement | null, targetText: string) => {
+      if (!container) return;
+
+      const buttons = container.querySelectorAll('button');
+      const targetButton = Array.from(buttons).find(
+        button => button.textContent?.trim() === targetText,
+      );
+
+      if (targetButton) {
+        targetButton.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start',
+        });
+      }
+    },
+    [],
+  );
 
   // 주소 변경 시 완료 상태와 함께 콜백 호출
   useEffect(() => {
@@ -118,10 +121,16 @@ const AddressSelector: React.FC<AddressSelectorProps> = ({
   // 초기 로드 시 선택된 항목으로 스크롤
   useEffect(() => {
     if (selectedCity) {
-      setTimeout(() => scrollToElement(cityScrollRef.current, selectedCity), 300);
+      setTimeout(
+        () => scrollToElement(cityScrollRef.current, selectedCity),
+        300,
+      );
     }
     if (selectedDistrict) {
-      setTimeout(() => scrollToElement(districtScrollRef.current, selectedDistrict), 300);
+      setTimeout(
+        () => scrollToElement(districtScrollRef.current, selectedDistrict),
+        300,
+      );
     }
   }, [selectedCity, selectedDistrict, scrollToElement]);
 
@@ -156,7 +165,10 @@ const AddressSelector: React.FC<AddressSelectorProps> = ({
       onDistrictChange?.(district);
 
       // 선택된 구/군으로 스크롤
-      setTimeout(() => scrollToElement(districtScrollRef.current, district), 100);
+      setTimeout(
+        () => scrollToElement(districtScrollRef.current, district),
+        100,
+      );
     },
     [onDistrictChange, scrollToElement],
   );
@@ -167,13 +179,13 @@ const AddressSelector: React.FC<AddressSelectorProps> = ({
     >
       {/* 선택된 지역 표시 - 상단 고정 */}
       {(selectedCity || selectedDistrict) && (
-        <div className="bg-blue-50 border-b border-gray-300 px-4 py-3 sticky top-0 z-10">
-          <div className="text-sm font-medium text-blue-800">
+        <div className="bg-brand-light border-b border-gray-300 px-4 py-3 sticky top-0 z-10">
+          <div className="text-sm font-medium text-brand-deepest">
             선택된 지역: {selectedCity}{selectedDistrict ? ` > ${selectedDistrict}` : ''}
           </div>
         </div>
       )}
-      
+
       {/* 모든 화면에서 좌우 분할 */}
       <div className="flex h-40 sm:h-56">
         {/* 좌측: 시/도 선택 */}
@@ -185,7 +197,7 @@ const AddressSelector: React.FC<AddressSelectorProps> = ({
                 onClick={() => handleCityChange(city)}
                 className={`w-full text-left px-2 sm:px-3 md:px-4 py-2 md:py-3 hover:bg-gray-100 border-b border-gray-200 transition-colors text-xs sm:text-sm md:text-base ${
                   selectedCity === city
-                    ? 'bg-blue-50 text-blue-700 border-r-2 border-r-blue-500'
+                    ? 'bg-brand-light text-brand-deepest border-r-2 border-r-brand-primary'
                     : 'text-gray-700'
                 }`}
               >
@@ -213,7 +225,7 @@ const AddressSelector: React.FC<AddressSelectorProps> = ({
                   onClick={() => handleDistrictChange(district)}
                   className={`w-full text-left px-2 sm:px-3 md:px-4 py-2 md:py-3 hover:bg-gray-100 border-b border-gray-200 transition-colors text-xs sm:text-sm md:text-base ${
                     selectedDistrict === district
-                      ? 'bg-blue-50 text-blue-700'
+                      ? 'bg-brand-light text-brand-deepest'
                       : 'text-gray-700'
                   }`}
                 >

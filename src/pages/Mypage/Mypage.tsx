@@ -112,9 +112,9 @@ export const Mypage = () => {
       <div className="px-4 bg-white pb-4">
         <div className="flex flex-col items-center py-8">
           {/* 프로필 이미지 */}
-          <ProfileImageUpload 
-            maxSizeInMB={5} 
-            editable={false} 
+          <ProfileImageUpload
+            maxSizeInMB={5}
+            editable={false}
             defaultImage={userInfo.profile_image}
           />
 
@@ -123,20 +123,24 @@ export const Mypage = () => {
             {userInfo.nickname}
           </h2>
           <p className="text-sm text-gray-600 mb-3">
-            {userInfo.city} {userInfo.district} · {userInfo.gender === 'MALE' ? '남성' : '여성'} · {calculateAge(userInfo.birth)}세
+            {userInfo.city} {userInfo.district} ·{' '}
+            {userInfo.gender === 'MALE' ? '남성' : '여성'} ·{' '}
+            {calculateAge(userInfo.birth)}세
           </p>
 
           {/* 관심사 태그 */}
           <div className="flex flex-wrap justify-center gap-2">
-            {getInterestsInfo(userInfo.interests_list).map((interest, index) => (
-              <span
-                key={index}
-                className={`inline-flex items-center gap-1 px-3 py-1.5 text-sm rounded-full transition-colors ${interest.bgColor} ${interest.textColor}`}
-              >
-                <i className={`${interest.icon} text-sm`} />
-                {interest.label}
-              </span>
-            ))}
+            {getInterestsInfo(userInfo.interests_list).map(
+              (interest, index) => (
+                <span
+                  key={index}
+                  className={`inline-flex items-center gap-1 px-3 py-1.5 text-sm rounded-full transition-colors ${interest.bgColor} ${interest.textColor}`}
+                >
+                  <i className={`${interest.icon} text-sm`} />
+                  {interest.label}
+                </span>
+              ),
+            )}
           </div>
         </div>
 

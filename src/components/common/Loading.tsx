@@ -21,7 +21,7 @@ function Spinner({ size = 'md' as LoadingProps['size'] }) {
     <span
       aria-hidden
       className={`inline-block rounded-full border-gray-200 animate-spin ${sizeMap[size!]}`}
-      style={{ borderTopColor: '#F5921F' }}  // ★ 포인트 색상
+      style={{ borderTopColor: '#F5921F' }} // ★ 포인트 색상
     />
   );
 }
@@ -29,9 +29,18 @@ function Spinner({ size = 'md' as LoadingProps['size'] }) {
 function Dots() {
   return (
     <span aria-hidden className="inline-flex items-center gap-1">
-      <i className="w-2 h-2 rounded-full animate-bounce [animation-delay:-0.2s]" style={{ backgroundColor: '#F5921F' }} />
-      <i className="w-2 h-2 rounded-full animate-bounce [animation-delay:-0.1s]" style={{ backgroundColor: '#F5921F' }} />
-      <i className="w-2 h-2 rounded-full animate-bounce" style={{ backgroundColor: '#F5921F' }} />
+      <i
+        className="w-2 h-2 rounded-full animate-bounce [animation-delay:-0.2s]"
+        style={{ backgroundColor: '#F5921F' }}
+      />
+      <i
+        className="w-2 h-2 rounded-full animate-bounce [animation-delay:-0.1s]"
+        style={{ backgroundColor: '#F5921F' }}
+      />
+      <i
+        className="w-2 h-2 rounded-full animate-bounce"
+        style={{ backgroundColor: '#F5921F' }}
+      />
     </span>
   );
 }
