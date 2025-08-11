@@ -83,18 +83,20 @@ export default function MeetingCard({
         <span className="absolute top-3 left-3 bg-blue-600 text-white px-3 py-1 rounded-full text-xs font-medium">
           {meeting.interest}
         </span>
-        <button
+        {/* <button
           className="absolute top-3 right-3 w-8 h-8 flex items-center justify-center bg-white/80 rounded-full hover:bg-white transition-colors"
           onClick={e => {
             e.stopPropagation();
           }}
         >
           <i className="ri-heart-line text-gray-600"></i>
-        </button>
+        </button> */}
       </div>
 
       <div className="p-4">
-        <h3 className="font-semibold text-gray-800 mb-2">{meeting.name}</h3>
+        <h3 className="text-xl font-semibold text-gray-800 mb-1">
+          {meeting.name}
+        </h3>
         <p className="text-sm text-gray-600 mb-3 line-clamp-2">
           {meeting.description}
         </p>

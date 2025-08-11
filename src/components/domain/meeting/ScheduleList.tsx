@@ -110,7 +110,7 @@ export default function ScheduleList({ clubRole }: ScheduleListProps) {
 
   const getStatusCard = (scheduleStatus: string) => {
     const baseStyle =
-      'inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium';
+      'inline-flex items-center px-2.5 py-0.5 rounded-full text-medium font-medium';
     switch (scheduleStatus) {
       case 'READY':
         return `${baseStyle} bg-[#F5921F]/10 text-[#F5921F] ring-1 ring-[#F5921F]/20`;
@@ -158,7 +158,7 @@ export default function ScheduleList({ clubRole }: ScheduleListProps) {
       schedule.scheduleStatus === 'SETTLING';
     const buttonText = isSettlement ? '정산 현황' : '참여 현황';
     const buttonClass =
-      'bg-gray-100 text-gray-700 px-3 py-1 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors cursor-pointer';
+      'bg-gray-100 text-gray-700 px-3 py-2 rounded-full text-sm font-medium hover:bg-gray-200 transition-colors cursor-pointer';
 
     return (
       <button
@@ -283,7 +283,7 @@ export default function ScheduleList({ clubRole }: ScheduleListProps) {
           return (
             <button
               onClick={() => handleActionClick('나가기', schedule)}
-              className="bg-[#F5921F] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#EF7C30] transition-colors cursor-pointer"
+              className="bg-[#F5921F] text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-[#EF7C30] transition-colors cursor-pointer"
             >
               나가기
             </button>
@@ -292,7 +292,7 @@ export default function ScheduleList({ clubRole }: ScheduleListProps) {
           return (
             <button
               onClick={() => handleActionClick('참여하기', schedule)}
-              className="bg-[#F5921F] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#EF7C30] transition-colors cursor-pointer"
+              className="bg-[#F5921F] text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-[#EF7C30] transition-colors cursor-pointer"
             >
               참여하기
             </button>
@@ -304,7 +304,7 @@ export default function ScheduleList({ clubRole }: ScheduleListProps) {
         return (
           <button
             onClick={() => handleActionClick('정산하기', schedule)}
-            className="bg-[#F5921F] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#EF7C30] transition-colors cursor-pointer"
+            className="bg-[#F5921F] text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-[#EF7C30] transition-colors cursor-pointer"
           >
             정산하기
           </button>
@@ -315,7 +315,7 @@ export default function ScheduleList({ clubRole }: ScheduleListProps) {
         return (
           <button
             disabled
-            className="bg-gray-400 text-white px-4 py-2 rounded-lg text-sm font-medium cursor-not-allowed"
+            className="bg-gray-400 text-white px-4 py-2 rounded-full text-sm font-medium cursor-not-allowed"
           >
             정산하기
           </button>
@@ -326,7 +326,7 @@ export default function ScheduleList({ clubRole }: ScheduleListProps) {
         return (
           <button
             disabled
-            className="bg-gray-400 text-white px-4 py-2 rounded-lg text-sm font-medium cursor-not-allowed"
+            className="bg-gray-400 text-white px-4 py-2 rounded-full text-sm font-medium cursor-not-allowed"
           >
             정산하기
           </button>
@@ -340,7 +340,7 @@ export default function ScheduleList({ clubRole }: ScheduleListProps) {
           return (
             <button
               onClick={() => handleActionClick('나가기', schedule)}
-              className="bg-[#F5921F] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#EF7C30] transition-colors cursor-pointer"
+              className="bg-[#F5921F] text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-[#EF7C30] transition-colors cursor-pointer"
             >
               나가기
             </button>
@@ -349,7 +349,7 @@ export default function ScheduleList({ clubRole }: ScheduleListProps) {
           return (
             <button
               onClick={() => handleActionClick('참여하기', schedule)}
-              className="bg-[#F5921F] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#EF7C30] transition-colors cursor-pointer"
+              className="bg-[#F5921F] text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-[#EF7C30] transition-colors cursor-pointer"
             >
               참여하기
             </button>
@@ -360,7 +360,7 @@ export default function ScheduleList({ clubRole }: ScheduleListProps) {
           return (
             <button
               onClick={() => handleActionClick('정산하기', schedule)}
-              className="bg-[#F5921F] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#EF7C30] transition-colors cursor-pointer"
+              className="bg-[#F5921F] text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-[#EF7C30] transition-colors cursor-pointer"
             >
               정산하기
             </button>
@@ -375,7 +375,7 @@ export default function ScheduleList({ clubRole }: ScheduleListProps) {
         return (
           <button
             disabled
-            className="bg-gray-400 text-white px-4 py-2 rounded-lg text-sm font-medium cursor-not-allowed"
+            className="bg-gray-400 text-white px-4 py-2 rounded-full text-sm font-medium cursor-not-allowed"
           >
             정산하기
           </button>
@@ -440,7 +440,7 @@ export default function ScheduleList({ clubRole }: ScheduleListProps) {
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex-1">
                     {/* 스케줄 정보 */}
-                    <h3 className="font-semibold text-gray-800 mb-1">
+                    <h3 className="font-semibold text-lg text-gray-800 mb-1">
                       {schedule.name}
                     </h3>
                     <p className="text-sm text-gray-600 mb-1">
@@ -456,7 +456,7 @@ export default function ScheduleList({ clubRole }: ScheduleListProps) {
                       <div
                         className={`rounded-full ${getDdayDot(schedule.dday)}`}
                       ></div>
-                      <span className="text-xs font-medium text-gray-600">
+                      <span className="text-lg font-medium text-gray-600">
                         {schedule.dday}
                       </span>
                     </div>
