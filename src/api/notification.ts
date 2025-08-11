@@ -65,3 +65,24 @@ export const deleteNotification = async (params: {
   );
   return response.data;
 };
+
+// SSE 연결 생성
+export const createSSEConnection = (userId: number, lastEventId?: string): EventSource => {
+  const url = new URL('/api/notifications/stream', window.location.origin);
+  url.searchParams.set('userId', userId.toString());
+  
+  if (lastEventId) {
+    url.searchParams.set('lastEventId', lastEventId);
+  }
+  
+  console.log('🌐 SSE EventSource 생성:', {
+    url: url.toString(),
+    userId,
+    lastEventId,
+    timestamp: new Date().toISOString()
+  });
+  
+  const eventSource = new EventSource(url.toString());
+  
+  return eventSource;
+};
