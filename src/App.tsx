@@ -35,31 +35,23 @@ function AppContent() {
   // FCM 초기화 (인증된 사용자만)
   useEffect(() => {
     if (isLoading || !isAuthenticated || !user) {
-      console.log('📱 FCM 초기화 대기 중... (인증 대기 또는 미인증 상태)');
       return;
     }
 
     // 이미 초기화된 경우 재초기화 스킵 (중복 방지)
     if (fcmService.isReady()) {
-      console.log('📱 FCM 이미 초기화됨 - 재초기화 스킵');
       return;
     }
 
     const initializeFCM = async () => {
       try {
-        console.log('📱 FCM 초기화 시작... (인증된 사용자:', user.userId + ')');
         const fcmInitialized = await fcmService.initialize();
 
         if (fcmInitialized) {
           await fcmService.sendTokenToBackend();
-          console.log('✅ FCM 초기화 및 토큰 전송 완료');
-        } else {
-          console.log(
-            '⚠️ FCM 초기화 실패 (알림 권한 거부 또는 브라우저 미지원)',
-          );
         }
-      } catch (error) {
-        console.error('❌ FCM 초기화 실패:', error);
+      } catch {
+        // FCM 초기화 실패는 조용히 처리
       }
     };
 

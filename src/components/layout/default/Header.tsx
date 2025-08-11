@@ -13,13 +13,10 @@ export default function Header() {
         const token = localStorage.getItem('accessToken');
         if (!token) return;
         
-        const userId = getUserIdFromToken(token);
-        if (!userId) return;
-        
-        const count = await getUnreadCount(userId);
+        const count = await getUnreadCount();
         setUnreadCount(count);
-      } catch (error) {
-        console.error('Failed to fetch unread count:', error);
+      } catch {
+        // 알림 개수 조회 실패 무시
       }
     };
 
@@ -31,7 +28,6 @@ export default function Header() {
 
     // SSE 이벤트 리스너 추가
     const handleUnreadCountUpdated = (event: CustomEvent) => {
-      console.log('Unread count updated via SSE:', event.detail);
       if (event.detail && typeof event.detail.count === 'number') {
         setUnreadCount(event.detail.count);
       }
