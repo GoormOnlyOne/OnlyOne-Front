@@ -7,6 +7,8 @@ import CommentSection, {
 import userProfile from '../../assets/user_profile.jpg';
 import apiClient from '../../api/client';
 import { showApiErrorToast } from '../../components/common/Toast/ToastProvider';
+import SortChips from '../../components/common/SortChips';
+
 
 interface FeedData {
 	clubId: number;
@@ -569,37 +571,43 @@ export const FeedList = () => {
 	const [selectedFeed, setSelectedFeed] = useState<FeedData | null>(null);
 	const likeSendingRef = useRef<Set<number>>(new Set());
 	const bottomSheetScrollRef = useRef<HTMLDivElement>(null);
+  type SortMode = 'latest' | 'popular';
+  const [sortMode, setSortMode] = useState<SortMode>('latest');
 
-	// API 호출
-	useEffect(() => {
-		const fetchFeeds = async () => {
-			try {
-				setLoading(true);
-				const response = await apiClient.get('/feeds?page=0&limit=20');
+  useEffect(() => {
+  let cancelled = false;
+  const fetchFeeds = async () => {
+    try {
+      setLoading(true);
 
-				// API 응답 데이터를 FeedData 형태로 변환
-				const rawFeeds =
-					response.data?.data || response.data?.content || response.data || [];
+      const path = sortMode === 'popular' ? '/feeds/popular' : '/feeds';
+      const response = await apiClient.get(`${path}?page=0&limit=20`);
 
-				console.log('피드 목록 확인~~~~: ', rawFeeds);
+      // API 응답 데이터를 FeedData 형태로 변환
+      const rawFeeds =
+        response.data?.data || response.data?.content || response.data || [];
 
-				const feedsData = rawFeeds.map((feed: any) => ({
-					...feed,
-					comments: [], // API에서 댓글은 별도로 로드
-					isRepost: !!(feed.parentFeed || feed.rootFeed), // repost 여부 판단
-				}));
+      if (cancelled) return;
 
-				setFeeds(feedsData);
-			} catch (error) {
-				console.error('피드 로드 실패:', error);
-				setFeeds([]);
-			} finally {
-				setLoading(false);
-			}
-		};
+      const feedsData = rawFeeds.map((feed: any) => ({
+        ...feed,
+        comments: [], // API에서 댓글은 별도로 로드
+        isRepost: !!(feed.parentFeed || feed.rootFeed), // repost 여부 판단
+      }));
 
-		fetchFeeds();
-	}, []);
+      setFeeds(feedsData);
+    } catch (error) {
+      if (cancelled) return;
+      console.error('피드 로드 실패:', error);
+      setFeeds([]);
+    } finally {
+      if (!cancelled) setLoading(false);
+    }
+  };
+
+  fetchFeeds();
+  return () => { cancelled = true; };
+}, [sortMode]); 
 
 	// 좋아요 처리
 	const handleLikeClick = async (feedId: number) => {
@@ -706,6 +714,9 @@ export const FeedList = () => {
 
 	return (
 		<div className="min-h-screen bg-gray-50">
+      <div className="z-10 bg-white px-4 pt-3 pb-2">
+        <SortChips value={sortMode} onChange={setSortMode} />
+      </div>
 			{/* 피드 리스트 */}
 			<div className="pb-4">
 				{feeds.map(feed => (
