@@ -1,5 +1,16 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import {
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  useLayoutEffect,
+} from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import userProfile from '../../assets/user_profile.jpg';
+import apiClient from '../../api/client';
+import { showApiErrorToast } from '../../components/common/Toast/ToastProvider';
+import Modal from '../../components/common/Modal';
+import { showToast as globalToast } from '../../components/common/Toast/ToastProvider';
 
 interface Comment {
   commentId: number;
@@ -32,109 +43,52 @@ const MeetingFeedDetail = () => {
   const [loading, setLoading] = useState(true);
   const [commentsLoading, setCommentsLoading] = useState(false);
   const [hasMoreComments, setHasMoreComments] = useState(true);
-  const [currentPage, setCurrentPage] = useState(1);
   const observerRef = useRef<HTMLDivElement>(null);
+  const { meetingId, feedId } = useParams();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isFeedModalOpen, setIsFeedModalOpen] = useState(false);
+  const [deleteTargetId, setDeleteTargetId] = useState<number | null>(null);
+  const commentsEndRef = useRef<HTMLDivElement>(null);
+  const sendingRef = useRef(false);
+  const [likeAnimating, setLikeAnimating] = useState(false);
+  const likeSendingRef = useRef(false);
+  const navigate = useNavigate();
 
-  // API 호출 시뮬레이션 (실제로는 useEffect에서 API 호출)
+  useLayoutEffect(() => {
+    if (!feedData) return;
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        commentsEndRef.current?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'end',
+        });
+      });
+    });
+  }, [feedData?.comments.length]);
+
   useEffect(() => {
-    // 임시 데이터 - 실제로는 client.ts의 API 호출로 대체
-    const mockFeedData: FeedDetail = {
-      content: '여기는 피드 내용이 들어갈 예정입니다.',
-      imageUrls: [
-        'https://d1c3fg3ti7m8cn.cloudfront.net/user/2e18a659-cd67-4f5e-b12a-65c6f34a2541',
-        'https://d1c3fg3ti7m8cn.cloudfront.net/user/6cb9a365-3352-443f-b208-6f7c538d0d41',
-        'https://d1c3fg3ti7m8cn.cloudfront.net/user/c29188ec-a9ca-4562-a959-8574b2703b0c',
-      ],
-      likeCount: 13,
-      commentCount: 12,
-      userId: 1,
-      nickname: 'Alice',
-      profileImage: 'alice.png',
-      updatedAt: '2025-07-31T17:07:13.287214',
-      comments: [
-        {
-          commentId: 1,
-          userId: 1,
-          nickname: 'Alice',
-          profileImage: 'alice.png',
-          content: '정말 좋은 사진이네요!',
-          createdAt: '2025-08-01T12:43:04.775105',
-          commentMine: true,
-        },
-        {
-          commentId: 2,
-          userId: 2,
-          nickname: 'Bob',
-          profileImage: 'bob.png',
-          content: '여기 어디인가요?',
-          createdAt: '2025-08-01T12:43:12.958482',
-          commentMine: false,
-        },
-        {
-          commentId: 3,
-          userId: 3,
-          nickname: 'Charlie',
-          profileImage: 'charlie.png',
-          content: '너무 맛있어 보여요!',
-          createdAt: '2025-08-01T12:44:15.123456',
-          commentMine: false,
-        },
-        {
-          commentId: 4,
-          userId: 4,
-          nickname: 'Diana',
-          profileImage: 'diana.png',
-          content: '다음에 저도 같이 가고 싶어요~',
-          createdAt: '2025-08-01T12:45:30.789012',
-          commentMine: false,
-        },
-        {
-          commentId: 5,
-          userId: 1,
-          nickname: 'Alice',
-          profileImage: 'alice.png',
-          content: '감사합니다! 다음에 꼭 함께 가요 😊',
-          createdAt: '2025-08-01T12:46:45.345678',
-          commentMine: true,
-        },
-        {
-          commentId: 6,
-          userId: 5,
-          nickname: 'Eve',
-          profileImage: 'eve.png',
-          content: '분위기가 정말 좋네요!',
-          createdAt: '2025-08-01T12:47:20.456789',
-          commentMine: false,
-        },
-        {
-          commentId: 7,
-          userId: 6,
-          nickname: 'Frank',
-          profileImage: 'frank.png',
-          content: '사진 정말 잘 찍으셨어요 👍',
-          createdAt: '2025-08-01T12:48:35.567890',
-          commentMine: false,
-        },
-        {
-          commentId: 8,
-          userId: 7,
-          nickname: 'Grace',
-          profileImage: 'grace.png',
-          content: '저도 이런 곳 가보고 싶어요!',
-          createdAt: '2025-08-01T12:49:50.678901',
-          commentMine: false,
-        },
-      ],
-      liked: true,
-      feedMine: true,
+    const fetchData = async () => {
+      setLoading(true);
+
+      try {
+        const response = await apiClient.get(
+          `/clubs/${meetingId}/feeds/${feedId}`,
+        );
+
+        if (response.success) {
+          const data = response.data;
+          setFeedData(data);
+        }
+      } catch (err: unknown) {
+        showApiErrorToast(err);
+        console.error('데이터를 불러오는 중 오류 발생');
+      } finally {
+        setLoading(false);
+      }
     };
 
-    // 로딩 시뮬레이션
-    setTimeout(() => {
-      setFeedData(mockFeedData);
-      setLoading(false);
-    }, 500);
-  }, []);
+    fetchData();
+  }, [meetingId, feedId]);
 
   const handlePrevImage = () => {
     if (!feedData) return;
@@ -150,108 +104,195 @@ const MeetingFeedDetail = () => {
     );
   };
 
-  const handleAddComment = () => {
-    if (!feedData || !newComment.trim()) return;
+  const handleLike = async () => {
+    if (!feedData) return;
+    if (likeSendingRef.current) return;
+    likeSendingRef.current = true;
 
-    const newCommentData: Comment = {
-      commentId: feedData.comments.length + 1,
-      userId: 1, // 현재 사용자 ID
-      nickname: '현재사용자',
-      profileImage: 'current-user.png',
-      content: newComment,
-      createdAt: new Date().toISOString(),
-      commentMine: true,
-    };
-
-    setFeedData({
-      ...feedData,
-      comments: [...feedData.comments, newCommentData],
-      commentCount: feedData.commentCount + 1,
+    const currentLiked = feedData.liked;
+    const currentLikeCount = feedData.likeCount;
+    setFeedData(prev => {
+      if (!prev) return prev;
+      const nextLiked = !prev.liked;
+      return {
+        ...prev,
+        liked: nextLiked,
+        likeCount: nextLiked
+          ? prev.likeCount + 1
+          : Math.max(0, prev.likeCount - 1),
+      };
     });
-    setNewComment('');
+
+    if (!currentLiked) {
+      setLikeAnimating(true);
+      setTimeout(() => setLikeAnimating(false), 300);
+    }
+
+    try {
+      await apiClient.put(`/clubs/${meetingId}/feeds/${feedId}/likes`);
+    } catch (err) {
+      // API 실패 시 원래 상태로 롤백
+      setFeedData(prev => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          liked: currentLiked,
+          likeCount: currentLikeCount,
+        };
+      });
+      showApiErrorToast(err);
+      console.error('좋아요 상태 변경 중 오류 발생');
+    } finally {
+      likeSendingRef.current = false;
+    }
   };
 
-  const handleDeleteComment = (commentId: number) => {
-    if (!feedData) return;
+  const handleAddComment = async () => {
+    if (!feedData || !newComment.trim()) return;
+    if (sendingRef.current) return;
+    sendingRef.current = true;
 
-    setFeedData({
-      ...feedData,
-      comments: feedData.comments.filter(
-        comment => comment.commentId !== commentId,
-      ),
-      commentCount: feedData.commentCount - 1,
-    });
+    try {
+      await apiClient.post(`/clubs/${meetingId}/feeds/${feedId}/comments`, {
+        content: newComment,
+      });
+      const response = await apiClient.get(
+        `/clubs/${meetingId}/feeds/${feedId}`,
+      );
+      if (response.success) {
+        setFeedData(response.data);
+        setNewComment('');
+      }
+    } catch (err: unknown) {
+      showApiErrorToast(err);
+      console.error('데이터를 불러오는 중 오류 발생');
+    } finally {
+      sendingRef.current = false;
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && !e.nativeEvent.isComposing && !e.repeat) {
+      e.preventDefault();
+      handleAddComment();
+    }
+  };
+
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+  };
+
+  const handleFeedUpdate = () => {
+    navigate(`/meeting/${meetingId}/feed/${feedId}/edit`);
+  };
+
+  const handleFeedDelete = async () => {
+    try {
+      const response = await apiClient.delete(
+        `/clubs/${meetingId}/feeds/${feedId}`,
+      );
+      if (response.success) {
+        globalToast('피드가 삭제되었습니다.', 'success', 2000);
+        navigate(-1);
+      }
+    } catch (err) {
+      showApiErrorToast(err);
+      console.error('피드 삭제 중 오류 발생');
+    } finally {
+      setIsFeedModalOpen(false);
+    }
+  };
+
+  //   const newCommentData: Comment = {
+  //     commentId: feedData.comments.length + 1,
+  //     userId: 1, // 현재 사용자 ID
+  //     nickname: '현재사용자',
+  //     profileImage: 'current-user.png',
+  //     content: newComment,
+  //     createdAt: new Date().toISOString(),
+  //     commentMine: true,
+  //   };
+
+  //   setFeedData({
+  //     ...feedData,
+  //     comments: [...feedData.comments, newCommentData],
+  //     commentCount: feedData.commentCount + 1,
+  //   });
+  //   setNewComment('');
+  // };
+
+  const handleDeleteComment = async (commentId: number) => {
+    if (!feedData) return;
+    try {
+      const response = await apiClient.delete(
+        `/clubs/${meetingId}/feeds/${feedId}/comments/${commentId}`,
+      );
+      if (response.success) {
+        setFeedData({
+          ...feedData,
+          comments: feedData.comments.filter(
+            comment => comment.commentId !== commentId,
+          ),
+          commentCount: feedData.commentCount - 1,
+        });
+        globalToast('댓글이 삭제되었습니다.', 'success', 2000);
+      }
+    } catch (err: unknown) {
+      showApiErrorToast(err);
+      console.error('댓글 삭제 중 오류 발생');
+    }
   };
 
   // 더 많은 댓글 불러오기
   const loadMoreComments = useCallback(async () => {
-    if (commentsLoading || !hasMoreComments || !feedData) return;
+    setHasMoreComments(false);
+    return;
+  }, []);
 
-    setCommentsLoading(true);
-    try {
-      // 임시 데이터 - 실제로는 API 호출
-      const mockUserNames = [
-        'Henry',
-        'Ivy',
-        'Jack',
-        'Kate',
-        'Leo',
-        'Mia',
-        'Noah',
-        'Olivia',
-        'Paul',
-        'Quinn',
-      ];
-      const mockComments = [
-        '정말 재미있어 보이네요!',
-        '저도 참여하고 싶어요',
-        '분위기가 너무 좋아요 ✨',
-        '다음 모임은 언제인가요?',
-        '사진 너무 예뻐요!',
-        '여기 분위기 어떤가요?',
-        '즐거운 시간 보내세요~',
-        '저도 초대해주세요 😄',
-        '정말 맛있어 보여요',
-        '좋은 추억 만드시길!',
-      ];
+  {
+    /* TODO: 무한 스크롤 구현 (API 응답도 페이징으로 바꿔야 함) */
+  }
+  // const loadMoreComments = useCallback(async () => {
+  //   if (commentsLoading || !hasMoreComments || !feedData) return;
+  //   setCommentsLoading(true);
+  //   try {
+  //     const newComments: Comment[] = Array.from(
+  //       { length: Math.min(3, 10 - (currentPage - 1) * 3) },
+  //       (_, index) => {
+  //         const globalIndex = (currentPage - 1) * 3 + index;
+  //         return {
+  //           commentId: feedData.comments.length + index + 1,
+  //           userId: 8 + globalIndex,
+  //           nickname: mockUserNames[globalIndex % mockUserNames.length],
+  //           profileImage: `user${globalIndex + 1}.png`,
+  //           content: mockComments[globalIndex % mockComments.length],
+  //           createdAt: new Date(Date.now() - globalIndex * 30000).toISOString(),
+  //           commentMine: Math.random() > 0.8, // 20% 확률로 내 댓글
+  //         };
+  //       },
+  //     );
 
-      const newComments: Comment[] = Array.from(
-        { length: Math.min(3, 10 - (currentPage - 1) * 3) },
-        (_, index) => {
-          const globalIndex = (currentPage - 1) * 3 + index;
-          return {
-            commentId: feedData.comments.length + index + 1,
-            userId: 8 + globalIndex,
-            nickname: mockUserNames[globalIndex % mockUserNames.length],
-            profileImage: `user${globalIndex + 1}.png`,
-            content: mockComments[globalIndex % mockComments.length],
-            createdAt: new Date(Date.now() - globalIndex * 30000).toISOString(),
-            commentMine: Math.random() > 0.8, // 20% 확률로 내 댓글
-          };
-        },
-      );
+  //     // 5페이지까지만 로드 (총 15개 + 초기 8개 = 23개 댓글)
+  //     if (currentPage >= 5) {
+  //       setHasMoreComments(false);
+  //     }
 
-      // 5페이지까지만 로드 (총 15개 + 초기 8개 = 23개 댓글)
-      if (currentPage >= 5) {
-        setHasMoreComments(false);
-      }
+  //     setFeedData(prev =>
+  //       prev
+  //         ? {
+  //             ...prev,
+  //             comments: [...prev.comments, ...newComments],
+  //           }
+  //         : null,
+  //     );
 
-      setFeedData(prev =>
-        prev
-          ? {
-              ...prev,
-              comments: [...prev.comments, ...newComments],
-            }
-          : null,
-      );
-
-      setCurrentPage(prev => prev + 1);
-    } catch (error) {
-      console.error('댓글 로딩 실패:', error);
-    } finally {
-      setCommentsLoading(false);
-    }
-  }, [commentsLoading, hasMoreComments, feedData, currentPage]);
+  //     setCurrentPage(prev => prev + 1);
+  //   } catch (error) {
+  //     console.error('댓글 로딩 실패:', error);
+  //   } finally {
+  //     setCommentsLoading(false);
+  //   }
+  // }, [commentsLoading, hasMoreComments, feedData, currentPage]);
 
   // Intersection Observer 설정
   useEffect(() => {
@@ -316,10 +357,16 @@ const MeetingFeedDetail = () => {
         </div>
         {feedData.feedMine && (
           <div className="flex gap-2">
-            <button className="px-3 py-1 text-sm bg-gray-200 rounded hover:bg-gray-300 transition-colors">
+            <button
+              onClick={handleFeedUpdate}
+              className="px-3 py-1 text-sm bg-gray-200 rounded hover:bg-gray-300 transition-colors"
+            >
               수정
             </button>
-            <button className="px-3 py-1 text-sm bg-red-100 text-red-600 rounded hover:bg-red-200 transition-colors">
+            <button
+              onClick={() => setIsFeedModalOpen(true)}
+              className="px-3 py-1 text-sm bg-red-100 text-red-600 rounded hover:bg-red-200 transition-colors"
+            >
               삭제
             </button>
           </div>
@@ -410,10 +457,19 @@ const MeetingFeedDetail = () => {
       {/* 좋아요와 댓글 정보 */}
       <div className="flex items-center gap-4 px-4 py-2 border-b border-gray-100">
         <div className="flex items-center gap-1">
-          <i
-            className={`${feedData.liked ? 'ri-heart-fill text-red-500' : 'ri-heart-line'}`}
-          ></i>
-          <span className="text-sm">{feedData.likeCount}</span>
+          <button
+            type="button"
+            onClick={handleLike}
+            aria-label="좋아요"
+            aria-pressed={feedData.liked}
+            className="transition-all duration-300 cursor-pointer hover:scale-110"
+          >
+            <i
+              className={`${feedData.liked ? 'ri-heart-fill text-red-500' : 'ri-heart-line text-gray-600'} ${likeAnimating ? 'scale-125 animate-bounce' : ''}`}
+            />
+            +{' '}
+          </button>
+          <span className="text-sm font-medium">{feedData.likeCount}</span>
         </div>
         <div className="flex items-center gap-1">
           <i className="ri-chat-3-line"></i>
@@ -422,7 +478,7 @@ const MeetingFeedDetail = () => {
       </div>
 
       {/* 댓글 목록 */}
-      <div className="flex-1 pb-20">
+      <div className="flex-1 pb-28">
         {feedData.comments.map(comment => (
           <div
             key={comment.commentId}
@@ -451,7 +507,10 @@ const MeetingFeedDetail = () => {
                 </span>
                 {comment.commentMine && (
                   <button
-                    onClick={() => handleDeleteComment(comment.commentId)}
+                    onClick={() => {
+                      setDeleteTargetId(comment.commentId);
+                      setIsModalOpen(true);
+                    }}
                     className="ml-auto px-2 py-1 text-xs bg-red-100 text-red-600 rounded hover:bg-red-200 transition-colors"
                   >
                     삭제
@@ -475,6 +534,7 @@ const MeetingFeedDetail = () => {
             </div>
           </div>
         )}
+        <div ref={commentsEndRef} className="h-24" />
       </div>
 
       {/* 댓글 입력 */}
@@ -484,6 +544,7 @@ const MeetingFeedDetail = () => {
             type="text"
             value={newComment}
             onChange={e => setNewComment(e.target.value)}
+            onKeyDown={handleKeyDown}
             placeholder="댓글을 입력해주세요."
             className="flex-1 px-3 py-2 border border-gray-300 rounded-lg"
           />
@@ -495,6 +556,27 @@ const MeetingFeedDetail = () => {
           </button>
         </div>
       </div>
+
+      {/* 댓글 삭제 확인 모달 */}
+      <Modal
+        isOpen={isModalOpen}
+        onClose={handleModalClose}
+        onConfirm={async () => {
+          if (deleteTargetId == null) return;
+          await handleDeleteComment(deleteTargetId);
+          setIsModalOpen(false);
+          setDeleteTargetId(null);
+        }}
+        title="댓글을 삭제하시겠습니까?"
+      />
+
+      {/* 피드 삭제 확인 모달*/}
+      <Modal
+        isOpen={isFeedModalOpen}
+        onClose={() => setIsFeedModalOpen(false)}
+        onConfirm={handleFeedDelete}
+        title="피드를 삭제하시겠습니까?"
+      />
     </div>
   );
 };
