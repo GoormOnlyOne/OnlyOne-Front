@@ -1,58 +1,139 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Step1 from '../../components/domain/signup/Step1';
 import Step2 from '../../components/domain/signup/Step2';
 import Step3 from '../../components/domain/signup/Step3';
 import type { AddressData } from '../../components/common/AddressSelector';
+import { getUserProfile, updateUserProfile } from '../../api/user';
+import type { ProfileResponse, ProfileUpdateRequest } from '../../types/endpoints/user.api';
+import { useToast } from '../../components/common/Toast/ToastContext';
 
-// 임시 사용자 데이터
-const mockUserData = {
-  userId: 'user123',
-  nickname: '벗킷러버',
-  gender: 'female',
-  birth: '1995-08-15',
-  profileImage: 'https://img.hankyung.com/photo/202409/01.37085530.1.jpg',
-  categories: ['travel', 'finance', 'social', 'culture'],
-  address: {
-    city: '서울',
-    district: '강남구',
-    isComplete: true,
-  },
-  joinDate: '2024-01-15',
-  point: 85000,
-};
 
 export const Profile = () => {
   const navigate = useNavigate();
+  const { showToast } = useToast();
   const [currentStep, setCurrentStep] = useState(1);
-  const [selectedCategories, setSelectedCategories] = useState<string[]>(
-    mockUserData.categories,
-  );
-  const [selectedAddress, setSelectedAddress] = useState<AddressData>(
-    mockUserData.address,
-  );
-  const [formData, setFormData] = useState({
-    categories: mockUserData.categories,
-    nickname: mockUserData.nickname,
-    gender: mockUserData.gender,
-    birth: mockUserData.birth,
-    profileImage: mockUserData.profileImage,
-    address: mockUserData.address,
+  const [loading, setLoading] = useState(true);
+  const [profileData, setProfileData] = useState<ProfileResponse | null>(null);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [selectedAddress, setSelectedAddress] = useState<AddressData>({
+    city: '',
+    district: '',
+    isComplete: false,
   });
+  const [formData, setFormData] = useState({
+    categories: [] as string[],
+    nickname: '',
+    gender: '',
+    birth: '',
+    profileImage: '',
+    address: {
+      city: '',
+      district: '',
+      isComplete: false,
+    },
+  });
+
+  // 소문자 관심사를 대문자로 변환하는 함수
+  const mapInterestsToCategories = (interests: string[]): string[] => {
+    if (!interests || !Array.isArray(interests)) {
+      return [];
+    }
+    
+    const interestMap: { [key: string]: string } = {
+      'culture': 'CULTURE',
+      'exercise': 'EXERCISE', 
+      'travel': 'TRAVEL',
+      'music': 'MUSIC',
+      'craft': 'CRAFT',
+      'social': 'SOCIAL',
+      'language': 'LANGUAGE',
+      'finance': 'FINANCE',
+    };
+    
+    return interests.map(interest => interestMap[interest.toLowerCase()] || interest.toUpperCase());
+  };
+
+  // 대문자 카테고리를 소문자로 변환하는 함수 (저장 시 사용)
+  const mapCategoriesToInterests = (categories: string[]): string[] => {
+    if (!categories || !Array.isArray(categories)) {
+      return [];
+    }
+    
+    const categoryMap: { [key: string]: string } = {
+      'CULTURE': 'culture',
+      'EXERCISE': 'exercise',
+      'TRAVEL': 'travel', 
+      'MUSIC': 'music',
+      'CRAFT': 'craft',
+      'SOCIAL': 'social',
+      'LANGUAGE': 'language',
+      'FINANCE': 'finance',
+    };
+    
+    return categories.map(category => categoryMap[category.toUpperCase()] || category.toLowerCase());
+  };
+
+  // 프로필 데이터 로드
+  useEffect(() => {
+    const loadProfile = async () => {
+      try {
+        setLoading(true);
+        const profile = await getUserProfile();
+        setProfileData(profile);
+        
+        // 폼 데이터 초기화
+        const address = {
+          city: profile.city,
+          district: profile.district,
+          isComplete: true,
+        };
+        
+        // 소문자 관심사를 대문자 카테고리로 변환
+        const mappedCategories = mapInterestsToCategories(profile.interestsList);
+        
+        setSelectedCategories(mappedCategories);
+        setSelectedAddress(address);
+        setFormData({
+          categories: mappedCategories,
+          nickname: profile.nickname,
+          gender: profile.gender,
+          birth: profile.birth,
+          profileImage: profile.profileImage,
+          address,
+        });
+      } catch (error) {
+        console.error('프로필 로드 실패:', error);
+        showToast('프로필 정보를 불러오는데 실패했습니다.', 'error');
+        navigate('/mypage');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadProfile();
+  }, [navigate, showToast]);
 
   const totalSteps = 3;
 
   // Step별 '다음' 버튼 활성화 조건 체크 함수
   const isStepValid = () => {
+    // 로딩 중이거나 데이터가 없으면 비활성화
+    if (loading || !profileData) {
+      return false;
+    }
+
     switch (currentStep) {
       case 1:
         // Step 1: 카테고리가 1개 이상 선택되어야 함
-        return selectedCategories.length >= 1;
+        return selectedCategories && selectedCategories.length >= 1;
       case 2:
-        // Step 2: 지역 선택
+        // Step 2: 지역 선택 (도시와 구/군이 모두 선택되어야 함)
         return (
           selectedAddress !== undefined &&
-          Object.keys(selectedAddress).length > 0
+          selectedAddress.city !== '' &&
+          selectedAddress.district !== '' &&
+          selectedAddress.isComplete === true
         );
       case 3:
         // Step 3: 모든 필드가 채워져야 함
@@ -67,7 +148,7 @@ export const Profile = () => {
   };
 
   // 다음 버튼
-  const handleNext = () => {
+  const handleNext = async () => {
     if (currentStep < totalSteps) {
       // 각 Step에서 다음으로 넘어갈 때 데이터 저장
       if (currentStep === 1) {
@@ -84,15 +165,34 @@ export const Profile = () => {
       setCurrentStep(prev => prev + 1);
     } else {
       // 프로필 수정 완료 처리
-      const finalData = {
-        ...formData,
-        categories: selectedCategories,
-        address: selectedAddress,
-      };
-      console.log('프로필 수정 데이터:', finalData);
-      // TODO: API 호출하여 프로필 수정 처리
-      alert('프로필이 수정되었습니다.');
-      navigate('/mypage');
+      try {
+        if (!profileData) {
+          showToast('프로필 정보가 없습니다.', 'error');
+          return;
+        }
+
+        const updateData: ProfileUpdateRequest = {
+          userId: profileData.userId,
+          nickname: formData.nickname,
+          birth: formData.birth,
+          status: profileData.status,
+          profileImage: formData.profileImage,
+          gender: formData.gender as 'MALE' | 'FEMALE',
+          city: selectedAddress.city,
+          district: selectedAddress.district,
+          interestsList: mapCategoriesToInterests(selectedCategories),
+        };
+
+        setLoading(true);
+        await updateUserProfile(updateData);
+        showToast('프로필이 성공적으로 수정되었습니다.', 'success');
+        navigate('/mypage');
+      } catch (error) {
+        console.error('프로필 수정 실패:', error);
+        showToast('프로필 수정에 실패했습니다.', 'error');
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -171,15 +271,27 @@ export const Profile = () => {
     );
   };
 
+  // 로딩 중 표시
+  if (loading) {
+    return (
+      <div className="min-h-screen w-full bg-white px-4 py-8 sm:px-6 md:px-8 lg:max-w-2xl lg:mx-auto flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">프로필 정보를 불러오는 중...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="w-full bg-white max-w-md mx-auto p-8">
+    <div className="min-h-screen w-full bg-white px-4 py-8 sm:px-6 md:px-8 lg:max-w-2xl lg:mx-auto">
       <Stepper />
 
       {/* Step별 콘텐츠 */}
       <div className="mb-8">
         {currentStep === 1 && (
           <Step1
-            selectedCategories={selectedCategories}
+            selectedCategories={selectedCategories || []}
             onCategoryChange={handleCategoryChange}
             maxSelection={5}
           />
@@ -204,7 +316,7 @@ export const Profile = () => {
         {currentStep === 1 && (
           <button
             onClick={handleCancel}
-            className="flex-1 px-6 py-3 border border-gray-300 rounded-lg font-medium hover:bg-gray-50 transition-colors"
+            className="flex-1 px-6 py-3 border border-gray-300 rounded-lg font-medium hover:bg-gray-50 transition-colors cursor-pointer"
           >
             취소
           </button>
@@ -213,7 +325,7 @@ export const Profile = () => {
         {currentStep > 1 && (
           <button
             onClick={handlePrev}
-            className="flex-1 px-6 py-3 border border-gray-300 rounded-lg font-medium hover:bg-gray-50 transition-colors"
+            className="flex-1 px-6 py-3 border border-gray-300 rounded-lg font-medium hover:bg-gray-50 transition-colors cursor-pointer"
           >
             이전
           </button>
@@ -221,7 +333,7 @@ export const Profile = () => {
 
         <button
           onClick={handleNext}
-          disabled={!isStepValid()}
+          disabled={!isStepValid() || loading}
           className={`
             flex-1 px-6 py-3 rounded-lg font-medium transition-colors
             ${
@@ -230,10 +342,10 @@ export const Profile = () => {
                 : 'bg-gray-800 text-white hover:bg-gray-900'
             }
             disabled:opacity-50 disabled:cursor-not-allowed
-            ${!isStepValid() ? 'cursor-not-allowed' : ''}
+            ${!isStepValid() || loading ? 'cursor-not-allowed' : 'cursor-pointer'}
           `}
         >
-          {currentStep === totalSteps ? '수정완료' : '다음'}
+          {loading ? '처리 중...' : (currentStep === totalSteps ? '수정완료' : '다음')}
         </button>
       </div>
     </div>
