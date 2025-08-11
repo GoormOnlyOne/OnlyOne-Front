@@ -1,19 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import apiClient from '../../../api/client';
-import MeetingCard from './MeetingCard';
+import MeetingCard, {type Meeting} from './MeetingCard';
 import EmptyState from '../search/EmptyState';
 
-interface Meeting {
-  clubId: number;
-  name: string;
-  description: string;
-  interest: string;
-  district: string;
-  memberCount: number;
-  image: string;
-  joined: boolean;
-}
 
 interface MeetingListProps {
   mode?: 'home' | 'full';
