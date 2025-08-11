@@ -194,7 +194,7 @@ export default function CategorySection({
 
               <span
                 className={`
-                text-xs sm:text-sm font-semibold transition-colors duration-300
+                text-xs sm:text-lg font-semibold transition-colors duration-300
                 ${
                   selected
                     ? 'text-white'
