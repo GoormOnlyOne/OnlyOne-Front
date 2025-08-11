@@ -1,5 +1,3 @@
-import type { ApiError } from '../../../api/client';
-
 export type ToastType = 'success' | 'error' | 'warning' | 'info' | 'default';
 
 let globalShowToast:

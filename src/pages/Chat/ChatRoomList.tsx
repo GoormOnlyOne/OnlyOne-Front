@@ -65,8 +65,6 @@ const ChatRoomList = () => {
 
   return (
     <div className="p-4">
-      <h2 className="text-xl font-bold mb-4">채팅방 목록</h2>
-
       {loading && <p className="text-gray-500">불러오는 중...</p>}
 
       {!loading && rooms.length === 0 && (

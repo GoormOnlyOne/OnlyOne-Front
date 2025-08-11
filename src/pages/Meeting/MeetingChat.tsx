@@ -1,5 +1,3 @@
-// src/pages/Meeting/MeetingChat.tsx
-
 import ChatRoomList from '../Chat/ChatRoomList';
 
 const MeetingChat = () => {

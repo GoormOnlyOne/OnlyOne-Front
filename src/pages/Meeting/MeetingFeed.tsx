@@ -9,11 +9,6 @@ export const MeetingFeed: React.FC = () => {
 
   return (
     <div className="relative">
-      {/* 헤더 */}
-      <div className="p-4 bg-gray-50 rounded">
-        <h3 className="text-lg font-semibold mb-2">게시판</h3>
-      </div>
-
       {/* 그리드 + 무한 스크롤; clubId prop 전달 */}
       <MeetingFeedGrid clubId={id} />
 
