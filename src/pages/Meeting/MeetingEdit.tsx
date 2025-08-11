@@ -3,13 +3,16 @@ import { useNavigate, useParams } from 'react-router-dom';
 import MeetingForm, {
   type InitialData,
   type Category,
+  type SubmittedData,
 } from '../../components/domain/meeting/MeetingForm';
+import { type AddressData } from '../../components/common/AddressSelector';
 import apiClient from '../../api/client';
 import { uploadImage } from '../../api/upload';
 import {
   showApiErrorToast,
   showToast as globalToast,
 } from '../../components/common/Toast/ToastProvider';
+import Loading from '../../components/common/Loading';
 
 export const MeetingEdit = () => {
   const { id } = useParams();
@@ -20,6 +23,7 @@ export const MeetingEdit = () => {
   useEffect(() => {
     async function fetchMeetingData() {
       try {
+        setLoading(true);
         const response = await apiClient.get(`/clubs/${id}`);
 
         if (response.success) {
@@ -50,7 +54,7 @@ export const MeetingEdit = () => {
     fetchMeetingData();
   }, [id, navigate]);
 
-  const handleSubmit = async (data: any, address: any) => {
+  const handleSubmit = async (data: SubmittedData, address: AddressData) => {
     try {
       let clubImageUrl = '';
 
@@ -74,12 +78,10 @@ export const MeetingEdit = () => {
         userLimit: data.userLimit,
         description: data.introduction,
         clubImage: clubImageUrl,
-        category: data.category || '기타',
+        category: data.category || 'CULTURE',
         city: address.city,
         district: address.district,
       };
-
-      console.log('모임 수정 페이로드:', payload);
 
       const response = await apiClient.patch(`/clubs/${id}`, payload);
 
@@ -93,11 +95,19 @@ export const MeetingEdit = () => {
     }
   };
 
-  if (loading) return <div className="p-8 text-center">불러오는 중...</div>;
-  if (!initialData)
+  if (loading) {
+    return (
+      <div className="relative min-h-[50vh]">
+        <Loading overlay text="불러오는 중..." />
+      </div>
+    );
+  }
+
+  if (!initialData) {
     return (
       <div className="p-8 text-center">모임 데이터를 불러올 수 없습니다.</div>
     );
+  }
 
   return (
     <MeetingForm

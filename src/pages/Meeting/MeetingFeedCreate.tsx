@@ -1,6 +1,8 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import MeetingFeedForm from '../../components/domain/meeting/MeetingFeedForm';
 import apiClient from '../../api/client';
+import { showToast as globalToast } from '../../components/common/Toast/ToastProvider';
+import { showApiErrorToast } from '../../components/common/Toast/ToastProvider';
 
 interface MeetingFeedFormData {
   feedUrls: string[];
@@ -19,11 +21,12 @@ const MeetingFeedCreate = () => {
         feedUrls: data.feedUrls,
         content: data.content,
       });
-
       // 성공 시 모임 상세 페이지로 이동
+      globalToast('피드를 생성했습니다.', 'success', 2000);
       navigate(`/meeting/${meetingId}`);
     } catch (error) {
-      console.error('피드 생성 실패:', error);
+      console.error('피드 생성실패:', error);
+      showApiErrorToast(error);
     }
   };
 

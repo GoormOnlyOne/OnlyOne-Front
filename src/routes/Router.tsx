@@ -1,5 +1,8 @@
 import { createBrowserRouter } from 'react-router-dom';
 
+// auth
+import ProtectedRoute from '../components/auth/ProtectedRoute.tsx';
+
 // layout
 import DefaultLayout from '../components/layout/default/Layout.tsx';
 import SearchLayout from '../components/layout/search/Layout.tsx';
@@ -9,6 +12,7 @@ import TitleLayout from '../components/layout/title/Layout.tsx';
 import { Home } from '../pages/Home.tsx';
 import { Category } from '../pages/Category/Category.tsx';
 import { Meeting } from '../pages/Meeting/Meeting.tsx';
+import Feed from '../pages/Feed/Feed';
 import { MeetingDetail } from '../pages/Meeting/MeetingDetail.tsx';
 import { ParticipationStatus } from '../pages/Meeting/ParticipationStatus.tsx';
 import { MeetingCreate } from '../pages/Meeting/MeetingCreate.tsx';
@@ -37,47 +41,67 @@ import PartnerMeetings from '../pages/PartnerMeetings.tsx';
 import RecommendedMeetings from '../pages/RecommendedMeetings.tsx';
 import MyMeeting from '../pages/Meeting/MyMeeting.tsx';
 
+import ChatRoomList from '../pages/Chat/ChatRoomList';
+import ChatRoom from '../pages/Chat/ChatRoom';
+
 export const router = createBrowserRouter([
-	// [기본] 레이아웃이 적용되는 라우트들
-	{
-		path: '/',
-		element: <DefaultLayout />,
-		children: [
-			{
-				index: true,
-				element: <Home />,
-			},
-			{
-				path: 'category',
-				element: <Category />,
-			},
-			{
-				path: 'meeting',
-				element: <Meeting />,
-			},
-		],
-	},
 
-	// [검색] 레이아웃이 적용되는 라우트들
-	{
-		path: '/search',
-		element: <SearchLayout />,
-		children: [
-			{
-				index: true,
-				element: <Search />,
-			},
-		],
-	},
+  // [기본] 레이아웃이 적용되는 라우트들
+  {
+    path: '/',
+    element: (
+      <ProtectedRoute>
+        <DefaultLayout />
+      </ProtectedRoute>
+    ),
+    children: [
+      {
+        index: true,
+        element: <Home />,
+      },
+      {
+        path: 'category',
+        element: <Category />,
+      },
+      {
+        path: 'meeting',
+        element: <Meeting />,
+      },
+    ],
+  },
 
-	// [타이틀] 레이아웃이 적용되는 라우트들
-	{
-		path: '/',
-		element: <TitleLayout />,
-		children: [
+  // [검색] 레이아웃이 적용되는 라우트들
+  {
+    path: '/search',
+    element: (
+      <ProtectedRoute>
+        <SearchLayout />
+      </ProtectedRoute>
+    ),
+    children: [
+      {
+        index: true,
+        element: <Search />,
+      },
+    ],
+  },
+
+  // [타이틀] 레이아웃이 적용되는 라우트들
+  {
+    path: '/',
+    element: (
+      <ProtectedRoute>
+        <TitleLayout />
+      </ProtectedRoute>
+    ),
+    children: [
+      {
+        path: 'mypage',
+        element: <Mypage />,
+      },
 			{
-				path: 'mypage',
-				element: <Mypage />,
+				path: 'mypage/my-meetings',
+				element: <MyMeeting />,
 			},
 			{
 				path: 'mypage/interest',
@@ -144,39 +168,51 @@ export const router = createBrowserRouter([
 				element: <PointCharge />,
 			},
 			{
-				path: '/success',
+				path: 'success',
 				element: <Success />,
 			},
+      {
+        path: 'chat/:chatRoomId/messages',
+        element: <ChatRoom />,
+      },
 			{
-				path: 'mypage/my-meetings',
-				element: <MyMeeting />,
-			},
+        path: 'clubs/:clubId/chat',
+        element: <ChatRoomList />,
+      },
+      {
+        path: 'chat/:chatRoomId/messages',
+        element: <ChatRoom />,
+      },
 			{
-				path: '/partner-meetings',
+				path: 'partner-meetings',
 				element: <PartnerMeetings />,
 			},
 			{
-				path: '/recommended-meetings',
+				path: 'recommended-meetings',
 				element: <RecommendedMeetings />,
 			},
 		],
 	},
 
-	// 레이아웃이 적용되지 않는 라우트들
-	{
-		path: '/login',
-		element: <Login />,
-	},
-	{
-		path: '/signup',
-		element: <Signup />,
-	},
-	{
-		path: '/kakao-callback',
-		element: <KakaoCallback />,
-	},
-	{
-		path: '/components',
-		element: <ComponentGallery />,
-	},
+  // 레이아웃이 적용되지 않는 라우트들
+  {
+    path: '/login',
+    element: <Login />,
+  },
+  {
+    path: '/signup',
+    element: (
+      <ProtectedRoute requireActive={false}>
+        <Signup />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/kakao-callback',
+    element: <KakaoCallback />,
+  },
+  {
+    path: '/components',
+    element: <ComponentGallery />,
+  },
 ]);

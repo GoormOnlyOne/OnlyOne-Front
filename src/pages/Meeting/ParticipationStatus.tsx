@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { useSearchParams, useParams } from 'react-router-dom';
 import ParticipantInfo from '../../components/domain/meeting/ParticipantInfo';
 import apiClient from '../../api/client';
+import { showApiErrorToast } from '../../components/common/Toast/ToastProvider';
+import Loading from '../../components/common/Loading';
 
 interface ParticipatorResponse {
   userId: number;
@@ -29,6 +31,12 @@ interface Settlement {
   settlementStatus: 'REQUESTED' | 'COMPLETED' | 'FAILED';
 }
 
+type ParticipatorsApi = { success: boolean; data: ParticipatorResponse[] };
+type SettlementsApi = {
+  success: boolean;
+  data: { userSettlementList: SettlementResponse[] };
+};
+
 export const ParticipationStatus: React.FC = () => {
   const [searchParams] = useSearchParams();
   const type =
@@ -52,12 +60,13 @@ export const ParticipationStatus: React.FC = () => {
       setError(null);
       try {
         if (type === 'settlement') {
-          // 정산 리스트 조회
-          const res = await apiClient.get<SettlementResponse[]>(
+          // ★ 변경: 제네릭 및 데이터 경로 정합성 수정
+          const res = await apiClient.get<SettlementsApi>(
             `/clubs/${meetingId}/schedules/${scheduleId}/settlements`,
           );
+          if (!res.success) throw new Error('정산 목록 조회 실패');
           const data = res.data.userSettlementList;
-          const transformed: Settlement[] = data.map(
+          const transformed: Settlement[] = (data ?? []).map(
             ({ userId, nickname, profileImage, settlementStatus }) => ({
               userId,
               nickname,
@@ -82,8 +91,8 @@ export const ParticipationStatus: React.FC = () => {
           setParticipants(transformed);
         }
       } catch (err: any) {
-        console.error(err);
-        setError(err.message || '데이터를 불러오는 중 오류가 발생했습니다.');
+        showApiErrorToast(err);
+        console.error('데이터를 불러오는 중 오류 발생');
       } finally {
         setLoading(false);
       }
@@ -93,9 +102,14 @@ export const ParticipationStatus: React.FC = () => {
   }, [meetingId, scheduleId, type]);
 
   if (loading) {
-    return <div className="p-4">로딩 중...</div>;
+    // ★ 변경: 공통 로딩 컴포넌트 사용
+    return (
+      <div className="relative min-h-[40vh]">
+        <Loading overlay text="불러오는 중..." />
+      </div>
+    );
   }
-
+  
   if (error) {
     return <div className="p-4 text-red-500">오류: {error}</div>;
   }

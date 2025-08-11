@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import KoreaData from '../../assets/json/korea_administrative_divisions.json';
 
 // JSON 데이터 타입 정의
@@ -61,6 +61,8 @@ const AddressSelector: React.FC<AddressSelectorProps> = ({
   const [selectedCity, setSelectedCity] = useState<string>(initialCity);
   const [selectedDistrict, setSelectedDistrict] =
     useState<string>(initialDistrict);
+  const cityScrollRef = useRef<HTMLDivElement>(null);
+  const districtScrollRef = useRef<HTMLDivElement>(null);
 
   const cities = Object.keys(typedKoreaData.korea_administrative_divisions);
   const districts = selectedCity
@@ -81,6 +83,28 @@ const AddressSelector: React.FC<AddressSelectorProps> = ({
     return true;
   }, [selectedCity, selectedDistrict, districts.length]);
 
+  // 간단한 이름 변환 함수 (이미 간소화된 이름이므로 그대로 반환)
+  const getSimpleName = useCallback((name: string) => {
+    return name;
+  }, []);
+
+  // 선택된 항목으로 스크롤하는 함수
+  const scrollToElement = useCallback((container: HTMLDivElement | null, targetText: string) => {
+    if (!container) return;
+    
+    const buttons = container.querySelectorAll('button');
+    const targetButton = Array.from(buttons).find(button => 
+      button.textContent?.trim() === targetText
+    );
+    
+    if (targetButton) {
+      targetButton.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+      });
+    }
+  }, []);
+
   // 주소 변경 시 완료 상태와 함께 콜백 호출
   useEffect(() => {
     const addressData: AddressData = {
@@ -90,10 +114,16 @@ const AddressSelector: React.FC<AddressSelectorProps> = ({
     };
     onAddressChange?.(addressData);
   }, [selectedCity, selectedDistrict, isComplete]);
-  // 간단한 이름 변환 함수 (이미 간소화된 이름이므로 그대로 반환)
-  const getSimpleName = useCallback((name: string) => {
-    return name;
-  }, []);
+
+  // 초기 로드 시 선택된 항목으로 스크롤
+  useEffect(() => {
+    if (selectedCity) {
+      setTimeout(() => scrollToElement(cityScrollRef.current, selectedCity), 300);
+    }
+    if (selectedDistrict) {
+      setTimeout(() => scrollToElement(districtScrollRef.current, selectedDistrict), 300);
+    }
+  }, [selectedCity, selectedDistrict, scrollToElement]);
 
   const handleCityChange = useCallback(
     (city: string) => {
@@ -111,8 +141,11 @@ const AddressSelector: React.FC<AddressSelectorProps> = ({
       if (firstDistrict) {
         onDistrictChange?.(firstDistrict);
       }
+
+      // 선택된 시/도로 스크롤
+      setTimeout(() => scrollToElement(cityScrollRef.current, city), 100);
     },
-    [onCityChange, onDistrictChange],
+    [onCityChange, onDistrictChange, scrollToElement],
   );
 
   const handleDistrictChange = useCallback(
@@ -121,19 +154,31 @@ const AddressSelector: React.FC<AddressSelectorProps> = ({
 
       // 콜백 호출
       onDistrictChange?.(district);
+
+      // 선택된 구/군으로 스크롤
+      setTimeout(() => scrollToElement(districtScrollRef.current, district), 100);
     },
-    [onDistrictChange],
+    [onDistrictChange, scrollToElement],
   );
 
   return (
     <div
       className={`w-full max-w-4xl mx-auto border border-gray-300 ${className}`}
     >
+      {/* 선택된 지역 표시 - 상단 고정 */}
+      {(selectedCity || selectedDistrict) && (
+        <div className="bg-blue-50 border-b border-gray-300 px-4 py-3 sticky top-0 z-10">
+          <div className="text-sm font-medium text-blue-800">
+            선택된 지역: {selectedCity}{selectedDistrict ? ` > ${selectedDistrict}` : ''}
+          </div>
+        </div>
+      )}
+      
       {/* 모든 화면에서 좌우 분할 */}
       <div className="flex h-40 sm:h-56">
         {/* 좌측: 시/도 선택 */}
         <div className="w-2/5 sm:w-1/3 border-r border-gray-300 bg-gray-50">
-          <div className="overflow-y-auto h-full">
+          <div ref={cityScrollRef} className="overflow-y-auto h-full">
             {cities.map(city => (
               <button
                 key={city}
@@ -152,7 +197,7 @@ const AddressSelector: React.FC<AddressSelectorProps> = ({
 
         {/* 우측: 구/군 선택 */}
         <div className="w-3/5 sm:w-2/3 bg-white">
-          <div className="overflow-y-auto h-full">
+          <div ref={districtScrollRef} className="overflow-y-auto h-full">
             {!selectedCity ? (
               <div className="flex items-center justify-center h-20 md:h-32 text-gray-500 text-xs sm:text-sm md:text-base px-2 text-center">
                 {placeholder.city}

@@ -1,12 +1,14 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import { logoutUser, getCurrentUser } from '../api/auth';
+import Loading from '../components/common/Loading';
 
 // 사용자 타입 정의
 export interface User {
-  id: number;
+  userId: number;
   kakaoId: number;
-  nickname: string | null;
-  profileImage: string | null;
-  isNewUser: boolean;
+  nickname: string;
+  status: 'GUEST' | 'ACTIVE' | 'INACTIVE';
+  profileImage: string;
 }
 
 // 인증 컨텍스트 타입
@@ -14,9 +16,12 @@ interface AuthContextType {
   isAuthenticated: boolean;
   accessToken: string | null;
   refreshToken: string | null;
-  login: (accessToken: string) => void;
-  logout: () => void;
+  user: User | null;
+  login: (accessToken: string) => Promise<void>;
+  logout: () => Promise<void>;
+  refreshUser: () => Promise<void>;
   isLoading: boolean;
+  isGuest: boolean;
 }
 
 // 컨텍스트 생성
@@ -27,11 +32,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [refreshToken, setRefreshToken] = useState<string | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   // 초기화: localStorage에서 토큰과 사용자 정보 로드
   useEffect(() => {
-    const initializeAuth = () => {
+    const initializeAuth = async () => {
       try {
         const storedAccessToken = localStorage.getItem('accessToken');
         const storedRefreshToken = localStorage.getItem('refreshToken');
@@ -40,6 +46,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setAccessToken(storedAccessToken);
           setRefreshToken(storedRefreshToken);
           setIsAuthenticated(true);
+          
+          // 사용자 정보 조회
+          try {
+            const userResponse = await getCurrentUser();
+            if (userResponse.success) {
+              setUser(userResponse.data);
+            }
+          } catch (error) {
+            console.error('사용자 정보 조회 실패:', error);
+            // 토큰이 유효하지 않으면 로그아웃 처리
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('refreshToken');
+            setIsAuthenticated(false);
+            setAccessToken(null);
+            setRefreshToken(null);
+          }
         }
       } catch (error) {
         console.error('인증 정보 로드 실패:', error);
@@ -55,35 +77,84 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   // 로그인 함수
-  const login = (newAccessToken: string) => {
+  const login = async (newAccessToken: string) => {
     localStorage.setItem('accessToken', newAccessToken);
     
     setAccessToken(newAccessToken);
     setIsAuthenticated(true);
+
+    // 사용자 정보 조회
+    try {
+      const userResponse = await getCurrentUser();
+      if (userResponse.success) {
+        setUser(userResponse.data);
+      }
+    } catch (error) {
+      console.error('로그인 후 사용자 정보 조회 실패:', error);
+    }
   };
 
   // 로그아웃 함수
-  const logout = () => {
+  const logout = async () => {
+    console.log('로그아웃 실행 중...');
+    
+    try {
+      // 서버에 로그아웃 요청
+      if (accessToken) {
+        await logoutUser();
+        console.log('서버 로그아웃 완료');
+      }
+    } catch (error) {
+      console.error('서버 로그아웃 실패:', error);
+      // 서버 로그아웃 실패해도 클라이언트 로그아웃은 진행
+    }
+    
+    // 클라이언트 토큰 제거
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
+    console.log('토큰 제거 완료');
     
     setAccessToken(null);
     setRefreshToken(null);
+    setUser(null);
     setIsAuthenticated(false);
+  };
+
+  // 사용자 정보 갱신 함수
+  const refreshUser = async () => {
+    if (!isAuthenticated || !accessToken) return;
+    
+    try {
+      const userResponse = await getCurrentUser();
+      if (userResponse.success) {
+        setUser(userResponse.data);
+      }
+    } catch (error) {
+      console.error('사용자 정보 갱신 실패:', error);
+    }
   };
 
   const value: AuthContextType = {
     isAuthenticated,
     accessToken,
     refreshToken,
+    user,
     login,
     logout,
+    refreshUser,
     isLoading,
+    isGuest: user?.status === 'GUEST',
   };
 
   return (
     <AuthContext.Provider value={value}>
-      {children}
+      {isLoading ? (
+        <div className="min-h-screen flex items-center justify-center">
+          <Loading text="로그인 상태 확인 중..." />
+        </div>
+      ) : (
+        children
+      )}
     </AuthContext.Provider>
   );
 };

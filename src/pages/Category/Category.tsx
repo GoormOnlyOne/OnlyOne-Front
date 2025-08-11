@@ -12,6 +12,7 @@ import AddressSelector, {
 } from '../../components/common/AddressSelector';
 import TabBar from '../../components/common/TabBar';
 import type { TabItem } from '../../components/common/TabBar';
+import Loading from '../../components/common/Loading';
 
 export const Category = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -142,9 +143,7 @@ export const Category = () => {
           {/* 모임 리스트 */}
           <div className="px-4 py-6">
             {loading ? (
-              <div className="flex justify-center py-8">
-                <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-              </div>
+              <Loading overlay text="로딩 중..." />
             ) : meetings.length > 0 ? (
               <div className="space-y-4">
                 {meetings.map(meeting => (
@@ -179,9 +178,7 @@ export const Category = () => {
           {/* 지역별 모임 리스트 */}
           <div className="px-4 py-6">
             {locationLoading ? (
-              <div className="flex justify-center py-8">
-                <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-              </div>
+              <Loading overlay text="로딩 중..." />
             ) : locationMeetings.length > 0 ? (
               <div className="space-y-4">
                 {locationMeetings.map(meeting => (

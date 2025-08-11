@@ -6,7 +6,7 @@ export default function DefaultLayout() {
   return (
     <div className="h-screen flex flex-col overflow-hidden">
       {/* 고정 헤더 - 높이를 명시적으로 설정 */}
-      <div className="h-14 flex-shrink-0">
+      <div className="h-17 flex-shrink-0">
         <Header />
       </div>
 
