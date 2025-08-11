@@ -33,37 +33,32 @@ export const useNotifications = ({ userId, pageSize = 20 }: UseNotificationsProp
       console.log('🔍 알림 API 호출 시작:', {
         userId,
         cursor: reset ? undefined : cursor || undefined,
-        size: pageSize,
-        markAsRead: reset
+        size: pageSize
       });
 
       const response = await getNotifications({
         userId,
         cursor: reset ? undefined : cursor || undefined,
         size: pageSize,
-        markAsRead: reset, // 첫 페이지 로드시에만 자동 읽음 처리
       });
 
       console.log('✅ 알림 API 응답:', response);
 
-      if (response.success) {
-        const newNotifications = response.data.notifications;
-        
-        setNotifications(prev => 
-          reset ? newNotifications : [...prev, ...newNotifications]
-        );
-        setCursor(response.data.cursor);
-        setHasMore(response.data.hasMore);
-        setUnreadCount(response.data.unreadCount);
-      }
+      const newNotifications = response.notifications;
+      
+      setNotifications(prev => 
+        reset ? newNotifications : [...prev, ...newNotifications]
+      );
+      setCursor(response.nextCursor);
+      setHasMore(response.hasNext);
+      setUnreadCount(response.unreadCount);
     } catch (err) {
       setError('알림을 불러오는데 실패했습니다.');
       console.error('Failed to load notifications - 상세 에러:', err);
       console.error('API 호출 파라미터:', {
         userId,
         cursor: reset ? undefined : cursor || undefined,
-        size: pageSize,
-        markAsRead: reset
+        size: pageSize
       });
     } finally {
       setLoading(false);
@@ -86,16 +81,15 @@ export const useNotifications = ({ userId, pageSize = 20 }: UseNotificationsProp
 
   const deleteNotification = useCallback(async (notificationId: number) => {
     try {
-      const response = await apiDeleteNotification({
+      await apiDeleteNotification({
         notificationId,
         userId,
       });
       
-      if (response.success) {
-        setNotifications(prev => 
-          prev.filter(notification => notification.notificationId !== notificationId)
-        );
-      }
+      // 삭제 성공시 UI에서 제거
+      setNotifications(prev => 
+        prev.filter(notification => notification.notificationId !== notificationId)
+      );
     } catch (err) {
       console.error('Failed to delete notification:', err);
     }
@@ -112,8 +106,8 @@ export const useNotifications = ({ userId, pageSize = 20 }: UseNotificationsProp
   }, []);
 
   useEffect(() => {
-    loadNotifications(true);
-  }, [userId]); 
+    void loadNotifications(true);
+  }, [userId, loadNotifications]); 
 
   // SSE 이벤트 리스너 추가
   useEffect(() => {

@@ -19,7 +19,7 @@ function AppContent() {
     ) => {
       // 'default'를 'info'로 매핑하거나 필터링
       const mappedType = type === 'default' ? 'info' : type;
-      showToast(message, mappedType as any, durationMs);
+      showToast(message, mappedType as 'success' | 'error' | 'warning' | 'info', durationMs);
     };
     
     setGlobalToastFunction(toastWrapper);

@@ -72,6 +72,12 @@ export const createSSEConnection = (userId: number, lastEventId?: string): Event
   const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/';
   const url = new URL(`sse/subscribe/${userId}`, baseUrl);
   
+  // JWT 토큰이 있으면 쿼리 파라미터로 추가 (EventSource는 헤더 설정 불가)
+  const token = localStorage.getItem('accessToken');
+  if (token) {
+    url.searchParams.set('token', token);
+  }
+  
   console.log('🌐 SSE EventSource 생성:', {
     url: url.toString(),
     userId,

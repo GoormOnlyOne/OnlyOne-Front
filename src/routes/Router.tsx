@@ -12,6 +12,7 @@ import TitleLayout from '../components/layout/title/Layout.tsx';
 import { Home } from '../pages/Home.tsx';
 import { Category } from '../pages/Category/Category.tsx';
 import { Meeting } from '../pages/Meeting/Meeting.tsx';
+import Feed from '../pages/Feed/Feed';
 import { MeetingDetail } from '../pages/Meeting/MeetingDetail.tsx';
 import { ParticipationStatus } from '../pages/Meeting/ParticipationStatus.tsx';
 import { MeetingCreate } from '../pages/Meeting/MeetingCreate.tsx';
@@ -44,6 +45,7 @@ import ChatRoomList from '../pages/Chat/ChatRoomList';
 import ChatRoom from '../pages/Chat/ChatRoom';
 
 export const router = createBrowserRouter([
+
   // [기본] 레이아웃이 적용되는 라우트들
   {
     path: '/',
