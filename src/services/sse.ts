@@ -140,6 +140,21 @@ export class SSEService {
       // 전체 이벤트 리스너에게도 전달
       const allListeners = this.listeners.get('*') || [];
       allListeners.forEach(listener => listener(sseEvent));
+      
+      // 알림 관련 이벤트를 window에 dispatch
+      if (sseEvent.type === 'notification') {
+        // 새 알림 수신 이벤트
+        window.dispatchEvent(new CustomEvent('notification-received', {
+          detail: sseEvent.data
+        }));
+        
+        // 읽지 않은 개수 업데이트 이벤트 (data에 unreadCount가 있는 경우)
+        if (sseEvent.data.unreadCount !== undefined) {
+          window.dispatchEvent(new CustomEvent('unread-count-updated', {
+            detail: { count: sseEvent.data.unreadCount }
+          }));
+        }
+      }
     } catch (error) {
       console.error('Failed to parse SSE message:', error);
     }

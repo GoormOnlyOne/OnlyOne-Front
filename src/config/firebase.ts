@@ -66,13 +66,10 @@ export const setupForegroundMessageListener = () => {
           tag: 'fcm-notification',
         });
       }
-
-      // SSE와 연동하여 상태 업데이트
-      window.dispatchEvent(
-        new CustomEvent('fcm-notification-received', {
-          detail: payload,
-        }),
-      );
+      // SSE와 연동하여 상태 업데이트 (통일된 이벤트명 사용)
+      window.dispatchEvent(new CustomEvent('notification-received', {
+        detail: payload
+      }));
     }
   });
 };
