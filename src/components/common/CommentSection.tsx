@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import userProfile from '../../assets/user_profile.jpg';
 import apiClient from '../../api/client';
 import Modal from '../common/Modal';
+import { showToast } from '../../components/common/Toast/ToastProvider';
 
 export interface Comment {
 	commentId: number;
@@ -105,7 +106,7 @@ export const CommentSection = ({
 			}
 		} catch (error) {
 			console.error('댓글 추가 실패:', error);
-			alert('댓글 추가에 실패했습니다. 다시 시도해주세요.');
+			showToast('댓글 추가에 실패했습니다. 다시 시도해주세요.', 'error');
 		} finally {
 			setCommentSubmitting(false);
 		}
@@ -136,7 +137,7 @@ export const CommentSection = ({
 			setDeleteTargetId(null);
 		} catch (error) {
 			console.error('댓글 삭제 실패:', error);
-			alert('댓글 삭제에 실패했습니다.');
+			showToast('댓글 삭제에 실패했습니다.', 'error');
 		}
 	};
 
