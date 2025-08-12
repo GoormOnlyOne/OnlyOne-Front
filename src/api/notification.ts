@@ -93,22 +93,9 @@ export const createSSEConnection = (
     url.searchParams.set('token', token);
   }
 
-  console.log('🌐 SSE EventSource 생성:', {
-    url: url.toString(),
-    userId,
-    lastEventId,
-    baseUrl,
-    timestamp: new Date().toISOString(),
-  });
-
   // EventSource에 Last-Event-ID 헤더를 설정하려면 직접 설정할 수 없으므로
   // 브라우저가 자동으로 처리하도록 합니다
   const eventSource = new EventSource(url.toString());
-
-  // Last-Event-ID가 있는 경우 로그로만 표시
-  if (lastEventId) {
-    console.log('📋 Last-Event-ID 설정됨:', lastEventId);
-  }
 
   return eventSource;
 };
