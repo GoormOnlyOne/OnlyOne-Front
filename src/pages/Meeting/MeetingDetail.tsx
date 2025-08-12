@@ -5,7 +5,6 @@ import MeetingHome from './MeetingHome';
 import MeetingFeed from './MeetingFeed';
 import MeetingChat from './MeetingChat';
 import apiClient from '../../api/client';
-import Alert from '../../components/common/Alert';
 import { showToast } from '../../components/common/Toast/ToastProvider';
 
 export const MeetingDetail = () => {
