@@ -8,6 +8,7 @@ import SignupComplete from '../components/domain/signup/Complete';
 import type { AddressData } from '../components/common/AddressSelector';
 import { signup } from '../api/auth';
 import type { SignupRequest } from '../api/auth';
+import Alert from '../components/common/Alert';
 
 export const Signup = () => {
   const navigate = useNavigate();
@@ -26,6 +27,10 @@ export const Signup = () => {
     profileImage: '',
     address: {} as AddressData,
   });
+
+  const [isAlertOpen, setIsAlertOpen] = useState(false);
+  const [alertMsg, setAlertMsg] = useState('');
+  const [alertVariant, setAlertVariant] = useState<'default' | 'danger'>('default');
 
   const totalSteps = 3;
 
@@ -102,10 +107,16 @@ export const Signup = () => {
 
       if (response.success) {
         setCurrentStep(4); // 완료 화면
+      } else {
+        setAlertMsg((response as any).message ?? '회원가입 처리 중 오류가 발생했습니다.');
+        setAlertVariant('default');
+        setIsAlertOpen(true);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('회원가입 오류:', error);
-      alert('회원가입 중 오류가 발생했습니다. 다시 시도해주세요.');
+      setAlertMsg(error?.message ?? '회원가입 중 오류가 발생했습니다. 다시 시도해주세요.');
+      setAlertVariant('default');
+      setIsAlertOpen(true);
     } finally {
       setIsSubmitting(false);
     }
@@ -256,6 +267,16 @@ export const Signup = () => {
           </button>
         </div>
       )}
+
+      <Alert
+        isOpen={isAlertOpen}
+        onClose={() => setIsAlertOpen(false)}
+        onConfirm={() => setIsAlertOpen(false)}
+        title={alertMsg}
+        variant={alertVariant}
+        cancelText="닫기"
+        confirmText="확인"
+      />
     </div>
   );
 };
