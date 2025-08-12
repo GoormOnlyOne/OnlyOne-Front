@@ -335,6 +335,9 @@ export const MeetingForm = ({
                 max={100}
                 required
               />
+              <p className="text-xs text-gray-500 mt-1">
+                최소 1명 이상 100명 이하
+              </p>
             </div>
 
             {/* 제출 */}

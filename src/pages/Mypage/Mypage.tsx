@@ -173,7 +173,6 @@ export const Mypage = () => {
       <div className="bg-white mt-2">
         <div className="px-4 py-6">
           <div className="divide-y divide-gray-100">
-
             {/* @TODO: MVP에서 안보여줌 */}
             {/* <Link
               to="/mypage/interest"
