@@ -59,12 +59,12 @@ export const FilterChips = ({
         {activeFilters.map((filter, index) => (
           <div
             key={`${filter.key}-${index}`}
-            className="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-100 text-blue-800 rounded-full text-sm font-medium"
+            className="inline-flex items-center gap-2 px-3 py-1.5 bg-brand-primary text-white rounded-full text-sm font-medium"
           >
             <span>{filter.label}</span>
             <button
               onClick={() => onRemoveFilter(filter.key)}
-              className="hover:bg-blue-200 rounded-full p-0.5 transition-colors"
+              className="rounded-full p-0.5 transition-colors hover:bg-white/20"
             >
               <i className="ri-close-line text-sm"></i>
             </button>

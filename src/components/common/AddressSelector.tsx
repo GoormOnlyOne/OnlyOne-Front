@@ -64,6 +64,16 @@ const AddressSelector: React.FC<AddressSelectorProps> = ({
   const cityScrollRef = useRef<HTMLDivElement>(null);
   const districtScrollRef = useRef<HTMLDivElement>(null);
 
+  // initialCity와 initialDistrict가 변경될 때 상태 업데이트
+  useEffect(() => {
+    if (initialCity) {
+      setSelectedCity(initialCity);
+    }
+    if (initialDistrict) {
+      setSelectedDistrict(initialDistrict);
+    }
+  }, [initialCity, initialDistrict]);
+
   const cities = Object.keys(typedKoreaData.korea_administrative_divisions);
   const districts = selectedCity
     ? typedKoreaData.korea_administrative_divisions[selectedCity]?.districts ||

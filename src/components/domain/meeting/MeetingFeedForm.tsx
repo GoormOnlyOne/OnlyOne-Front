@@ -171,7 +171,7 @@ const MeetingFeedForm = ({
                             imagePreviews[index],
                           );
                           // 에러 이미지 처리
-                          e.currentTarget.src = '/placeholder-image.png'; // 또는 기본 이미지
+                          e.currentTarget.src = `https://picsum.photos/seed/picsum/200/300`; // 또는 기본 이미지
                         }}
                       />
                       <button
@@ -208,7 +208,7 @@ const MeetingFeedForm = ({
                               '이미지 로드 실패:',
                               imagePreviews[index],
                             );
-                            e.currentTarget.src = '/placeholder-image.png';
+                            e.currentTarget.src = `https://picsum.photos/seed/picsum/200/300`;
                           }}
                         />
                         <button
