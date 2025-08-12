@@ -5,11 +5,15 @@ import MeetingHome from './MeetingHome';
 import MeetingFeed from './MeetingFeed';
 import MeetingChat from './MeetingChat';
 import apiClient from '../../api/client';
+import Alert from '../../components/common/Alert';
 
 export const MeetingDetail = () => {
   const { id: meetingId } = useParams<{ id: string }>();
   const [searchParams, setSearchParams] = useSearchParams();
   const [clubRole, setClubRole] = useState<'LEADER' | 'MEMBER' | 'GUEST' | null>(null);
+
+  const [isAlertOpen, setIsAlertOpen] = useState(false);
+  const [alertMsg, setAlertMsg] = useState('');
 
   useEffect(() => {
     if (!meetingId) return;
@@ -74,4 +78,4 @@ export const MeetingDetail = () => {
   );
 };
 
-export { MeetingDetail as default } from './MeetingDetail';
+export default MeetingDetail;
