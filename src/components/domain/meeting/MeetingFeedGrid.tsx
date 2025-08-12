@@ -65,7 +65,7 @@ const MeetingFeedGrid: React.FC<MeetingFeedGridProps> = ({ clubId, readOnly = fa
         `/clubs/${clubId}/feeds?page=${page}&limit=20`,
       )
       .then(response => {
-        const content = response?.data?.content ?? [];
+        const content = response?.data?.data?.content ?? [];
         if (page === 0) {
           setFirstLoaded(true);
           setFirstPageEmpty(content.length === 0);
@@ -78,8 +78,8 @@ const MeetingFeedGrid: React.FC<MeetingFeedGridProps> = ({ clubId, readOnly = fa
         setItems(prev => {
           const existingIds = new Set(prev.map(i => i.id));
           const newOnes = content
-            .filter(dto => !existingIds.has(dto.feedId))
-            .map(dto => ({
+            .filter((dto: FeedSummaryDto) => !existingIds.has(dto.feedId))
+            .map((dto: FeedSummaryDto) => ({
               id: dto.feedId,
               imageUrl: dto.thumbnailUrl,
               likeCount: dto.likeCount,
