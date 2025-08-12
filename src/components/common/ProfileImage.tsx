@@ -3,6 +3,7 @@ import clsx from 'clsx';
 import defaultProfileImage from '../../assets/user_profile.jpg';
 import { uploadImage } from '../../api/upload';
 import Loading from './Loading';
+import Alert from './Alert';
 
 export interface ProfileImage {
   file: File;
@@ -31,6 +32,16 @@ export const ProfileImageUpload: React.FC<ProfileImageUploadProps> = ({
   const [selectedImage, setSelectedImage] = useState<ProfileImage | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const [isAlertOpen, setIsAlertOpen] = useState(false);
+  const [alertMessage, setAlertMessage] = useState('');
+  const [alertVariant, setAlertVariant] = useState<'default' | 'danger'>('default');
+
+  const showAlert = useCallback((message: string, variant: 'default' | 'danger' = 'default') => {
+    setAlertMessage(message);
+    setAlertVariant(variant);
+    setIsAlertOpen(true);
+  }, []);
 
   const validateFile = useCallback(
     (file: File): string | null => {
@@ -121,6 +132,7 @@ export const ProfileImageUpload: React.FC<ProfileImageUploadProps> = ({
     (defaultImage && defaultImage !== defaultProfileImage);
 
   return (
+    <>
     <div className="flex justify-center w-full max-w-md mx-auto">
       {/* 이미지 미리보기 영역 */}
       <div
@@ -194,6 +206,17 @@ export const ProfileImageUpload: React.FC<ProfileImageUploadProps> = ({
         className="hidden"
       />
     </div>
+    
+    <Alert
+        isOpen={isAlertOpen}
+        onClose={() => setIsAlertOpen(false)}
+        onConfirm={() => setIsAlertOpen(false)}
+        title={alertMessage}
+        variant={alertVariant}
+        cancelText="닫기"
+        confirmText="확인"
+      />
+    </>
   );
 };
 

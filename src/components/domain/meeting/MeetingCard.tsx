@@ -7,7 +7,7 @@ import {
   showToast as globalToast,
 } from '../../common/Toast/ToastProvider';
 
-interface Meeting {
+export interface Meeting {
   clubId: number;
   name: string;
   description: string;

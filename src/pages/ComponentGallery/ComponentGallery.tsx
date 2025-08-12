@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import 'tailwindcss';
 import Navigation from '../../components/common/Navigation';
-import Modal from '../../components/common/Modal';
+import Alert from '../../components/common/Alert';
 import ProfileImageUpload, {
   type ProfileImage,
 } from '../../components/common/ProfileImage';
@@ -20,6 +20,7 @@ import ScheduleList from '../../components/domain/meeting/ScheduleList';
 import ParticipantInfo from '../../components/domain/meeting/ParticipantInfo';
 
 export const ComponentGallery = () => {
+  
   // 모달
   const [isDefaultModalOpen, setIsDefaultModalOpen] = useState(true);
 

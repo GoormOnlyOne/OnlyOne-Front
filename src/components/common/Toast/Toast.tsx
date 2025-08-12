@@ -36,7 +36,7 @@ export const Toast: React.FC<ToastProps> = ({
 
   const getToastStyles = () => {
     const baseStyles =
-      'fixed left-1/2 transform -translate-x-1/2 z-50 max-w-sm w-full mx-4 p-4 rounded-lg shadow-lg transition-all duration-300';
+      'fixed left-1/2 transform -translate-x-1/2 z-50 max-w-sm w-full mx-auto p-4 rounded-lg shadow-lg transition-all duration-300';
 
     const positionStyles = {
       top: 'top-4',

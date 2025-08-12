@@ -29,6 +29,7 @@ interface CommonResponse<T> {
 
 interface MeetingFeedGridProps {
   clubId: string;
+  readOnly?: boolean;
 }
 
 // 숫자 포맷: 1.2K처럼 compact
@@ -38,7 +39,7 @@ const formatCount = (n: number) =>
     maximumFractionDigits: 1,
   }).format(n);
 
-const MeetingFeedGrid: React.FC<MeetingFeedGridProps> = ({ clubId }) => {
+const MeetingFeedGrid: React.FC<MeetingFeedGridProps> = ({ clubId, readOnly = false }) => {
   const [items, setItems] = useState<FeedItem[]>([]);
   const [page, setPage] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -113,12 +114,6 @@ const MeetingFeedGrid: React.FC<MeetingFeedGridProps> = ({ clubId }) => {
 
   return (
     <>
-      {loading && items.length === 0 && (
-        <div className="relative">
-          <Loading overlay text="로딩 중..." />
-        </div>
-      )}
-
       {!loading && firstLoaded && firstPageEmpty && (
         <EmptyState
           title="이 모임에는 아직 피드가 게시되지 않았습니다."
@@ -127,12 +122,27 @@ const MeetingFeedGrid: React.FC<MeetingFeedGridProps> = ({ clubId }) => {
         />
       )}
 
-      <div className="grid grid-cols-3 gap-2 p-4">
+      <div className="grid grid-cols-3 gap-2 p-4 relative min-h-[200px]">
+        {loading && items.length === 0 && (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <Loading text="피드를 불러오는 중..." />
+          </div>
+        )}
         {items.map(item => (
           <Link
             key={item.id}
             to={`/meeting/${clubId}/feed/${item.id}`}
-            aria-label="피드 상세 보기"
+            aria-label={readOnly ? '모임 가입 필요' : '피드 상세 보기'}
+            onClick={e => {
+              if (readOnly) {
+                e.preventDefault();
+                e.stopPropagation();
+                alert('모임에 가입해야 자세히 볼 수 있어요.');
+              }
+            }}
+            tabIndex={readOnly ? -1 : 0}
+            aria-disabled={readOnly}
+            className={readOnly ? 'cursor-not-allowed' : undefined}
           >
             <div className="relative aspect-square bg-gray-200 rounded overflow-hidden group">
               <img
