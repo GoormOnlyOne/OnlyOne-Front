@@ -73,10 +73,10 @@ export default function TitleLayout() {
       await apiClient.delete(`/clubs/${meetingId}/leave`);
       globalToast('모임에서 탈퇴하였습니다.', 'success', 2000);
       // 화면은 그대로 유지 (navigate 없음)
-    } catch (e) {
+    } catch (e as any) {
       console.error('모임 탈퇴 실패:', e);
       globalToast(
-        '모임에 가입하지 않은 상태입니다. 잠시 후 다시 시도해주세요.',
+        e.response?.data?.message || '모임 탈퇴에 실패했습니다.',
         'error',
         2000,
       );
