@@ -35,14 +35,14 @@ export default function MeetingList({
 
   // 모드별 엔드포인트/사이즈 선택
   const getEndpointAndSize = () => {
-    if (mode === 'my') {
-      return { endpoint: '/search/user', size: 20 }; // 내 모임 보기
+    switch (mode) {
+      case 'my':
+        return { endpoint: '/search/user', size: 20 };
+      case 'full':
+        return { endpoint: apiEndpoint ?? '/search/recommendations', size: 20 };
+      case 'home':
+        return { endpoint: apiEndpoint ?? '/search/recommendations', size: 20 };
     }
-    if (mode === 'full') {
-      return { endpoint: apiEndpoint ?? '/search/recommendations', size: 20 };
-    }
-    // home
-    return { endpoint: '/search/recommendations', size: 5 };
   };
 
   // 데이터 로드 함수
