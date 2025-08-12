@@ -67,13 +67,33 @@ export const MeetingDetail = () => {
   ];
 
   return (
-    <div>
-      <TabBar
-        key={`${defaultTab}-${clubRole ?? 'n'}`}   // 뒤로가기/쿼리 변경 시 리마운트 보장
-        tabs={meetingTabs}
-        defaultTab={defaultTab}                    // URL 기반 초기 탭
-        onTabChange={handleTabChange}              // 변경 시 URL 반영
-      />
+    <div className="flex flex-col h-full bg-gray-50 overflow-hidden">
+      {/* 고정된 탭바 */}
+      <div className="flex-shrink-0 bg-white border-b border-gray-200">
+        <div className="flex">
+          {meetingTabs.map(tab => {
+            const isActive = defaultTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => handleTabChange(tab.id)}
+                className={`py-3 px-4 text-base font-medium transition-all duration-200 cursor-pointer flex-1 text-center ${
+                  isActive
+                    ? 'text-brand-primary border-b-2 border-brand-primary'
+                    : 'text-gray-600 hover:text-brand-primary border-b-2 border-transparent hover:border-gray-300'
+                }`}
+              >
+                {tab.label}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* 스크롤 가능한 컨텐츠 영역 - 탭바(50px) 높이만 제외 */}
+      <div className="overflow-y-auto" style={{ height: 'calc(100% - 50px)' }}>
+        {meetingTabs.find(tab => tab.id === defaultTab)?.content}
+      </div>
     </div>
   );
 };

@@ -242,7 +242,7 @@ export default function MeetingList({
       )}
 
 	  {/* 모임 목록 */}
-      <div className="px-4 py-6">
+      <div>
         <div className="space-y-4">
           {meetings.map(meeting => (
             <MeetingCard
