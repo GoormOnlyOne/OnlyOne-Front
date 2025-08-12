@@ -258,7 +258,7 @@ export const Profile = () => {
                 transition-all duration-300
                 ${
                   currentStep >= step
-                    ? 'bg-blue-600 text-white'
+                    ? 'bg-[var(--color-brand-primary)] text-white hover:bg-[color-mix(in srgb, var(--color-brand-primary) 90%, black)]'
                     : 'bg-gray-200 text-gray-500'
                 }
               `}
@@ -269,7 +269,7 @@ export const Profile = () => {
               <div
                 className={`
                   w-16 h-1 mx-2 transition-all duration-300
-                  ${currentStep > step ? 'bg-blue-600' : 'bg-gray-200'}
+                  ${currentStep > step ? 'bg-[var(--color-brand-primary)] text-white hover:bg-[color-mix(in srgb, var(--color-brand-primary) 90%, black)]' : 'bg-gray-200'}
                 `}
               />
             )}
@@ -343,15 +343,11 @@ export const Profile = () => {
           onClick={handleNext}
           disabled={!isStepValid() || loading}
           className={`
-            flex-1 px-6 py-3 rounded-lg font-medium transition-colors
-            ${
-              currentStep === totalSteps
-                ? 'bg-blue-600 text-white hover:bg-blue-700'
-                : 'bg-gray-800 text-white hover:bg-gray-900'
-            }
-            disabled:opacity-50 disabled:cursor-not-allowed
-            ${!isStepValid() || loading ? 'cursor-not-allowed' : 'cursor-pointer'}
-          `}
+    flex-1 px-6 py-3 rounded-lg font-medium transition-colors
+    bg-[var(--color-brand-primary)] text-white hover:bg-[color-mix(in srgb, var(--color-brand-primary) 90%, black)]
+    disabled:opacity-50 disabled:cursor-not-allowed
+    ${!isStepValid() || loading ? 'cursor-not-allowed' : 'cursor-pointer'}
+  `}
         >
           {loading
             ? '처리 중...'
