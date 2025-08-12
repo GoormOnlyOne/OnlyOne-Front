@@ -40,18 +40,24 @@ export const getPresignedUrl = async (
       imageSize: Number(file.size), // Long 타입으로 명시적 변환
     };
 
-    const response = await apiClient.post<{
-      success: boolean;
-      data: PresignedUrlResponse;
-    }>(`/${imageFolderType}/presigned-url`, request);
+    const response = await apiClient.post<
+      PresignedUrlResponse | { success: boolean; data: PresignedUrlResponse }
+    >(`/${imageFolderType}/presigned-url`, request);
 
     console.log('Presigned URL Response:', response.data);
     
-    if (!response.data.success || !response.data.data) {
+    // response.data가 직접 PresignedUrlResponse 객체인지 확인 (타입 가드)
+    if ('presignedUrl' in response.data && 'imageUrl' in response.data) {
+      return { success: true, data: response.data as PresignedUrlResponse };
+    }
+    
+    // 아니면 기존 래핑된 구조인지 확인
+    const wrappedResponse = response.data as { success: boolean; data: PresignedUrlResponse };
+    if (!wrappedResponse.success || !wrappedResponse.data) {
       throw new Error(`Presigned URL 발급 실패: ${file.name}`);
     }
     
-    return response.data;
+    return wrappedResponse;
   } catch (error) {
     console.error(`Presigned URL 발급 실패 (${file.name}):`, error);
     throw error;
