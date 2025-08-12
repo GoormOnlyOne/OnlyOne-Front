@@ -88,7 +88,7 @@ export const Mypage = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 relative">
-        <Loading overlay text="로당 중..." />
+        <Loading overlay text="로딩 중..." />
       </div>
     );
   }
