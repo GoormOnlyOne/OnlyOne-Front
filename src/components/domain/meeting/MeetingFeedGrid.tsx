@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import apiClient from '../../../api/client';
 import { Link } from 'react-router-dom';
 import EmptyState from '../search/EmptyState';
+import Loading from '../../common/Loading';
 
 interface FeedItem {
   id: number;
@@ -112,6 +113,12 @@ const MeetingFeedGrid: React.FC<MeetingFeedGridProps> = ({ clubId }) => {
 
   return (
     <>
+      {loading && items.length === 0 && (
+        <div className="relative">
+          <Loading overlay text="로딩 중..." />
+        </div>
+      )}
+
       {!loading && firstLoaded && firstPageEmpty && (
         <EmptyState
           title="이 모임에는 아직 피드가 게시되지 않았습니다."
@@ -171,7 +178,11 @@ const MeetingFeedGrid: React.FC<MeetingFeedGridProps> = ({ clubId }) => {
         ))}
       </div>
 
-      {loading && <p className="text-center mt-2 text-gray-500">로딩 중...</p>}
+      {loading && items.length > 0 && (
+        <div className="py-2">
+          <Loading text="불러오는 중..." overlay={false} />
+        </div>
+      )}
     </>
   );
 };

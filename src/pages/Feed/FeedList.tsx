@@ -7,6 +7,8 @@ import CommentSection, {
 import userProfile from '../../assets/user_profile.jpg';
 import apiClient from '../../api/client';
 import { showApiErrorToast } from '../../components/common/Toast/ToastProvider';
+import SortChips from '../../components/common/SortChips';
+
 
 interface FeedData {
 	clubId: number;
@@ -287,7 +289,7 @@ const FeedItem = ({ feed, onCommentClick, onLikeClick }: FeedItemProps) => {
 
 											{/* rootFeed 이미지 카운터 */}
 											{feed.rootFeed.imageUrls.length > 1 && (
-												<div className="absolute top-4 right-4 bg-black bg-opacity-50 text-white px-2 py-1 rounded text-sm">
+												<div className="absolute top-4 right-4 bg-black/50 text-white px-2 py-1 rounded text-sm">
 													{rootFeedImageIndex + 1}/
 													{feed.rootFeed.imageUrls.length}
 												</div>
@@ -298,13 +300,13 @@ const FeedItem = ({ feed, onCommentClick, onLikeClick }: FeedItemProps) => {
 												<>
 													<button
 														onClick={handlePrevRootFeedImage}
-														className="absolute left-4 top-1/2 -translate-y-1/2 w-8 h-8 bg-black bg-opacity-50 text-white rounded-full flex items-center justify-center hover:bg-opacity-70"
+														className="absolute left-4 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/50 text-white rounded-full flex items-center justify-center hover:bg-opacity-70"
 													>
 														<i className="ri-arrow-left-wide-line"></i>
 													</button>
 													<button
 														onClick={handleNextRootFeedImage}
-														className="absolute right-4 top-1/2 -translate-y-1/2 w-8 h-8 bg-black bg-opacity-50 text-white rounded-full flex items-center justify-center hover:bg-opacity-70"
+														className="absolute right-4 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/50 text-white rounded-full flex items-center justify-center hover:bg-opacity-70"
 													>
 														<i className="ri-arrow-right-wide-line"></i>
 													</button>
@@ -425,7 +427,7 @@ const FeedItem = ({ feed, onCommentClick, onLikeClick }: FeedItemProps) => {
 
 												{/* 이미지 카운터 */}
 												{feed.parentFeed.imageUrls.length > 1 && (
-													<div className="absolute top-4 right-4 bg-black bg-opacity-50 text-white px-2 py-1 rounded text-sm">
+													<div className="absolute top-4 right-4 bg-black/50 text-white px-2 py-1 rounded text-sm">
 														{rootFeedImageIndex + 1}/
 														{feed.parentFeed.imageUrls.length}
 													</div>
@@ -436,13 +438,13 @@ const FeedItem = ({ feed, onCommentClick, onLikeClick }: FeedItemProps) => {
 													<>
 														<button
 															onClick={handlePrevRootFeedImage}
-															className="absolute left-4 top-1/2 -translate-y-1/2 w-8 h-8 bg-black bg-opacity-50 text-white rounded-full flex items-center justify-center hover:bg-opacity-70"
+															className="absolute left-4 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/50 text-white rounded-full flex items-center justify-center hover:bg-opacity-70"
 														>
 															<i className="ri-arrow-left-wide-line"></i>
 														</button>
 														<button
 															onClick={handleNextRootFeedImage}
-															className="absolute right-4 top-1/2 -translate-y-1/2 w-8 h-8 bg-black bg-opacity-50 text-white rounded-full flex items-center justify-center hover:bg-opacity-70"
+															className="absolute right-4 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/50 text-white rounded-full flex items-center justify-center hover:bg-opacity-70"
 														>
 															<i className="ri-arrow-right-wide-line"></i>
 														</button>
@@ -491,7 +493,7 @@ const FeedItem = ({ feed, onCommentClick, onLikeClick }: FeedItemProps) => {
 
 				{/* 일반 피드 - 이미지 카운터 */}
 				{!feed.isRepost && feed.imageUrls.length > 1 && (
-					<div className="absolute top-4 right-4 bg-black bg-opacity-50 text-white px-2 py-1 rounded text-sm">
+					<div className="absolute top-4 right-4 bg-black/50 text-white px-2 py-1 rounded text-sm">
 						{currentImageIndex + 1}/{feed.imageUrls.length}
 					</div>
 				)}
@@ -501,13 +503,13 @@ const FeedItem = ({ feed, onCommentClick, onLikeClick }: FeedItemProps) => {
 					<>
 						<button
 							onClick={handlePrevImage}
-							className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-black bg-opacity-50 text-white rounded-full flex items-center justify-center hover:bg-opacity-70 text-xl"
+							className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/50 text-white rounded-full flex items-center justify-center hover:bg-opacity-70 text-xl"
 						>
 							<i className="ri-arrow-left-wide-line"></i>
 						</button>
 						<button
 							onClick={handleNextImage}
-							className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-black bg-opacity-50 text-white rounded-full flex items-center justify-center hover:bg-opacity-70 text-xl"
+							className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/50 text-white rounded-full flex items-center justify-center hover:bg-opacity-70 text-xl"
 						>
 							<i className="ri-arrow-right-wide-line"></i>
 						</button>
@@ -521,8 +523,7 @@ const FeedItem = ({ feed, onCommentClick, onLikeClick }: FeedItemProps) => {
 							<button
 								key={index}
 								onClick={() => setCurrentImageIndex(index)}
-								className={`w-2 h-2 rounded-full ${index === currentImageIndex ? 'bg-blue-500' : 'bg-gray-300'
-									}`}
+								className={`w-2 h-2 rounded-full ${index === currentImageIndex ? 'bg-brand-primary' : 'bg-gray-300'}`}
 							/>
 						))}
 					</div>
@@ -569,37 +570,43 @@ export const FeedList = () => {
 	const [selectedFeed, setSelectedFeed] = useState<FeedData | null>(null);
 	const likeSendingRef = useRef<Set<number>>(new Set());
 	const bottomSheetScrollRef = useRef<HTMLDivElement>(null);
+  type SortMode = 'latest' | 'popular';
+  const [sortMode, setSortMode] = useState<SortMode>('latest');
 
-	// API 호출
-	useEffect(() => {
-		const fetchFeeds = async () => {
-			try {
-				setLoading(true);
-				const response = await apiClient.get('/feeds?page=0&limit=20');
+  useEffect(() => {
+  let cancelled = false;
+  const fetchFeeds = async () => {
+    try {
+      setLoading(true);
 
-				// API 응답 데이터를 FeedData 형태로 변환
-				const rawFeeds =
-					response.data?.data || response.data?.content || response.data || [];
+      const path = sortMode === 'popular' ? '/feeds/popular' : '/feeds';
+      const response = await apiClient.get(`${path}?page=0&limit=20`);
 
-				console.log('피드 목록 확인~~~~: ', rawFeeds);
+      // API 응답 데이터를 FeedData 형태로 변환
+      const rawFeeds =
+        response.data?.data || response.data?.content || response.data || [];
 
-				const feedsData = rawFeeds.map((feed: any) => ({
-					...feed,
-					comments: [], // API에서 댓글은 별도로 로드
-					isRepost: !!(feed.parentFeed || feed.rootFeed), // repost 여부 판단
-				}));
+      if (cancelled) return;
 
-				setFeeds(feedsData);
-			} catch (error) {
-				console.error('피드 로드 실패:', error);
-				setFeeds([]);
-			} finally {
-				setLoading(false);
-			}
-		};
+      const feedsData = rawFeeds.map((feed: any) => ({
+        ...feed,
+        comments: [], // API에서 댓글은 별도로 로드
+        isRepost: !!(feed.parentFeed || feed.rootFeed), // repost 여부 판단
+      }));
 
-		fetchFeeds();
-	}, []);
+      setFeeds(feedsData);
+    } catch (error) {
+      if (cancelled) return;
+      console.error('피드 로드 실패:', error);
+      setFeeds([]);
+    } finally {
+      if (!cancelled) setLoading(false);
+    }
+  };
+
+  fetchFeeds();
+  return () => { cancelled = true; };
+}, [sortMode]); 
 
 	// 좋아요 처리
 	const handleLikeClick = async (feedId: number) => {
@@ -706,6 +713,9 @@ export const FeedList = () => {
 
 	return (
 		<div className="min-h-screen bg-gray-50">
+      <div className="z-10 bg-white px-4 pt-3 pb-2">
+        <SortChips value={sortMode} onChange={setSortMode} />
+      </div>
 			{/* 피드 리스트 */}
 			<div className="pb-4">
 				{feeds.map(feed => (

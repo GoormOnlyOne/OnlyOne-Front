@@ -24,11 +24,9 @@ export const Notice = () => {
 
         setNotifications(readNotifications);
         setUnreadCount(0); // 모든 알림이 읽음 처리되었으므로 0으로 설정
-
-        console.log('✅ 알림 목록 조회 완료 - 모든 알림이 읽음 처리됨');
-      } catch (err) {
+        
+      } catch {
         setError('알림을 불러오는데 실패했습니다.');
-        console.error('알림 조회 실패:', err);
       } finally {
         setLoading(false);
       }
@@ -38,7 +36,6 @@ export const Notice = () => {
   }, []);
 
   const handleClick = (notification: NotificationApi) => {
-    console.log('알림 클릭:', notification);
     // 알림 타입에 따른 라우팅 처리
   };
 
@@ -63,8 +60,7 @@ export const Notice = () => {
       setNotifications(prev =>
         prev.filter(n => n.notificationId !== notification.notificationId),
       );
-    } catch (err) {
-      console.error('알림 삭제 실패:', err);
+    } catch {
       setError('알림 삭제에 실패했습니다.');
     }
   };
@@ -100,8 +96,8 @@ export const Notice = () => {
             <div
               key={notification.notificationId}
               onClick={() => handleClick(notification)}
-              className={`p-4 border-b cursor-pointer hover:bg-gray-50 ${
-                !notification.isRead ? 'bg-blue-50 border-blue-200' : ''
+              className={`p-4 mb-0 border-b border-gray-200 cursor-pointer hover:bg-neutral-100 ${
+                notification.isRead ? 'bg-neutral-50 border-blue-200' : ''
               }`}
             >
               <div className="flex justify-between items-start mb-2">
@@ -134,7 +130,7 @@ export const Notice = () => {
               </div>
               <p className="text-sm text-gray-700">{notification.content}</p>
               {!notification.isRead && (
-                <div className="w-2 h-2 bg-blue-500 rounded-full mt-2" />
+                <div className="w-2 h-2 bg-neutral-50 rounded-full mt-2" />
               )}
             </div>
           ))}

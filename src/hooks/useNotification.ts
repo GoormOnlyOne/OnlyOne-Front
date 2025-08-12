@@ -41,12 +41,10 @@ export function useNotification(
   const [error, setError] = useState<string | null>(null);
 
   // 브라우저 알림 권한 요청
-  const requestNotificationPermission =
-    useCallback(async (): Promise<boolean> => {
-      if (!('Notification' in window)) {
-        console.warn('This browser does not support notifications');
-        return false;
-      }
+  const requestNotificationPermission = useCallback(async (): Promise<boolean> => {
+    if (!('Notification' in window)) {
+      return false;
+    }
 
       if (Notification.permission === 'granted') {
         return true;
@@ -126,7 +124,6 @@ export function useNotification(
       const errorMessage =
         err instanceof Error ? err.message : 'Failed to fetch notifications';
       setError(errorMessage);
-      console.error('Failed to refresh notifications:', err);
     } finally {
       setLoading(false);
     }
@@ -145,7 +142,6 @@ export function useNotification(
       const errorMessage =
         err instanceof Error ? err.message : 'Failed to connect';
       setError(errorMessage);
-      console.error('Failed to connect to notification service:', err);
     }
   }, [userId, refreshNotifications]);
 
@@ -173,7 +169,6 @@ export function useNotification(
       const errorMessage =
         err instanceof Error ? err.message : 'Failed to mark all as read';
       setError(errorMessage);
-      console.error('Failed to mark all notifications as read:', err);
     }
   }, [userId]);
 
@@ -186,8 +181,7 @@ export function useNotification(
     // 알림 이벤트 리스너
     const handleNotification = (event: SSEEvent) => {
       const notification = event.data as Notification;
-      console.log('New notification received:', notification);
-
+      
       // 알림 목록에 추가
       setNotifications(prev => [notification, ...prev]);
 

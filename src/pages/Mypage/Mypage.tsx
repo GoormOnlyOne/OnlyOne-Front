@@ -7,6 +7,7 @@ import { withdrawUser } from '../../api/auth';
 import { getMyPage } from '../../api/user';
 import type { MyPageResponse } from '../../types/endpoints/user.api';
 import { getInterestsInfo } from '../../utils/interest';
+import Loading from '../../components/common/Loading';
 
 export const Mypage = () => {
   const navigate = useNavigate();
@@ -86,11 +87,8 @@ export const Mypage = () => {
   // 로딩 중일 때 표시
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-          <p className="text-gray-600">로딩 중...</p>
-        </div>
+      <div className="min-h-screen bg-gray-50 relative">
+        <Loading overlay text="로당 중..." />
       </div>
     );
   }
@@ -145,7 +143,7 @@ export const Mypage = () => {
         </div>
 
         {/* 포인트 섹션 */}
-        <div className="mb-4 mx-4 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden transition-shadow hover:shadow-md">
+        <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
           <div className="py-6 px-6 flex items-center justify-between">
             <div className="flex flex-col">
               <h3 className="text-base font-semibold text-gray-800 leading-snug">
@@ -159,7 +157,10 @@ export const Mypage = () => {
             {/* 충전하기 버튼 */}
             <Link
               to="/payment/charge"
-              className="bg-blue-500 text-white text-sm px-6 py-2 rounded-full hover:bg-blue-700 cursor-pointer hover:shadow-md transition-shadow flex items-center gap-1"
+              className="bg-gradient-to-br from-brand-primary to-brand-secondary text-white text-sm
+              px-6 py-2 rounded-full
+              hover:from-brand-secondary hover:to-brand-primary transition-all duration-200 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed
+              flex items-center gap-1"
             >
               <i className="ri-coins-line text-lg"></i>
               <span>충전하기</span>
@@ -172,6 +173,7 @@ export const Mypage = () => {
       <div className="bg-white mt-2">
         <div className="px-4 py-6">
           <div className="divide-y divide-gray-100">
+            {/* @TODO: MVP에서 안보여줌 */}
             {/* <Link
               to="/mypage/interest"
               className="flex items-center justify-between py-3 hover:bg-gray-50 cursor-pointer"

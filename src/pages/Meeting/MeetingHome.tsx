@@ -213,9 +213,9 @@ const MeetingHome: React.FC = () => {
                 onClick={handleModalOpen}
                 className="
                   w-[90vw] max-w-md mb-6 py-4
-                  bg-[#F5921F] text-white text-lg font-bold
+                  bg-gradient-to-br from-brand-primary to-brand-secondary text-white text-lg font-bold
                   rounded-xl shadow-lg
-                  hover:bg-[#EF7C30] active:scale-95
+                  hover:from-brand-secondary hover:to-brand-primary active:scale-95
                   transition-all duration-200
                 "
               >

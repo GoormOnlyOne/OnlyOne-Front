@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router-dom'; // 👈 추가
 import TabBar, { type TabItem } from '../../components/common/TabBar';
 import MeetingHome from './MeetingHome';
 import MeetingFeed from './MeetingFeed';
@@ -8,11 +8,11 @@ import apiClient from '../../api/client';
 
 export const MeetingDetail = () => {
   const { id: meetingId } = useParams<{ id: string }>();
+  const [searchParams, setSearchParams] = useSearchParams();          // 👈 추가
   const [clubRole, setClubRole] = useState<'LEADER' | 'MEMBER' | 'GUEST' | null>(null);
 
   useEffect(() => {
     if (!meetingId) return;
-
     const fetchMeetingInfo = async () => {
       try {
         const response = await apiClient.get(`/clubs/${meetingId}`);
@@ -23,43 +23,40 @@ export const MeetingDetail = () => {
         console.error('Failed to fetch meeting info:', error);
       }
     };
-
     fetchMeetingInfo();
   }, [meetingId]);
+
+  // 💡 URL 쿼리에서 탭 읽기 + 게스트 접근 제한 처리
+  const requestedTab = (searchParams.get('tab') as 'home' | 'feed' | 'chat' | null) ?? null;
+  const isRestricted = (t: string) => clubRole === 'GUEST' && (t === 'feed' || t === 'chat');
+  const defaultTab = requestedTab && !isRestricted(requestedTab) ? requestedTab : 'home';
 
   const handleTabChange = (tabId: string) => {
     if (clubRole === 'GUEST' && (tabId === 'feed' || tabId === 'chat')) {
       alert('모임에 가입해야 볼 수 있습니다.');
       return false; // 탭 변경 방지
     }
-    console.log('모임 탭 변경:', tabId);
+    // URL 동기화: home이면 tab 제거, 그 외엔 설정
+    const sp = new URLSearchParams(searchParams);
+    if (tabId === 'home') sp.delete('tab');
+    else sp.set('tab', tabId);
+    setSearchParams(sp, { replace: true });
     return true;
   };
 
   const meetingTabs: TabItem[] = [
-    {
-      id: 'home',
-      label: '홈',
-      content: <MeetingHome />,
-    },
-    {
-      id: 'feed',
-      label: '게시판',
-      content: <MeetingFeed />,
-    },
-    {
-      id: 'chat',
-      label: '채팅',
-      content: <MeetingChat />,
-    },
+    { id: 'home', label: '홈', content: <MeetingHome /> },
+    { id: 'feed', label: '게시판', content: <MeetingFeed /> },
+    { id: 'chat', label: '채팅', content: <MeetingChat /> },
   ];
 
   return (
     <div>
       <TabBar
+        key={`${defaultTab}-${clubRole ?? 'n'}`}   // 🔁 뒤로가기/쿼리 변경 시 리마운트 보장
         tabs={meetingTabs}
-        defaultTab="home"
-        onTabChange={handleTabChange}
+        defaultTab={defaultTab}                    // 🧭 URL 기반 초기 탭
+        onTabChange={handleTabChange}              // 🔗 변경 시 URL 반영
       />
     </div>
   );
