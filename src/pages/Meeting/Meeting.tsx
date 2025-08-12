@@ -4,7 +4,7 @@ import ScrollToTopButton from '../../components/common/ScrollToTopButton';
 
 export const Meeting = () => {
   return (
-    <div className="flex flex-col bg-gray-50">
+    <div className="flex flex-col bg-neutral-50">
       {/* 모임 만들기 카드 */}
       <div className="p-4">
         <CreateMeetingCard />

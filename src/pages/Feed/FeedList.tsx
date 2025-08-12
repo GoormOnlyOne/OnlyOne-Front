@@ -292,7 +292,7 @@ const FeedItem = ({ feed, onCommentClick, onLikeClick, onRefeedClick }: FeedItem
 
 											{/* rootFeed 이미지 카운터 */}
 											{feed.rootFeed.imageUrls.length > 1 && (
-												<div className="absolute top-4 right-4 bg-black bg-opacity-50 text-white px-2 py-1 rounded text-sm">
+												<div className="absolute top-4 right-4 bg-black/50 text-white px-2 py-1 rounded text-sm">
 													{rootFeedImageIndex + 1}/
 													{feed.rootFeed.imageUrls.length}
 												</div>
@@ -303,13 +303,13 @@ const FeedItem = ({ feed, onCommentClick, onLikeClick, onRefeedClick }: FeedItem
 												<>
 													<button
 														onClick={handlePrevRootFeedImage}
-														className="absolute left-4 top-1/2 -translate-y-1/2 w-8 h-8 bg-black bg-opacity-50 text-white rounded-full flex items-center justify-center hover:bg-opacity-70"
+														className="absolute left-4 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/50 text-white rounded-full flex items-center justify-center hover:bg-opacity-70"
 													>
 														<i className="ri-arrow-left-wide-line"></i>
 													</button>
 													<button
 														onClick={handleNextRootFeedImage}
-														className="absolute right-4 top-1/2 -translate-y-1/2 w-8 h-8 bg-black bg-opacity-50 text-white rounded-full flex items-center justify-center hover:bg-opacity-70"
+														className="absolute right-4 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/50 text-white rounded-full flex items-center justify-center hover:bg-opacity-70"
 													>
 														<i className="ri-arrow-right-wide-line"></i>
 													</button>
@@ -430,7 +430,7 @@ const FeedItem = ({ feed, onCommentClick, onLikeClick, onRefeedClick }: FeedItem
 
 												{/* 이미지 카운터 */}
 												{feed.parentFeed.imageUrls.length > 1 && (
-													<div className="absolute top-4 right-4 bg-black bg-opacity-50 text-white px-2 py-1 rounded text-sm">
+													<div className="absolute top-4 right-4 bg-black/50 text-white px-2 py-1 rounded text-sm">
 														{rootFeedImageIndex + 1}/
 														{feed.parentFeed.imageUrls.length}
 													</div>
@@ -441,13 +441,13 @@ const FeedItem = ({ feed, onCommentClick, onLikeClick, onRefeedClick }: FeedItem
 													<>
 														<button
 															onClick={handlePrevRootFeedImage}
-															className="absolute left-4 top-1/2 -translate-y-1/2 w-8 h-8 bg-black bg-opacity-50 text-white rounded-full flex items-center justify-center hover:bg-opacity-70"
+															className="absolute left-4 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/50 text-white rounded-full flex items-center justify-center hover:bg-opacity-70"
 														>
 															<i className="ri-arrow-left-wide-line"></i>
 														</button>
 														<button
 															onClick={handleNextRootFeedImage}
-															className="absolute right-4 top-1/2 -translate-y-1/2 w-8 h-8 bg-black bg-opacity-50 text-white rounded-full flex items-center justify-center hover:bg-opacity-70"
+															className="absolute right-4 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/50 text-white rounded-full flex items-center justify-center hover:bg-opacity-70"
 														>
 															<i className="ri-arrow-right-wide-line"></i>
 														</button>
@@ -496,7 +496,7 @@ const FeedItem = ({ feed, onCommentClick, onLikeClick, onRefeedClick }: FeedItem
 
 				{/* 일반 피드 - 이미지 카운터 */}
 				{!feed.isRepost && feed.imageUrls.length > 1 && (
-					<div className="absolute top-4 right-4 bg-black bg-opacity-50 text-white px-2 py-1 rounded text-sm">
+					<div className="absolute top-4 right-4 bg-black/50 text-white px-2 py-1 rounded text-sm">
 						{currentImageIndex + 1}/{feed.imageUrls.length}
 					</div>
 				)}
@@ -506,13 +506,13 @@ const FeedItem = ({ feed, onCommentClick, onLikeClick, onRefeedClick }: FeedItem
 					<>
 						<button
 							onClick={handlePrevImage}
-							className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-black bg-opacity-50 text-white rounded-full flex items-center justify-center hover:bg-opacity-70 text-xl"
+							className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/50 text-white rounded-full flex items-center justify-center hover:bg-opacity-70 text-xl"
 						>
 							<i className="ri-arrow-left-wide-line"></i>
 						</button>
 						<button
 							onClick={handleNextImage}
-							className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-black bg-opacity-50 text-white rounded-full flex items-center justify-center hover:bg-opacity-70 text-xl"
+							className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/50 text-white rounded-full flex items-center justify-center hover:bg-opacity-70 text-xl"
 						>
 							<i className="ri-arrow-right-wide-line"></i>
 						</button>
@@ -526,8 +526,7 @@ const FeedItem = ({ feed, onCommentClick, onLikeClick, onRefeedClick }: FeedItem
 							<button
 								key={index}
 								onClick={() => setCurrentImageIndex(index)}
-								className={`w-2 h-2 rounded-full ${index === currentImageIndex ? 'bg-blue-500' : 'bg-gray-300'
-									}`}
+								className={`w-2 h-2 rounded-full ${index === currentImageIndex ? 'bg-brand-primary' : 'bg-gray-300'}`}
 							/>
 						))}
 					</div>

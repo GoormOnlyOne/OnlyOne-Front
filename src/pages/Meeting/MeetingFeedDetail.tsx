@@ -191,54 +191,54 @@ const MeetingFeedDetail = () => {
 		);
 	}
 
-	return (
-		<div className="min-h-screen bg-white">
-			{/* 피드 작성자 정보 */}
-			<div className="flex items-center justify-between p-4 border-b border-gray-100">
-				<div className="flex items-center gap-3">
-					<div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
-						<img
-							src={feedData.profileImage || userProfile}
-							className="w-10 h-10 rounded-full"
-							alt="프로필"
-						/>
-					</div>
-					<div>
-						<div className="text-sm font-medium">{feedData.nickname}</div>
-						<div className="text-xs text-gray-500">
-							{new Date(feedData.updatedAt)
-								.toLocaleDateString('ko-KR', {
-									month: '2-digit',
-									day: '2-digit',
-								})
-								.replace(/\./g, '/')
-								.replace(/\/$/, '')
-								.replace(/\s/g, '')}{' '}
-							{new Date(feedData.updatedAt).toLocaleTimeString('ko-KR', {
-								hour: '2-digit',
-								minute: '2-digit',
-								hour12: false,
-							})}
-						</div>
-					</div>
-				</div>
-				{feedData.feedMine && (
-					<div className="flex gap-2">
-						<button
-							onClick={handleFeedUpdate}
-							className="px-3 py-1 text-sm bg-gray-200 rounded hover:bg-gray-300 transition-colors"
-						>
-							수정
-						</button>
-						<button
-							onClick={() => setIsFeedModalOpen(true)}
-							className="px-3 py-1 text-sm bg-red-100 text-red-600 rounded hover:bg-red-200 transition-colors"
-						>
-							삭제
-						</button>
-					</div>
-				)}
-			</div>
+  return (
+    <div className="min-h-screen bg-neutral-50">
+      {/* 피드 작성자 정보 */}
+      <div className="flex items-center justify-between p-4 border-b border-gray-100">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
+            <img
+              src={feedData.profileImage || userProfile}
+              className="w-10 h-10 rounded-full"
+              alt="프로필"
+            />
+          </div>
+          <div>
+            <div className="text-sm font-medium">{feedData.nickname}</div>
+            <div className="text-xs text-gray-500">
+              {new Date(feedData.updatedAt)
+                .toLocaleDateString('ko-KR', {
+                  month: '2-digit',
+                  day: '2-digit',
+                })
+                .replace(/\./g, '/')
+                .replace(/\/$/, '')
+                .replace(/\s/g, '')}{' '}
+              {new Date(feedData.updatedAt).toLocaleTimeString('ko-KR', {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false,
+              })}
+            </div>
+          </div>
+        </div>
+        {feedData.feedMine && (
+          <div className="flex gap-2">
+            <button
+              onClick={handleFeedUpdate}
+              className="px-3 py-1 text-sm bg-gray-200 rounded hover:bg-gray-300 transition-colors"
+            >
+              수정
+            </button>
+            <button
+              onClick={() => setIsFeedModalOpen(true)}
+              className="px-3 py-1 text-sm bg-red-100 text-red-600 rounded hover:bg-red-200 transition-colors"
+            >
+              삭제
+            </button>
+          </div>
+        )}
+      </div>
 
 			{/* 이미지 캐러셀 */}
 			<div className="relative">
@@ -253,68 +253,68 @@ const MeetingFeedDetail = () => {
 						const endX = e.changedTouches[0].clientX;
 						const diff = startX - endX;
 
-						if (Math.abs(diff) > 50) {
-							// 50px 이상 스와이프해야 동작
-							if (diff > 0) {
-								handleNextImage(); // 왼쪽으로 스와이프 → 다음 이미지
-							} else {
-								handlePrevImage(); // 오른쪽으로 스와이프 → 이전 이미지
-							}
-						}
-					}}
-				>
-					{feedData.imageUrls.length > 0 ? (
-						<img
-							src={feedData.imageUrls[currentImageIndex]}
-							alt={`피드 이미지 ${currentImageIndex + 1}`}
-							className="w-full h-full object-cover"
-							onError={e => {
-								e.currentTarget.src = `https://picsum.photos/seed/picsum/200/300`;
-							}}
-						/>
-					) : (
-						<span className="text-gray-500">사진이 들어갑니다.</span>
-					)}
-				</div>
+            if (Math.abs(diff) > 50) {
+              // 50px 이상 스와이프해야 동작
+              if (diff > 0) {
+                handleNextImage(); // 왼쪽으로 스와이프 → 다음 이미지
+              } else {
+                handlePrevImage(); // 오른쪽으로 스와이프 → 이전 이미지
+              }
+            }
+          }}
+        >
+          {feedData.imageUrls.length > 0 ? (
+            <img
+              src={feedData.imageUrls[currentImageIndex]}
+              alt={`피드 이미지 ${currentImageIndex + 1}`}
+              className="w-full h-full object-cover"
+              onError={e => {
+                e.currentTarget.src = '/placeholder-image.jpg';
+              }}
+            />
+          ) : (
+            <span className="text-gray-500">사진이 들어갑니다.</span>
+          )} 
+        </div>
 
-				{/* 이미지 카운터 */}
-				{feedData.imageUrls.length > 1 && (
-					<div className="absolute top-4 right-4 bg-black bg-opacity-50 text-white px-2 py-1 rounded text-sm">
-						{currentImageIndex + 1}/{feedData.imageUrls.length}
-					</div>
-				)}
+        {/* 이미지 카운터 */}
+        {feedData.imageUrls.length > 1 && (
+          <div className="absolute top-4 right-4 bg-black/50 text-white px-2 py-1 rounded text-sm">
+            {currentImageIndex + 1}/{feedData.imageUrls.length}
+          </div>
+        )}
 
-				{/* 좌우 화살표 버튼 */}
-				{feedData.imageUrls.length > 1 && (
-					<>
-						<button
-							onClick={handlePrevImage}
-							className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-black bg-opacity-50 text-white rounded-full flex items-center justify-center hover:bg-opacity-70 text-xl"
-						>
-							<i className="ri-arrow-left-wide-line"></i>
-						</button>
-						<button
-							onClick={handleNextImage}
-							className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-black bg-opacity-50 text-white rounded-full flex items-center justify-center hover:bg-opacity-70 text-xl"
-						>
-							<i className="ri-arrow-right-wide-line"></i>
-						</button>
-					</>
-				)}
+        {/* 좌우 화살표 버튼 */}
+        {feedData.imageUrls.length > 1 && (
+          <>
+            <button
+              onClick={handlePrevImage}
+              className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/50 text-white rounded-full flex items-center justify-center hover:bg-opacity-70 text-xl"
+            >
+              <i className="ri-arrow-left-wide-line"></i>
+            </button>
+            <button
+              onClick={handleNextImage}
+              className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/50 text-white rounded-full flex items-center justify-center hover:bg-opacity-70 text-xl"
+            >
+              <i className="ri-arrow-right-wide-line"></i>
+            </button>
+          </>
+        )}
 
-				{/* 이미지 네비게이션 점들 */}
-				{feedData.imageUrls.length > 1 && (
-					<div className="flex justify-center gap-2 py-4">
-						{feedData.imageUrls.map((_, index) => (
-							<button
-								key={index}
-								onClick={() => setCurrentImageIndex(index)}
-								className={`w-2 h-2 rounded-full ${index === currentImageIndex ? 'bg-blue-500' : 'bg-gray-300'}`}
-							/>
-						))}
-					</div>
-				)}
-			</div>
+        {/* 이미지 네비게이션 점들 */}
+        {feedData.imageUrls.length > 1 && (
+          <div className="flex justify-center gap-2 py-4">
+            {feedData.imageUrls.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => setCurrentImageIndex(index)}
+                className={`w-2 h-2 rounded-full ${index === currentImageIndex ? 'bg-brand-primary' : 'bg-gray-300'}`}
+              />
+            ))}
+          </div>
+        )}
+      </div>
 
 			{/* 피드 내용 */}
 			<div className="px-4 py-3">

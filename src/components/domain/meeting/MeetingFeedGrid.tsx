@@ -113,12 +113,6 @@ const MeetingFeedGrid: React.FC<MeetingFeedGridProps> = ({ clubId }) => {
 
   return (
     <>
-      {loading && items.length === 0 && (
-        <div className="relative">
-          <Loading overlay text="로딩 중..." />
-        </div>
-      )}
-
       {!loading && firstLoaded && firstPageEmpty && (
         <EmptyState
           title="이 모임에는 아직 피드가 게시되지 않았습니다."
@@ -127,7 +121,12 @@ const MeetingFeedGrid: React.FC<MeetingFeedGridProps> = ({ clubId }) => {
         />
       )}
 
-      <div className="grid grid-cols-3 gap-2 p-4">
+      <div className="grid grid-cols-3 gap-2 p-4 relative min-h-[200px]">
+        {loading && items.length === 0 && (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <Loading text="피드를 불러오는 중..." />
+          </div>
+        )}
         {items.map(item => (
           <Link
             key={item.id}

@@ -40,7 +40,7 @@ export default function TitleHeader({
           {isBack && (
             <button
               onClick={handleBack}
-              className="cursor-pointer w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
+              className="cursor-pointer w-10 h-10 flex items-center justify-center rounded-full hover:bg-neutral-100 transition-colors"
               aria-label="뒤로가기"
             >
               <i className="ri-arrow-left-line text-gray-700 text-xl"></i>
