@@ -30,7 +30,7 @@ const normalizeContentType = (fileType: string): string => {
 export const getPresignedUrl = async (
   file: File,
   imageFolderType: string,
-): Promise<PresignedUrlResponse> => {
+): Promise<{ success: boolean; data: PresignedUrlResponse }> => {
   try {
     validateFileType(file);
 
@@ -51,7 +51,7 @@ export const getPresignedUrl = async (
       throw new Error(`Presigned URL 발급 실패: ${file.name}`);
     }
     
-    return response.data.data;
+    return response.data;
   } catch (error) {
     console.error(`Presigned URL 발급 실패 (${file.name}):`, error);
     throw error;
@@ -63,7 +63,10 @@ export const getPresignedUrls = async (
   files: File[],
   imageFolderType: string,
 ): Promise<PresignedUrlResponse[]> => {
-  const promises = files.map(file => getPresignedUrl(file, imageFolderType));
+  const promises = files.map(async file => {
+    const response = await getPresignedUrl(file, imageFolderType);
+    return response.data;
+  });
   return Promise.all(promises);
 };
 
