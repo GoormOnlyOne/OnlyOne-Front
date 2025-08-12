@@ -19,13 +19,13 @@ const ProtectedRoute = ({
 
     // 인증되지 않은 경우 로그인 페이지로
     if (!isAuthenticated) {
-      navigate('/login');
+      navigate('/login', { replace: true });
       return;
     }
 
     // ACTIVE 상태가 필요한데 GUEST 상태인 경우 회원가입 페이지로
     if (requireActive && isGuest) {
-      navigate('/signup');
+      navigate('/signup', { replace: true });
       return;
     }
   }, [isAuthenticated, user, isLoading, isGuest, navigate, requireActive]);
