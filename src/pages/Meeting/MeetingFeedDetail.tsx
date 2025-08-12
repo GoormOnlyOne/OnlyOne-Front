@@ -347,7 +347,7 @@ const MeetingFeedDetail = () => {
 					className="flex items-center gap-2"
 					onClick={handleRefeedClick}
 				>
-					<i className="ri-repeat-2-line text-xl" />
+					<i className="ri-repeat-2-line" />
 					<span className="text-sm">{feedData.repostCount}</span>
 				</button>
 			</div>
