@@ -297,7 +297,7 @@ export const ScheduleForm = ({
                 className={`w-full py-3 px-4 rounded-lg font-medium transition-colors focus:ring-2 focus:ring-offset-2 
                   ${
                     isFormValid
-                      ? 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500'
+                      ? 'bg-brand-primary text-white hover:bg-brand-secondary focus:ring-brand-secondary'
                       : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                   }`}
               >
