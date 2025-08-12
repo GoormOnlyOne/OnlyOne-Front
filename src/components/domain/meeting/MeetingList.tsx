@@ -133,7 +133,7 @@ export default function MeetingList({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, hasMore, loading, mode]);
 
-  const handleViewMore = () => {
+  const handleViewMorePartner = () => {
     navigate('/partner-meetings');
   };
 
@@ -211,7 +211,7 @@ export default function MeetingList({
               {/* 더보기 버튼 */}
               <div className="flex justify-center mt-6">
                 <button
-                  onClick={handleViewMoreRecommended}
+                  onClick={handleViewMorePartner}
                   className="bg-gradient-to-br from-brand-primary to-brand-secondary text-white px-4 py-2 rounded-full text-sm font-medium hover:from-brand-secondary hover:to-brand-primary transition-all duration-200 hover:shadow-md"
                 >
                   더보기 →
