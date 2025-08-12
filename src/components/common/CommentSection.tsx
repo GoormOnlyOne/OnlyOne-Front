@@ -320,7 +320,7 @@ export const CommentSection = ({
 						disabled={commentSubmitting}
 						className={`px-4 py-2 rounded-lg font-medium transition-colors ${commentSubmitting
 							? 'bg-gray-400 text-gray-200 cursor-not-allowed'
-							: 'bg-blue-600 text-white hover:bg-blue-700'
+							: 'bg-brand-primary text-white hover:bg-brand-secondary'
 							}`}
 					>
 						{commentSubmitting ? '전송중...' : '전송'}
