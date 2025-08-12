@@ -62,15 +62,14 @@ const MeetingFeedGrid: React.FC<MeetingFeedGridProps> = ({ clubId, readOnly = fa
     setLoading(true);
 
     apiClient
-      .get<CommonResponse<PageResponse<FeedSummaryDto>>>(
+      .get<PageResponse<FeedSummaryDto>>(
         `/clubs/${clubId}/feeds?page=${page}&limit=20`,
       )
       .then(response => {
         console.log('Full API response:', response);
         console.log('response.data:', response?.data);
         
-        // 타입 정의에 맞게 수정: CommonResponse<PageResponse<FeedSummaryDto>>
-        const content = response?.data?.data?.content ?? [];
+        const content = response?.data?.content ?? [];
         
         console.log('Extracted content:', content);
         
