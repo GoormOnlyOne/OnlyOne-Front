@@ -4,6 +4,7 @@ import defaultProfileImage from '../../assets/user_profile.jpg';
 import { uploadImage } from '../../api/upload';
 import Loading from './Loading';
 import  Modal from './Modal';
+import { showToast } from '../../components/common/Toast/ToastProvider';
 
 export interface ProfileImage {
   file: File;
@@ -65,7 +66,7 @@ export const ProfileImageUpload: React.FC<ProfileImageUploadProps> = ({
     async (file: File) => {
       const validationError = validateFile(file);
       if (validationError) {
-        alert(validationError); // 에러 메시지를 alert으로 표시
+        showToast(validationError, 'error');
         return;
       }
 
@@ -89,7 +90,7 @@ export const ProfileImageUpload: React.FC<ProfileImageUploadProps> = ({
         onImageSelect?.(profileImage);
       } catch (error) {
         console.error('이미지 업로드 실패:', error);
-        alert('이미지 업로드에 실패했습니다. 다시 시도해주세요.');
+        showToast('이미지 업로드에 실패했습니다. 다시 시도해주세요.', 'error');
       } finally {
         setIsUploading(false);
       }

@@ -6,6 +6,7 @@ import MeetingFeed from './MeetingFeed';
 import MeetingChat from './MeetingChat';
 import apiClient from '../../api/client';
 import Modal from '../../components/common/Modal';
+import { showToast } from '../../components/common/Toast/ToastProvider';
 
 export const MeetingDetail = () => {
   const { id: meetingId } = useParams<{ id: string }>();
@@ -37,7 +38,7 @@ export const MeetingDetail = () => {
 
   const handleTabChange = (tabId: string) => {
     if (clubRole === 'GUEST' && tabId === 'chat') {
-      alert('모임에 가입해야 볼 수 있습니다.');
+      showToast('모임에 가입해야 볼 수 있습니다.', 'error');
       return false; // 탭 변경 방지
     }
     // URL 동기화: home이면 tab 제거, 그 외엔 설정

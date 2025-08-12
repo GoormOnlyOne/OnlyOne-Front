@@ -4,6 +4,7 @@ import apiClient from '../api/client';
 import { useAuth } from '../contexts/AuthContext';
 import Loading from '../components/common/Loading';
 import Modal from '../components/common/Modal';
+import { showToast } from '../components/common/Toast/ToastProvider';
 
 // 백엔드 응답 타입 정의
 interface KakaoLoginResponse {
@@ -26,16 +27,6 @@ const KakaoCallback: React.FC = () => {
   const [alertVariant, setAlertVariant] = useState<'default' | 'danger'>('default');
   const [alertConfirm, setAlertConfirm] = useState<(() => void) | undefined>(undefined);
 
-  const openAlert = (
-    msg: string,
-    options?: { variant?: 'default' | 'danger'; onConfirm?: () => void }
-  ) => {
-    setAlertMsg(msg);
-    setAlertVariant(options?.variant ?? 'default');
-    setAlertConfirm(() => options?.onConfirm);
-    setIsAlertOpen(true);
-  };
-
   useEffect(() => {
     const handleKakaoCallback = async () => {
       // 이미 요청이 진행 중이면 중단
@@ -50,10 +41,8 @@ const KakaoCallback: React.FC = () => {
 
         if (!code) {
           setError('인증 코드가 없습니다.');
-          openAlert('인증 코드가 없습니다.', {
-            variant: 'default',
-            onConfirm: () => navigate('/login'),
-          });
+          showToast('인증 코드가 없습니다.', 'error');
+          navigate('/login');
           return;
         }
 
@@ -90,7 +79,9 @@ const KakaoCallback: React.FC = () => {
         } else {
           const msg = response.data.error || '로그인 처리 중 오류가 발생했습니다.';
           setError(msg);
-          openAlert(msg, { variant: 'default', onConfirm: () => navigate('/login') });
+          showToast(msg, 'error');
+          navigate('/login');
+            return;
         }
       } catch (error: any) {
         console.error('카카오 로그인 실패:', error);
@@ -98,14 +89,17 @@ const KakaoCallback: React.FC = () => {
         if (error?.status === 403) {
           const msg = '탈퇴한 계정입니다. 탈퇴한 계정은 다시 로그인할 수 없습니다.';
           setError(msg);
-          openAlert(msg, { variant: 'default', onConfirm: () => navigate('/login') });
-          return;
+          showToast(msg, 'error');
+          navigate('/login');
+            return;
         }
 
         const msg = error?.message || '카카오 로그인 처리 중 오류가 발생했습니다.';
         setError(msg);
-        openAlert(msg, { variant: 'default', onConfirm: () => navigate('/login') });
-      } finally {
+        showToast(msg, 'error');
+        navigate('/login');
+            return;
+        } finally {
         setLoading(false);
       }
     };
