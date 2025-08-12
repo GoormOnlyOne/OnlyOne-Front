@@ -6,16 +6,16 @@ export const testSSEConnection = (userId: number = 1) => {
 
   // 연결 성공
   eventSource.onopen = () => {
-    // Connection successful
+    // Connection successful - removed console log
   };
 
   // 메시지 수신
   eventSource.onmessage = (event) => {
     try {
       const data = JSON.parse(event.data);
-      // Message received and parsed
+      // Message received and parsed - removed console log
     } catch (e) {
-      // Raw text data received
+      // Raw text data received - removed console log
     }
   };
 
@@ -23,25 +23,25 @@ export const testSSEConnection = (userId: number = 1) => {
   eventSource.addEventListener('notification', (event) => {
     try {
       const notification = JSON.parse(event.data);
-      // Notification received
+      // Notification received - removed console log
     } catch (e) {
-      // Notification data parsing error
+      // Notification data parsing error - removed console log
     }
   });
 
   // 하트비트 이벤트 처리
   eventSource.addEventListener('heartbeat', (event) => {
-    // Heartbeat received
+    // Heartbeat received - removed console log
   });
 
   // 연결 에러
   eventSource.onerror = (error) => {
-    // Connection error - auto reconnection will be attempted
+    // Connection error - auto reconnection will be attempted - removed console log
   };
 
   // 10초 후 연결 상태 체크
   setTimeout(() => {
-    // Connection status checked
+    // Connection status checked - removed console log
   }, 10000);
 
   // 연결 종료 함수 반환
