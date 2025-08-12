@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { Category } from '../meeting/MeetingForm';
+import Alert from '../../../components/common/Alert';
 
 // 카테고리 동작 모드 타입 정의
 export type CategoryMode = 'navigation' | 'single-select' | 'multi-select';
@@ -81,6 +82,9 @@ export default function CategorySection({
     Array.isArray(initialValue) ? initialValue : [],
   );
 
+  const [isAlertOpen, setIsAlertOpen] = useState(false);
+  const [alertMsg, setAlertMsg] = useState('');
+
   useEffect(() => {
     if (mode === 'single-select' && typeof initialValue === 'string') {
       setSelectedCategory(initialValue);
@@ -109,7 +113,8 @@ export default function CategorySection({
           } else if (prev.length < maxSelection) {
             next = [...prev, cat];
           } else {
-            alert(`최대 ${maxSelection}개까지만 선택할 수 있습니다.`);
+            setAlertMsg(`최대 ${maxSelection}개까지만 선택할 수 있습니다.`);
+            setIsAlertOpen(true);
             return prev;
           }
 
@@ -132,6 +137,7 @@ export default function CategorySection({
   };
 
   return (
+    <>
     <div className="w-full">
       <div className="grid grid-cols-4 gap-3 sm:gap-4">
         {categories.map(({ id, label, emoji }) => {
@@ -198,5 +204,16 @@ export default function CategorySection({
         </div>
       )}
     </div>
+
+    <Alert
+        isOpen={isAlertOpen}
+        onClose={() => setIsAlertOpen(false)}
+        onConfirm={() => setIsAlertOpen(false)}
+        title={alertMsg}
+        variant="default"
+        cancelText="닫기"
+        confirmText="확인"
+      />
+    </>
   );
 }

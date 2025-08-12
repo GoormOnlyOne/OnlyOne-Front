@@ -11,6 +11,8 @@ import type { ChatMessageDto } from '../../types/chat/chat.types';
 import { getUserIdFromToken } from '../../utils/auth';
 import { Image } from 'lucide-react';
 import Loading from '../../components/common/Loading';
+import Alert from '../../components/common/Alert';
+
 
 const formatChatTime = (iso: string) => {
   const d = new Date(iso);
@@ -34,6 +36,11 @@ const ChatRoom: React.FC = () => {
 
   const { messages: liveMessages, sendMessage } = useChatSocket(chatRoomIdNum, currentUserId!);
   const bottomRef = useRef<HTMLDivElement>(null);
+
+  const [isAlertOpen, setIsAlertOpen] = useState(false);
+  const [alertMsg, setAlertMsg] = useState('');
+  const [alertVariant, setAlertVariant] = useState<'default' | 'danger'>('default');
+  const [onAlertConfirm, setOnAlertConfirm] = useState<(() => void) | undefined>(undefined);
 
   useEffect(() => {
     if (!chatRoomIdNum) return;
@@ -95,6 +102,9 @@ const ChatRoom: React.FC = () => {
       }
     } catch (err) {
       console.error('❌ 이미지 업로드 또는 메시지 전송 실패:', err);
+      setAlertMsg('메시지 전송에 실패했습니다. 잠시 후 다시 시도해주세요.');
+      setAlertVariant('default');
+      setIsAlertOpen(true);
     }
   };
 
@@ -107,20 +117,31 @@ const ChatRoom: React.FC = () => {
   };
 
   const handleDeleteMessage = async (messageId: number) => {
-    const confirm = window.confirm('이 메시지를 삭제하시겠습니까?');
-    if (!confirm) return;
-    try {
-      await deleteChatMessage(messageId);
-      setMessages(prev =>
-        prev.map(m =>
-          m.messageId === messageId
-            ? { ...m, text: '(삭제된 메세지입니다.)', imageUrl: '', deleted: true }
-            : m
-        )
-      );
-    } catch (err) {
-      alert('메시지 삭제에 실패했습니다.');
-    }
+    setAlertMsg('이 메시지를 삭제하시겠습니까?');
+    setAlertVariant('default');
+    setOnAlertConfirm(() => async () => {
+      try {
+        await deleteChatMessage(messageId);
+        setMessages(prev =>
+          prev.map(m =>
+            m.messageId === messageId
+              ? { ...m, text: '(삭제된 메세지입니다.)', imageUrl: '', deleted: true }
+              : m
+          )
+        );
+      } catch (err) {
+        console.error('메시지 삭제 실패:', err);
+        setAlertMsg('메시지 삭제에 실패했습니다.');
+        setAlertVariant('default');
+        setOnAlertConfirm(undefined); // 에러 알림은 확인만
+        setIsAlertOpen(true);
+        return;
+      } finally {
+        setIsAlertOpen(false);
+        setOnAlertConfirm(undefined);
+      }
+    });
+    setIsAlertOpen(true);
   };
 
   return (
@@ -243,6 +264,24 @@ const ChatRoom: React.FC = () => {
           </div>
         </form>
       </div>
+      <Alert
+        isOpen={isAlertOpen}
+        onClose={() => {
+          setIsAlertOpen(false);
+          setOnAlertConfirm(undefined);
+        }}
+        onConfirm={() => {
+          if (onAlertConfirm) {
+            onAlertConfirm();
+          } else {
+            setIsAlertOpen(false);
+          }
+        }}
+        title={alertMsg}
+        variant={alertVariant}
+        cancelText="닫기"
+        confirmText="확인"
+      />
     </div>
   );
 };

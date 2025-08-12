@@ -4,6 +4,7 @@ import apiClient from '../../../api/client';
 import MeetingCard, {type Meeting} from './MeetingCard';
 import EmptyState from '../search/EmptyState';
 import Loading from '../../common/Loading';
+import Alert from '../../../components/common/Alert';
 
 
 interface MeetingListProps {
@@ -23,6 +24,9 @@ export default function MeetingList({
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   const navigate = useNavigate();
+
+  const [isAlertOpen, setIsAlertOpen] = useState(false);
+  const [alertMsg, setAlertMsg] = useState('');
 
   // 모드별 엔드포인트/사이즈 선택
   const getEndpointAndSize = () => {
@@ -133,7 +137,8 @@ export default function MeetingList({
 
   const handleJoinMeeting = (clubId: number) => {
     console.log(`모임 ${clubId}에 가입`);
-    alert('모임 가입이 완료되었습니다!');
+    setAlertMsg('모임 가입이 완료되었습니다!');
+    setIsAlertOpen(true);
   };
 
   // 홈 모드 렌더링
@@ -215,7 +220,7 @@ export default function MeetingList({
           <>
             {loading && meetings.length === 0 && (
               <div className="py-4">
-                <Loading text="모임 불러오는 중..." overlay={false} />
+                <Loading text="로딩 중..." overlay={false} />
               </div>
             )}
             <div className="space-y-4">
@@ -267,6 +272,16 @@ export default function MeetingList({
           />
         )}
       </div>
+
+      <Alert
+        isOpen={isAlertOpen}
+        onClose={() => setIsAlertOpen(false)}
+        onConfirm={() => setIsAlertOpen(false)}
+        title={alertMsg}
+        confirmText="확인"
+        cancelText="닫기"
+        variant="default"
+      />
     </div>
   );
 }

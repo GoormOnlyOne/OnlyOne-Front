@@ -1,15 +1,19 @@
 import { useState, useEffect } from 'react';
-import { useParams, useSearchParams } from 'react-router-dom'; // 👈 추가
+import { useParams, useSearchParams } from 'react-router-dom';
 import TabBar, { type TabItem } from '../../components/common/TabBar';
 import MeetingHome from './MeetingHome';
 import MeetingFeed from './MeetingFeed';
 import MeetingChat from './MeetingChat';
 import apiClient from '../../api/client';
+import Alert from '../../components/common/Alert';
 
 export const MeetingDetail = () => {
   const { id: meetingId } = useParams<{ id: string }>();
-  const [searchParams, setSearchParams] = useSearchParams();          // 👈 추가
+  const [searchParams, setSearchParams] = useSearchParams();
   const [clubRole, setClubRole] = useState<'LEADER' | 'MEMBER' | 'GUEST' | null>(null);
+
+  const [isAlertOpen, setIsAlertOpen] = useState(false);
+  const [alertMsg, setAlertMsg] = useState('');
 
   useEffect(() => {
     if (!meetingId) return;
@@ -32,7 +36,7 @@ export const MeetingDetail = () => {
   const defaultTab = requestedTab && !isRestricted(requestedTab) ? requestedTab : 'home';
 
   const handleTabChange = (tabId: string) => {
-    if (clubRole === 'GUEST' && (tabId === 'feed' || tabId === 'chat')) {
+    if (clubRole === 'GUEST' && tabId === 'chat') {
       alert('모임에 가입해야 볼 수 있습니다.');
       return false; // 탭 변경 방지
     }
@@ -45,21 +49,33 @@ export const MeetingDetail = () => {
   };
 
   const meetingTabs: TabItem[] = [
-    { id: 'home', label: '홈', content: <MeetingHome /> },
-    { id: 'feed', label: '게시판', content: <MeetingFeed /> },
-    { id: 'chat', label: '채팅', content: <MeetingChat /> },
+    {
+      id: 'home',
+      label: '홈',
+      content: <MeetingHome />,
+    },
+    {
+      id: 'feed',
+      label: '게시판',
+      content: <MeetingFeed readOnly={clubRole ==='GUEST'}/>
+    },
+    {
+      id: 'chat',
+      label: '채팅',
+      content: <MeetingChat />,
+    },
   ];
 
   return (
     <div>
       <TabBar
-        key={`${defaultTab}-${clubRole ?? 'n'}`}   // 🔁 뒤로가기/쿼리 변경 시 리마운트 보장
+        key={`${defaultTab}-${clubRole ?? 'n'}`}   // 뒤로가기/쿼리 변경 시 리마운트 보장
         tabs={meetingTabs}
-        defaultTab={defaultTab}                    // 🧭 URL 기반 초기 탭
-        onTabChange={handleTabChange}              // 🔗 변경 시 URL 반영
+        defaultTab={defaultTab}                    // URL 기반 초기 탭
+        onTabChange={handleTabChange}              // 변경 시 URL 반영
       />
     </div>
   );
 };
 
-export { MeetingDetail as default } from './MeetingDetail';
+export default MeetingDetail;
