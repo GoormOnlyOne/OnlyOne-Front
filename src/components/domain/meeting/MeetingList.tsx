@@ -4,7 +4,7 @@ import apiClient from '../../../api/client';
 import MeetingCard, {type Meeting} from './MeetingCard';
 import EmptyState from '../search/EmptyState';
 import Loading from '../../common/Loading';
-import Alert from '../../../components/common/Alert';
+import Modal from '../../../components/common/Modal';
 
 
 interface MeetingListProps {
@@ -273,7 +273,7 @@ export default function MeetingList({
         )}
       </div>
 
-      <Alert
+      <Modal
         isOpen={isAlertOpen}
         onClose={() => setIsAlertOpen(false)}
         onConfirm={() => setIsAlertOpen(false)}

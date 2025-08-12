@@ -8,7 +8,6 @@ import apiClient from '../../api/client';
 import Alert from '../../components/common/Alert';
 import { showToast } from '../../components/common/Toast/ToastProvider';
 
-
 export const MeetingDetail = () => {
   const { id: meetingId } = useParams<{ id: string }>();
   const [searchParams, setSearchParams] = useSearchParams();
