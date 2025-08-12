@@ -22,6 +22,7 @@ export function showApiErrorToast(error: unknown) {
   if (globalShowToast) {
     globalShowToast(msg, 'error', 3000);
   } else {
+    console.log('여기니1');
     alert(msg);
   }
 }
@@ -35,6 +36,7 @@ export function showToast(
   if (globalShowToast) {
     globalShowToast(message, type, durationMs);
   } else {
+    console.log('여기니2');
     alert(message);
   }
 }
