@@ -1,6 +1,7 @@
 // PointChargePage.tsx
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { showToast as globalToast } from '../../components/common/Toast/ToastProvider';
 
 interface PointOption {
   points: number;
@@ -28,7 +29,7 @@ export function PointCharge() {
 
   const handleSubmit = () => {
     if (!selectedOption || !agreed) {
-      alert('포인트를 선택하고 약관에 동의해주세요.');
+      globalToast('포인트를 선택하고 약관에 동의해주세요.', 'error', 3000);
       return;
     }
 

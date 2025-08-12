@@ -26,9 +26,8 @@ export default function SearchHeader({
   };
 
   const handleSearch = () => {
-    if (searchTerm.trim()) {
-      onSearch?.(searchTerm.trim());
-    }
+    // 빈 검색어도 허용 (필터만으로 검색 가능)
+    onSearch?.(searchTerm.trim());
   };
 
   // enter 눌렀을 때도 검색 동작
@@ -80,7 +79,7 @@ export default function SearchHeader({
         {/* 검색 버튼 */}
         <button
           onClick={handleSearch}
-          className="w-10 h-10 flex items-center justify-center rounded-full bg-blue-500 hover:bg-blue-600 transition-colors"
+          className="w-10 h-10 flex items-center justify-center rounded-full bg-neutral-50 hover:bg-neutral-100 transition-colors"
           aria-label="검색"
         >
           <i className="ri-search-line text-white text-lg"></i>

@@ -5,77 +5,102 @@ import {
   type ScheduleFormData,
   type InitialData,
 } from '../../components/domain/meeting/ScheduleForm';
+import {
+  showApiErrorToast,
+  showToast as globalToast,
+} from '../../components/common/Toast/ToastProvider';
+import apiClient from '../../api/client';
+import Loading from '../../components/common/Loading';
 
 export const MeetingScheduleEdit = () => {
   const navigate = useNavigate();
-  const { id } = useParams<{ id: string }>();
+  const { meetingId, scheduleId } = useParams<{
+    meetingId: string;
+    scheduleId: string;
+  }>();
   const [initialData, setInitialData] = useState<InitialData | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // TODO: API에서 정모 데이터 가져오기
     const fetchMeetingSchedule = async () => {
       try {
-        // const response = await getMeetingSchedule(id);
-        // setInitialData(response.data);
+        const response = await apiClient.get(
+          `/clubs/${meetingId}/schedules/${scheduleId}`,
+        );
 
-        // 임시 데이터
-        setInitialData({
-          meetingName: '월간 독서 모임',
-          meetingDate: '2025-08-15',
-          meetingTime: '14:00',
-          location: '강남역 스타벅스',
-          costPerPerson: 5000,
-          capacity: 10,
-        });
+        if (response.success) {
+          const data = response.data;
+          const scheduleDate = new Date(data.scheduleTime);
+
+          setInitialData({
+            meetingName: data.name,
+            meetingDate: scheduleDate.toISOString().split('T')[0],
+            meetingTime: scheduleDate.toTimeString().slice(0, 5),
+            location: data.location,
+            costPerPerson: data.cost,
+            userLimit: data.userLimit,
+          });
+        }
       } catch (error) {
         console.error('정모 데이터 로드 실패:', error);
-        alert('정모 정보를 불러올 수 없습니다.');
-        navigate('/meeting-schedules');
+        showApiErrorToast(error);
+        navigate(`/meeting/${meetingId}`);
       } finally {
         setLoading(false);
       }
     };
 
     fetchMeetingSchedule();
-  }, [id, navigate]);
+  }, [meetingId, scheduleId, navigate]);
 
   const handleSubmit = async (data: ScheduleFormData) => {
     try {
-      console.log('정모 수정:', data);
-      // TODO: API 호출하여 정모 수정
-      // const response = await updateMeetingSchedule(id, data);
+      const payload = {
+        name: data.meetingName,
+        location: data.location,
+        cost: data.costPerPerson,
+        userLimit: data.userLimit,
+        scheduleTime: new Date(
+          `${data.meetingDate}T${data.meetingTime}`,
+        ).toISOString(),
+      };
 
-      // 성공 시 상세 페이지로 이동
-      // navigate(`/meeting-schedules/${id}`);
+      const response = await apiClient.patch<{
+        success: boolean;
+        data: { scheduleId: number };
+      }>(`/clubs/${meetingId}/schedules/${scheduleId}`, payload);
 
-      alert('정모가 수정되었습니다!');
+      if (response.success) {
+        globalToast('정기 모임이 수정되었습니다.', 'success', 2000);
+        navigate(`/meeting/${meetingId}`);
+      }
     } catch (error) {
+      showApiErrorToast(error);
       console.error('정모 수정 실패:', error);
-      alert('정모 수정에 실패했습니다.');
     }
   };
 
   const handleDelete = async () => {
     try {
-      console.log('정모 삭제');
-      // TODO: API 호출하여 정모 삭제
-      // await deleteMeetingSchedule(id);
+      const response = await apiClient.delete<{
+        success: boolean;
+      }>(`/clubs/${meetingId}/schedules/${scheduleId}`);
 
-      // 성공 시 목록 페이지로 이동
-      // navigate('/meeting-schedules');
-
-      alert('정모가 삭제되었습니다!');
+      if (response.success) {
+        globalToast('정기 모임이 삭제되었습니다.', 'success', 2000);
+        navigate(`/meeting/${meetingId}`);
+      }
     } catch (error) {
+      showApiErrorToast(error);
       console.error('정모 삭제 실패:', error);
-      alert('정모 삭제에 실패했습니다.');
     }
   };
 
   if (loading) {
+    // ★ 변경: 공통 로딩 컴포넌트 사용
     return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-        <div className="text-gray-500">로딩 중...</div>
+      <div className="relative min-h-[50vh]">
+        <Loading overlay text="로딩 중..." />
       </div>
     );
   }

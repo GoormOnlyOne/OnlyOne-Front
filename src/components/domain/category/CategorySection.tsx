@@ -1,5 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import type { Category } from '../meeting/MeetingForm';
+import Modal from '../../../components/common/Modal';
 
 // 카테고리 동작 모드 타입 정의
 export type CategoryMode = 'navigation' | 'single-select' | 'multi-select';
@@ -7,224 +9,184 @@ export type CategoryMode = 'navigation' | 'single-select' | 'multi-select';
 // Props 타입 정의
 interface CategorySectionProps {
   mode?: CategoryMode;
-  onCategoryChange?: (categoryId: string | string[]) => void;
+  /** 단일 또는 다중 선택 초기값(수정 모드에서) */
+  initialValue?: Category | Category[];
+  /** 기존 호환성을 위한 defaultSelected (deprecated) */
   defaultSelected?: string | string[];
-  maxSelection?: number; // 최대 선택 개수 추가
+  /** 선택이 바뀔 때 호출되는 콜백 */
+  onCategoryChange?: (category: Category | Category[]) => void;
+  /** 다중 선택 시 최대 개수 */
+  maxSelection?: number;
 }
 
-const categories = [
+// 실제 표시될 카테고리 목록 (백엔드 enum과 1:1 매핑되는 ID)
+const categories: {
+  id: Category;
+  label: string;
+  emoji: string;
+}[] = [
   {
-    id: 'culture',
+    id: 'CULTURE',
     label: '문화',
-    icon: 'ri-palette-line',
-    activeIcon: 'ri-palette-fill',
+    emoji: '🎨',
   },
   {
-    id: 'sports',
+    id: 'EXERCISE',
     label: '운동',
-    icon: 'ri-run-line',
-    activeIcon: 'ri-run-fill',
+    emoji: '🏃🏻‍♂️',
   },
   {
-    id: 'travel',
+    id: 'TRAVEL',
     label: '여행',
-    icon: 'ri-plane-line',
-    activeIcon: 'ri-plane-fill',
+    emoji: '✈️',
   },
   {
-    id: 'music',
+    id: 'MUSIC',
     label: '음악',
-    icon: 'ri-music-2-line',
-    activeIcon: 'ri-music-2-fill',
+    emoji: '🎵',
   },
   {
-    id: 'craft',
+    id: 'CRAFT',
     label: '공예',
-    icon: 'ri-scissors-cut-line',
-    activeIcon: 'ri-scissors-cut-fill',
+    emoji: '✂️',
   },
   {
-    id: 'social',
+    id: 'SOCIAL',
     label: '사교',
-    icon: 'ri-team-line',
-    activeIcon: 'ri-team-fill',
+    emoji: '💁🏻',
   },
   {
-    id: 'language',
+    id: 'LANGUAGE',
     label: '외국어',
-    icon: 'ri-translate-2',
-    activeIcon: 'ri-translate',
+    emoji: '🌐',
   },
   {
-    id: 'finance',
+    id: 'FINANCE',
     label: '재테크',
-    icon: 'ri-money-dollar-circle-line',
-    activeIcon: 'ri-money-dollar-circle-fill',
+    emoji: '💵',
   },
 ];
 
 export default function CategorySection({
   mode = 'single-select',
+  initialValue,
   onCategoryChange,
-  defaultSelected,
-  maxSelection = 5, // 기본값 5
+  maxSelection = 5,
 }: CategorySectionProps) {
   const navigate = useNavigate();
 
-  // single-select 모드용 상태
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(
-    typeof defaultSelected === 'string' ? defaultSelected : null,
+  const [selectedCategory, setSelectedCategory] = useState<Category | null>(
+    typeof initialValue === 'string' ? initialValue : null,
+  );
+  const [selectedCategories, setSelectedCategories] = useState<Category[]>(
+    Array.isArray(initialValue) ? initialValue : [],
   );
 
-  // multi-select 모드용 상태
-  const [selectedCategories, setSelectedCategories] = useState<string[]>(
-    Array.isArray(defaultSelected) ? defaultSelected : [],
-  );
+  const [isAlertOpen, setIsAlertOpen] = useState(false);
+  const [alertMsg, setAlertMsg] = useState('');
 
-  const handleCategoryClick = (categoryId: string) => {
+  useEffect(() => {
+    if (mode === 'single-select' && typeof initialValue === 'string') {
+      setSelectedCategory(initialValue);
+    }
+    if (mode === 'multi-select' && Array.isArray(initialValue)) {
+      setSelectedCategories(initialValue);
+    }
+  }, [initialValue, mode]);
+
+  const handleCategoryClick = (cat: Category) => {
     switch (mode) {
       case 'navigation':
-        // 카테고리 페이지로 이동
-        navigate(`/category/${categoryId}`);
+        navigate(`/category?select=${cat}`);
         break;
 
       case 'single-select':
-        // 단일 선택 모드
-        setSelectedCategory(categoryId);
-        onCategoryChange?.(categoryId);
+        setSelectedCategory(cat);
+        setTimeout(() => onCategoryChange?.(cat), 0);
         break;
 
       case 'multi-select':
-        // 다중 선택 모드
         setSelectedCategories(prev => {
-          let newSelection: string[];
-
-          if (prev.includes(categoryId)) {
-            // 이미 선택된 경우 - 선택 해제
-            newSelection = prev.filter(id => id !== categoryId);
+          let next: Category[];
+          if (prev.includes(cat)) {
+            next = prev.filter(id => id !== cat);
+          } else if (prev.length < maxSelection) {
+            next = [...prev, cat];
           } else {
-            // 새로 선택하는 경우
-            if (prev.length < maxSelection) {
-              // 최대 선택 개수 미만인 경우에만 추가
-              newSelection = [...prev, categoryId];
-            } else {
-              // 최대 선택 개수에 도달한 경우 - 선택하지 않고 알림
-              alert(`최대 ${maxSelection}개까지만 선택할 수 있습니다.`);
-              return prev; // 상태 변경 없음
-            }
+            setAlertMsg(`최대 ${maxSelection}개까지만 선택할 수 있습니다.`);
+            setIsAlertOpen(true);
+            return prev;
           }
 
-          onCategoryChange?.(newSelection);
-          return newSelection;
+          setTimeout(() => onCategoryChange?.(next), 0);
+          return next;
         });
         break;
     }
   };
 
-  // 카테고리가 선택되었는지 확인하는 함수
-  const isSelected = (categoryId: string): boolean => {
-    if (mode === 'single-select') {
-      return selectedCategory === categoryId;
-    } else if (mode === 'multi-select') {
-      return selectedCategories.includes(categoryId);
-    }
-    return false;
-  };
+  const isSelected = (cat: Category) =>
+    mode === 'multi-select'
+      ? selectedCategories.includes(cat)
+      : selectedCategory === cat;
 
-  // 선택 가능한지 확인하는 함수 (multi-select 모드에서만)
-  const isSelectable = (categoryId: string): boolean => {
+  const isSelectable = (cat: Category) => {
     if (mode !== 'multi-select') return true;
-
-    // 이미 선택된 경우는 항상 클릭 가능 (선택 해제를 위해)
-    if (isSelected(categoryId)) return true;
-
-    // 최대 선택 개수에 도달하지 않은 경우 선택 가능
+    if (isSelected(cat)) return true;
     return selectedCategories.length < maxSelection;
   };
 
   return (
+    <>
     <div className="w-full">
       <div className="grid grid-cols-4 gap-3 sm:gap-4">
-        {categories.map(category => {
-          const selected = isSelected(category.id);
-          const selectable = isSelectable(category.id);
+        {categories.map(({ id, label, emoji }) => {
+          const selected = isSelected(id);
+          const selectable = isSelectable(id);
 
           return (
             <button
-              key={category.id}
-              onClick={() => handleCategoryClick(category.id)}
+              key={id}
+              onClick={() => handleCategoryClick(id)}
               disabled={!selectable && mode === 'multi-select'}
-              className={`
-                relative flex flex-col items-center justify-center
-                aspect-square w-full
-                p-2 sm:p-3 rounded-2xl 
-                transition-all duration-300 transform
+              className={`relative flex flex-col items-center justify-center aspect-square w-full p-2 sm:p-3 rounded-2xl transition-all duration-300 transform group
                 ${selectable ? 'cursor-pointer' : 'cursor-not-allowed'}
                 ${
                   selected
-                    ? 'bg-gradient-to-br from-blue-500 to-purple-500 scale-105 shadow-lg'
+                    ? 'bg-gradient-to-br from-brand-primary via-brand-secondary to-[#FFAE00] scale-105 shadow-lg shadow-brand-warm/30'
                     : selectable
-                      ? 'bg-gradient-to-br from-blue-50 to-purple-50 hover:from-blue-100 hover:to-purple-100 hover:scale-105'
-                      : 'bg-gray-100 opacity-50'
+                      ? 'bg-gradient-to-br from-brand-light to-brand-soft hover:from-brand-primary/60 hover:via-brand-secondary/60 hover:to-[#FFAE00]/60 hover:scale-105 hover:shadow-md hover:shadow-brand-warm/20'
+                      : 'bg-neutral-100 opacity-50'
                 }
               `}
             >
-              {/* 선택된 상태 애니메이션 효과 */}
               {selected && (
-                <div className="absolute inset-0 rounded-2xl bg-white opacity-20 animate-pulse" />
+                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/30 via-white/20 to-white/10 animate-pulse" />
               )}
-
-              {/* 아이콘 컨테이너 */}
               <div
-                className={`
-                w-10 h-10 sm:w-12 sm:h-12 
-                flex items-center justify-center mb-1 sm:mb-2 rounded-xl
-                transition-all duration-300
-                ${selected ? 'bg-white/20 backdrop-blur-sm' : 'bg-white/40'}
-              `}
+                className={`w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center mb-1 sm:mb-2 rounded-xl transition-all duration-300 ${selected ? 'bg-white/20 backdrop-blur-sm' : 'bg-white/40'}`}
               >
-                <i
-                  className={`
-                  ${selected ? category.activeIcon : category.icon}
-                  transition-all duration-300
-                  ${
-                    selected
-                      ? 'text-white text-xl sm:text-2xl animate-bounce-once'
-                      : selectable
-                        ? 'text-gray-700 text-lg sm:text-xl'
-                        : 'text-gray-400 text-lg sm:text-xl'
-                  }
-                `}
-                ></i>
+                <span
+                  className={`transition-all duration-300 ${selected ? 'text-2xl sm:text-3xl animate-bounce-once drop-shadow-sm' : selectable ? 'text-xl sm:text-2xl group-hover:scale-110' : 'text-xl sm:text-2xl opacity-50'}`}
+                >
+                  {emoji}
+                </span>
               </div>
 
-              {/* 라벨 */}
               <span
-                className={`
-                text-[10px] sm:text-xs font-medium transition-colors duration-300
-                ${
-                  selected
-                    ? 'text-white'
-                    : selectable
-                      ? 'text-gray-700'
-                      : 'text-gray-400'
-                }
-              `}
+                className={`${selected ? 'text-white font-semibold drop-shadow-sm' : selectable ? 'text-brand-deepest group-hover:text-white font-medium' : 'text-neutral-400'} text-xs sm:text-sm transition-all duration-300`}
               >
-                {category.label}
+                {label}
               </span>
 
-              {/* 다중 선택 모드에서 선택된 개수 표시 */}
               {mode === 'multi-select' && selected && (
                 <div className="absolute -top-1 -right-1 w-5 h-5 bg-white rounded-full flex items-center justify-center shadow-sm">
-                  <span className="text-xs font-bold text-blue-500">✓</span>
+                  <span className="text-xs font-bold text-brand-primary drop-shadow-sm">✓</span>
                 </div>
               )}
-
-              {/* 선택 불가능한 상태 표시 (최대 선택 도달) */}
               {mode === 'multi-select' && !selectable && !selected && (
-                <div className="absolute inset-0 rounded-2xl bg-gray-900/10 flex items-center justify-center">
-                  <div className="bg-gray-800/80 text-white text-[10px] px-2 py-1 rounded-full">
+                <div className="absolute inset-0 rounded-2xl bg-neutral-900/10 flex items-center justify-center">
+                  <div className="bg-neutral-600/90 text-white text-[10px] px-2 py-1 rounded-full shadow-sm">
                     최대 선택
                   </div>
                 </div>
@@ -234,15 +196,24 @@ export default function CategorySection({
         })}
       </div>
 
-      {/* 선택 개수 안내 (multi-select 모드에서만) */}
-      {mode === 'multi-select' &&
-        selectedCategories.length === maxSelection && (
-          <div className="mt-4 text-center">
-            <p className="text-sm text-orange-600 font-medium animate-fade-in">
-              최대 {maxSelection}개까지 선택 가능합니다.
-            </p>
-          </div>
-        )}
+      {mode === 'multi-select' && selectedCategories.length === maxSelection && (
+        <div className="mt-4 text-center">
+          <p className="text-sm text-brand-primary font-semibold animate-fade-in bg-brand-light/50 py-2 px-4 rounded-full">
+            최대 {maxSelection}개까지 선택 가능합니다.
+          </p>
+        </div>
+      )}
     </div>
+
+    <Modal
+        isOpen={isAlertOpen}
+        onClose={() => setIsAlertOpen(false)}
+        onConfirm={() => setIsAlertOpen(false)}
+        title={alertMsg}
+        variant="default"
+        cancelText="닫기"
+        confirmText="확인"
+      />
+    </>
   );
 }

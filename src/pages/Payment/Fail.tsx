@@ -1,9 +1,9 @@
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams } from 'react-router-dom';
 
 export function FailPage() {
   const [searchParams] = useSearchParams();
-  const errorCode = searchParams.get("code");
-  const errorMessage = searchParams.get("message");
+  const errorCode = searchParams.get('code');
+  const errorMessage = searchParams.get('message');
 
   return (
     <div className="wrapper w-100">
@@ -38,9 +38,9 @@ export function FailPage() {
           >
             다시 테스트하기
           </a>
-          <div className="flex" style={{ gap: "16px" }}>
+          <div className="flex" style={{ gap: '16px' }}>
             <a
-              className="btn w-100"
+              className="flex-1 text-center bg-gray-100 py-2 px-4 rounded hover:bg-gray-200 transition"
               href="https://docs.tosspayments.com/reference/error-codes"
               target="_blank"
               rel="noreferrer noopener"

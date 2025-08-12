@@ -1,5 +1,8 @@
 import { createBrowserRouter } from 'react-router-dom';
 
+// auth
+import ProtectedRoute from '../components/auth/ProtectedRoute.tsx';
+
 // layout
 import DefaultLayout from '../components/layout/default/Layout.tsx';
 import SearchLayout from '../components/layout/search/Layout.tsx';
@@ -13,7 +16,7 @@ import { MeetingDetail } from '../pages/Meeting/MeetingDetail.tsx';
 import { ParticipationStatus } from '../pages/Meeting/ParticipationStatus.tsx';
 import { MeetingCreate } from '../pages/Meeting/MeetingCreate.tsx';
 import { MeetingEdit } from '../pages/Meeting/MeetingEdit.tsx';
-import MeetingScheduleCrate from '../pages/Meeting/MeetingScheduleCrate.tsx';
+import MeetingScheduleCrate from '../pages/Meeting/MeetingScheduleCreate.tsx';
 import MeetingScheduleEdit from '../pages/Meeting/MeetingScheduleEdit.tsx';
 import { Search } from '../pages/Search.tsx';
 import { Notice } from '../pages/Notice.tsx';
@@ -33,12 +36,23 @@ import MeetingFeedDetail from '../pages/Meeting/MeetingFeedDetail.tsx';
 import PointCharge from '../pages/Payment/PointCharge.tsx';
 import { Success } from '../pages/Payment/Success.tsx';
 import { Checkout } from '../pages/Payment/Checkout.tsx';
+import PartnerMeetings from '../pages/PartnerMeetings.tsx';
+import RecommendedMeetings from '../pages/RecommendedMeetings.tsx';
+import MyMeeting from '../pages/Meeting/MyMeeting.tsx';
+
+import ChatRoomList from '../pages/Chat/ChatRoomList';
+import ChatRoom from '../pages/Chat/ChatRoom';
+import FeedList from '../pages/Feed/FeedList.tsx';
 
 export const router = createBrowserRouter([
   // [기본] 레이아웃이 적용되는 라우트들
   {
     path: '/',
-    element: <DefaultLayout />,
+    element: (
+      <ProtectedRoute>
+        <DefaultLayout />
+      </ProtectedRoute>
+    ),
     children: [
       {
         index: true,
@@ -58,7 +72,11 @@ export const router = createBrowserRouter([
   // [검색] 레이아웃이 적용되는 라우트들
   {
     path: '/search',
-    element: <SearchLayout />,
+    element: (
+      <ProtectedRoute>
+        <SearchLayout />
+      </ProtectedRoute>
+    ),
     children: [
       {
         index: true,
@@ -70,11 +88,19 @@ export const router = createBrowserRouter([
   // [타이틀] 레이아웃이 적용되는 라우트들
   {
     path: '/',
-    element: <TitleLayout />,
+    element: (
+      <ProtectedRoute>
+        <TitleLayout />
+      </ProtectedRoute>
+    ),
     children: [
       {
         path: 'mypage',
         element: <Mypage />,
+      },
+      {
+        path: 'mypage/my-meetings',
+        element: <MyMeeting />,
       },
       {
         path: 'mypage/interest',
@@ -141,8 +167,32 @@ export const router = createBrowserRouter([
         element: <PointCharge />,
       },
       {
-        path: '/success',
+        path: 'success',
         element: <Success />,
+      },
+      {
+        path: 'chat/:chatRoomId/messages',
+        element: <ChatRoom />,
+      },
+      {
+        path: 'clubs/:clubId/chat',
+        element: <ChatRoomList />,
+      },
+      {
+        path: 'chat/:chatRoomId/messages',
+        element: <ChatRoom />,
+      },
+      {
+        path: 'partner-meetings',
+        element: <PartnerMeetings />,
+      },
+      {
+        path: 'recommended-meetings',
+        element: <RecommendedMeetings />,
+      },
+      {
+        path: 'feed',
+        element: <FeedList />,
       },
     ],
   },
@@ -154,7 +204,11 @@ export const router = createBrowserRouter([
   },
   {
     path: '/signup',
-    element: <Signup />,
+    element: (
+      <ProtectedRoute requireActive={false}>
+        <Signup />
+      </ProtectedRoute>
+    ),
   },
   {
     path: '/kakao-callback',

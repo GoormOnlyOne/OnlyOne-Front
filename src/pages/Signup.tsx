@@ -1,18 +1,24 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import Step1 from '../components/domain/signup/Step1';
 import Step2 from '../components/domain/signup/Step2';
 import Step3 from '../components/domain/signup/Step3';
 import SignupComplete from '../components/domain/signup/Complete';
 import type { AddressData } from '../components/common/AddressSelector';
+import { signup } from '../api/auth';
+import type { SignupRequest } from '../api/auth';
+import Modal from '../components/common/Modal';
 
 export const Signup = () => {
   const navigate = useNavigate();
+  const { refreshUser } = useAuth();
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedAddress, setSelectedAddress] = useState<
     AddressData | undefined
   >();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     categories: [] as string[],
     nickname: '',
@@ -21,6 +27,10 @@ export const Signup = () => {
     profileImage: '',
     address: {} as AddressData,
   });
+
+  const [isAlertOpen, setIsAlertOpen] = useState(false);
+  const [alertMsg, setAlertMsg] = useState('');
+  const [alertVariant, setAlertVariant] = useState<'default' | 'danger'>('default');
 
   const totalSteps = 3;
 
@@ -31,25 +41,32 @@ export const Signup = () => {
         // Step 1: 카테고리가 1개 이상 선택되어야 함
         return selectedCategories.length >= 1;
       case 2:
-        // Step 2: 지역 선택
+        // Step 2: 지역 선택 (도시와 구/군이 모두 선택되어야 함)
         return (
           selectedAddress !== undefined &&
-          Object.keys(selectedAddress).length > 0
+          selectedAddress.city !== '' &&
+          selectedAddress.district !== '' &&
+          selectedAddress.isComplete === true
         );
-      case 3:
-        // Step 3: 모든 필드가 채워져야 함
+      case 3: {
+        // Step 3: 모든 필드가 채워져야 하고 닉네임은 2자 이상 10자 이하, 특수문자 제외
+        const nicknameRegex = /^[가-힣a-zA-Z0-9]{2,10}$/;
         return (
           formData.nickname !== '' &&
+          formData.nickname.trim().length >= 2 &&
+          formData.nickname.length <= 10 &&
+          nicknameRegex.test(formData.nickname.trim()) &&
           formData.gender !== '' &&
           formData.birth !== ''
         );
+      }
       default:
         return false;
     }
   };
 
   // 다음 버튼
-  const handleNext = () => {
+  const handleNext = async () => {
     if (currentStep < totalSteps) {
       // 각 Step에서 다음으로 넘어갈 때 데이터 저장
       if (currentStep === 1) {
@@ -66,14 +83,42 @@ export const Signup = () => {
       setCurrentStep(prev => prev + 1);
     } else {
       // 회원가입 완료 처리
-      const finalData = {
-        ...formData,
+      await handleSignupSubmit();
+    }
+  };
+
+  // 회원가입 API 호출
+  const handleSignupSubmit = async () => {
+    if (isSubmitting) return;
+
+    setIsSubmitting(true);
+    try {
+      const signupData: SignupRequest = {
+        nickname: formData.nickname,
+        birth: formData.birth,
+        gender: formData.gender as 'MALE' | 'FEMALE',
+        profileImage: formData.profileImage || undefined,
+        city: selectedAddress?.city || '',
+        district: selectedAddress?.district || '',
         categories: selectedCategories,
-        address: selectedAddress,
       };
-      console.log('회원가입 데이터:', finalData);
-      // TODO: API 호출하여 회원가입 처리
-      setCurrentStep(4); // 완료 화면
+
+      const response = await signup(signupData);
+
+      if (response.success) {
+        setCurrentStep(4); // 완료 화면
+      } else {
+        setAlertMsg((response as any).message ?? '회원가입 처리 중 오류가 발생했습니다.');
+        setAlertVariant('default');
+        setIsAlertOpen(true);
+      }
+    } catch (error: any) {
+      console.error('회원가입 오류:', error);
+      setAlertMsg(error?.message ?? '회원가입 중 오류가 발생했습니다. 다시 시도해주세요.');
+      setAlertVariant('default');
+      setIsAlertOpen(true);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -105,15 +150,17 @@ export const Signup = () => {
   };
 
   // 프로필 이미지 변경 핸들러
-  // const handleProfileImageChange = (imageUrl: string) => {
-  //   setFormData(prev => ({
-  //     ...prev,
-  //     profileImage: imageUrl
-  //   }));
-  // };
+  const handleProfileImageChange = (imageUrl: string) => {
+    setFormData(prev => ({
+      ...prev,
+      profileImage: imageUrl,
+    }));
+  };
 
   // 회원가입 완료 핸들러
-  const handleSignupComplete = () => {
+  const handleSignupComplete = async () => {
+    // 사용자 정보를 갱신하여 최신 상태(ACTIVE)를 가져온 후 메인 페이지로 이동
+    await refreshUser();
     navigate('/');
   };
 
@@ -131,7 +178,7 @@ export const Signup = () => {
                 transition-all duration-300
                 ${
                   currentStep >= step
-                    ? 'bg-blue-600 text-white'
+                    ? 'bg-brand-primary text-white'
                     : 'bg-gray-200 text-gray-500'
                 }
               `}
@@ -142,7 +189,7 @@ export const Signup = () => {
               <div
                 className={`
                   w-16 h-1 mx-2 transition-all duration-300
-                  ${currentStep > step ? 'bg-blue-600' : 'bg-gray-200'}
+                  ${currentStep > step ? 'bg-brand-primary' : 'bg-gray-200'}
                 `}
               />
             )}
@@ -153,7 +200,7 @@ export const Signup = () => {
   };
 
   return (
-    <div className="min-h-screen w-full max-w-md bg-white rounded-2xl p-8">
+    <div className="min-h-screen w-full bg-white px-4 py-8 sm:px-6 md:px-8 lg:max-w-2xl lg:mx-auto">
       <Stepper />
 
       {/* Step별 콘텐츠 */}
@@ -175,7 +222,7 @@ export const Signup = () => {
           <Step3
             formData={formData}
             onFormChange={handleFormChange}
-            // onProfileImageChange={handleProfileImageChange} // ProfileImageUpload의 실제 props 확인 필요
+            onProfileImageChange={handleProfileImageChange}
           />
         )}
         {currentStep === 4 && (
@@ -192,7 +239,7 @@ export const Signup = () => {
           {currentStep > 1 && (
             <button
               onClick={handlePrev}
-              className="flex-1 px-6 py-3 border border-gray-300 rounded-lg font-medium hover:bg-gray-50 transition-colors"
+              className="flex-1 px-6 py-3 border border-gray-300 rounded-lg font-medium hover:bg-gray-50 transition-colors cursor-pointer"
             >
               이전
             </button>
@@ -200,22 +247,36 @@ export const Signup = () => {
 
           <button
             onClick={handleNext}
-            disabled={!isStepValid()}
+            disabled={!isStepValid() || isSubmitting}
             className={`
               flex-1 px-6 py-3 rounded-lg font-medium transition-colors
               ${
                 currentStep === totalSteps
-                  ? 'bg-blue-600 text-white hover:bg-blue-700'
-                  : 'bg-gray-800 text-white hover:bg-gray-900'
+                  ? 'bg-[var(--color-brand-primary)] text-white hover:bg-[color-mix(in srgb, var(--color-brand-primary) 90%, black)]'
+                  : 'bg-brand-primary text-white hover:brand-secondary'
               }
               disabled:opacity-50 disabled:cursor-not-allowed
-              ${!isStepValid() ? 'cursor-not-allowed' : ''}
+              ${!isStepValid() || isSubmitting ? 'cursor-not-allowed' : 'cursor-pointer'}
             `}
           >
-            {currentStep === totalSteps ? '가입완료' : '다음'}
+            {isSubmitting
+              ? '가입 중...'
+              : currentStep === totalSteps
+                ? '가입완료'
+                : '다음'}
           </button>
         </div>
       )}
+
+      <Modal
+        isOpen={isAlertOpen}
+        onClose={() => setIsAlertOpen(false)}
+        onConfirm={() => setIsAlertOpen(false)}
+        title={alertMsg}
+        variant={alertVariant}
+        cancelText="닫기"
+        confirmText="확인"
+      />
     </div>
   );
 };

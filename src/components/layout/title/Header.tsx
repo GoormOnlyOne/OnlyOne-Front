@@ -7,6 +7,9 @@ interface TitleHeaderProps {
   isLike?: boolean;
   isOut?: boolean;
   onBack?: () => void;
+
+  onOut?: () => void;
+  outDisabled?: boolean;
 }
 
 export default function TitleHeader({
@@ -16,6 +19,8 @@ export default function TitleHeader({
   isLike = false,
   isOut = false,
   onBack,
+  onOut,
+  outDisabled,
 }: TitleHeaderProps) {
   const navigate = useNavigate();
 
@@ -35,7 +40,7 @@ export default function TitleHeader({
           {isBack && (
             <button
               onClick={handleBack}
-              className="cursor-pointer w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
+              className="cursor-pointer w-10 h-10 flex items-center justify-center rounded-full hover:bg-neutral-100 transition-colors"
               aria-label="뒤로가기"
             >
               <i className="ri-arrow-left-line text-gray-700 text-xl"></i>
@@ -52,18 +57,21 @@ export default function TitleHeader({
 
         {/* 우측: 아이콘 버튼들 */}
         <div className="flex items-center gap-2">
-          {isLike && (
+          {/* {isLike && (
             <button
-              className="cursor-pointer w-10 h-10 flex items-center justify-center rounded-full bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer"
+              className="cursor-pointer w-10 h-10 flex items-center justify-center rounded-full bg-neutral-50 hover:bg-neutral-100 transition-colors cursor-pointer"
               aria-label="좋아요"
             >
               <i className="ri-heart-line text-gray-600 text-lg"></i>
             </button>
-          )}
+          )} */}
           {isOut && (
             <button
-              className="cursor-pointer w-10 h-10 flex items-center justify-center rounded-full bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer"
+              onClick={onOut}
+              disabled={outDisabled}
+              className="cursor-pointer w-10 h-10 flex items-center justify-center rounded-full bg-neutral-50 hover:bg-neutral-100 transition-colors cursor-pointer"
               aria-label="나가기"
+              title={outDisabled ? '처리 중...' : '모임 나가기'}
             >
               <i className="ri-logout-box-line text-gray-600 text-lg"></i>
             </button>

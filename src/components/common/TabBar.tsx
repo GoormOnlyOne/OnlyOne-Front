@@ -10,7 +10,7 @@ export interface TabItem {
 interface TabBarProps {
   tabs: TabItem[];
   defaultTab?: string;
-  onTabChange?: (tabId: string) => void;
+  onTabChange?: (tabId: string) => void | boolean;
 }
 
 const TabBar: React.FC<TabBarProps> = ({ tabs, defaultTab, onTabChange }) => {
@@ -22,8 +22,10 @@ const TabBar: React.FC<TabBarProps> = ({ tabs, defaultTab, onTabChange }) => {
     (tabId: string) => {
       if (tabId === activeTab) return;
 
+      const result = onTabChange?.(tabId);
+      if (result === false) return;
+
       setActiveTab(tabId);
-      onTabChange?.(tabId);
     },
     [activeTab, onTabChange],
   );
@@ -32,8 +34,8 @@ const TabBar: React.FC<TabBarProps> = ({ tabs, defaultTab, onTabChange }) => {
     return clsx(
       'py-3 px-4 text-base font-medium transition-all duration-200 cursor-pointer flex-1 text-center',
       isActive
-        ? 'text-blue-600 border-b-2 border-blue-600'
-        : 'text-gray-600 hover:text-blue-600 border-b-2 border-transparent hover:border-gray-300',
+        ? 'text-brand-primary border-b-2 border-brand-primary'
+        : 'text-gray-600 hover:text-brand-primary border-b-2 border-transparent hover:border-gray-300',
     );
   };
 

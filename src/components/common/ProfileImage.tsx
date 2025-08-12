@@ -1,6 +1,10 @@
 import React, { useState, useRef, useCallback } from 'react';
 import clsx from 'clsx';
 import defaultProfileImage from '../../assets/user_profile.jpg';
+import { uploadImage } from '../../api/upload';
+import Loading from './Loading';
+import  Modal from './Modal';
+import { showToast } from '../../components/common/Toast/ToastProvider';
 
 export interface ProfileImage {
   file: File;
@@ -27,7 +31,18 @@ export const ProfileImageUpload: React.FC<ProfileImageUploadProps> = ({
   editable = true,
 }) => {
   const [selectedImage, setSelectedImage] = useState<ProfileImage | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const [isAlertOpen, setIsAlertOpen] = useState(false);
+  const [alertMessage, setAlertMessage] = useState('');
+  const [alertVariant, setAlertVariant] = useState<'default' | 'danger'>('default');
+
+  const showModal = useCallback((message: string, variant: 'default' | 'danger' = 'default') => {
+    setAlertMessage(message);
+    setAlertVariant(variant);
+    setIsAlertOpen(true);
+  }, []);
 
   const validateFile = useCallback(
     (file: File): string | null => {
@@ -48,23 +63,37 @@ export const ProfileImageUpload: React.FC<ProfileImageUploadProps> = ({
   );
 
   const handleFileSelect = useCallback(
-    (file: File) => {
+    async (file: File) => {
       const validationError = validateFile(file);
       if (validationError) {
-        alert(validationError); // 에러 메시지를 alert으로 표시
+        showToast(validationError, 'error');
         return;
       }
 
-      const url = URL.createObjectURL(file);
-      const profileImage: ProfileImage = {
-        file,
-        url,
-        name: file.name,
-        size: file.size,
-      };
+      setIsUploading(true);
+      console.log('file:', file);
 
-      setSelectedImage(profileImage);
-      onImageSelect?.(profileImage);
+      try {
+        // 실제 서버에 업로드
+        const uploadedUrl = await uploadImage(file, 'user');
+
+        console.log('이미지 업로드 성공:', uploadedUrl);
+
+        const profileImage: ProfileImage = {
+          file,
+          url: uploadedUrl,
+          name: file.name,
+          size: file.size,
+        };
+
+        setSelectedImage(profileImage);
+        onImageSelect?.(profileImage);
+      } catch (error) {
+        console.error('이미지 업로드 실패:', error);
+        showToast('이미지 업로드에 실패했습니다. 다시 시도해주세요.', 'error');
+      } finally {
+        setIsUploading(false);
+      }
     },
     [validateFile, onImageSelect],
   );
@@ -81,9 +110,6 @@ export const ProfileImageUpload: React.FC<ProfileImageUploadProps> = ({
   const handleRemoveImage = (event: React.MouseEvent) => {
     event.stopPropagation(); // 부모의 클릭 이벤트 방지
 
-    if (selectedImage?.url) {
-      URL.revokeObjectURL(selectedImage.url);
-    }
     setSelectedImage(null);
     onImageRemove?.();
 
@@ -101,15 +127,20 @@ export const ProfileImageUpload: React.FC<ProfileImageUploadProps> = ({
   const displayImage =
     selectedImage?.url || defaultImage || defaultProfileImage;
   const hasImage = selectedImage !== null || defaultImage !== undefined;
+  // 사용자가 직접 업로드한 이미지 또는 defaultImage로 전달받은 사용자 이미지 체크
+  const hasCustomImage =
+    selectedImage !== null ||
+    (defaultImage && defaultImage !== defaultProfileImage);
 
   return (
+    <>
     <div className="flex justify-center w-full max-w-md mx-auto">
       {/* 이미지 미리보기 영역 */}
       <div
-        onClick={editable ? handleUploadClick : undefined}
+        onClick={editable && !isUploading ? handleUploadClick : undefined}
         className={clsx(
           'w-24 h-24 rounded-full relative mb-4 group',
-          editable ? 'cursor-pointer' : '',
+          editable && !isUploading ? 'cursor-pointer' : '',
           !hasImage ? 'bg-gray-300 flex items-center justify-center' : '',
         )}
       >
@@ -129,18 +160,25 @@ export const ProfileImageUpload: React.FC<ProfileImageUploadProps> = ({
           <div className="absolute inset-0 rounded-full bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
         )}
 
-        {/* 카메라 아이콘 (수정 가능할 때만) */}
-        {editable && (
+        {/* 카메라 아이콘 또는 로딩 표시 (수정 가능할 때만) */}
+        {editable && !isUploading && (
           <div className="absolute bottom-0 right-0 w-6 h-6 bg-gray-600 rounded-full flex items-center justify-center">
             <i className="ri-camera-fill text-xs text-white" />
           </div>
         )}
 
-        {/* X 버튼 (사용자 이미지가 있을 때 + 수정 가능할 때) */}
-        {hasImage && editable && (
+        {/* 업로드 로딩 표시 */}
+        {isUploading && (
+          <div className="absolute inset-0 rounded-full bg-black/50 flex items-center justify-center">
+            <Loading size="sm" />
+          </div>
+        )}
+
+        {/* X 버튼 (사용자가 직접 업로드한 이미지가 있을 때 + 수정 가능할 때) */}
+        {hasCustomImage && editable && (
           <button
             onClick={handleRemoveImage}
-            className="absolute -top-2 -right-2 w-5 h-5 bg-black/70 text-white rounded-full flex items-center justify-center hover:bg-black transition-colors z-10"
+            className="absolute -top-2 -right-2 w-5 h-5 bg-black/70 text-white rounded-full flex items-center justify-center hover:bg-black transition-colors z-10 cursor-pointer"
             type="button"
           >
             <svg
@@ -169,6 +207,17 @@ export const ProfileImageUpload: React.FC<ProfileImageUploadProps> = ({
         className="hidden"
       />
     </div>
+    
+    <Modal
+        isOpen={isAlertOpen}
+        onClose={() => setIsAlertOpen(false)}
+        onConfirm={() => setIsAlertOpen(false)}
+        title={alertMessage}
+        variant={alertVariant}
+        cancelText="닫기"
+        confirmText="확인"
+      />
+    </>
   );
 };
 

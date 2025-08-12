@@ -4,7 +4,8 @@ import {
   showApiErrorToast,
   showToast as globalToast,
 } from '../../components/common/Toast/ToastProvider';
-import apiClient from '../../api/client';
+import apiClient, { type ApiError } from '../../api/client';
+import Loading from '../../components/common/Loading';
 
 interface ConfirmPaymentRequestDto {
   paymentKey: string;
@@ -21,7 +22,8 @@ const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 export function Success() {
   const [isConfirmed, setIsConfirmed] = useState(false);
-  const [errorOccurred, setErrorOccurred] = useState<Error | null>(null);
+  const [errorOccurred, setErrorOccurred] = useState<ApiError | null>(null);
+  const [isProcessing, setIsProcessing] = useState(true);
 
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -39,7 +41,7 @@ export function Success() {
       });
 
       const maxRetries = 6;
-      let lastError: any = null;
+      let lastError: ApiError | null = null;
 
       for (let attempt = 1; attempt <= maxRetries; attempt++) {
         try {
@@ -55,8 +57,8 @@ export function Success() {
             setIsConfirmed(true);
             return;
           }
-        } catch (err: any) {
-          lastError = err;
+        } catch (err) {
+          lastError = err as ApiError;
           console.warn(`Confirm attempt ${attempt} failed`, err);
           if (attempt < maxRetries) await delay(5000);
         }
@@ -84,16 +86,10 @@ export function Success() {
 
   return (
     <div className="wrapper w-full flex items-center justify-center min-h-screen">
-      {!isConfirmed && !errorOccurred && (
-        <div className="flex flex-col items-center gap-6">
-          <img
-            src="https://static.toss.im/lotties/loading-spot-apng.png"
-            width={120}
-            height={120}
-            alt="loading"
-          />
-          <h2 className="title">결제 요청까지 성공했어요.</h2>
-          <p className="description">
+      {isProcessing && !errorOccurred && !isConfirmed && (
+        <div className="flex flex-col items-center gap-4">
+          <Loading size="lg" text="결제 승인 처리 중..." />
+          <p className="description text-gray-600">
             결제 승인 처리 중입니다. 잠시만 기다려주세요.
           </p>
         </div>
