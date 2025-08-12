@@ -61,31 +61,28 @@ export const RefeedBottomSheet = ({
 	};
 
 	return (
-		<BottomSheet
-			isOpen={isOpen}
-			onClose={handleClose}
-			title="리피드할 모임 선택"
-			maxHeight="80vh"
-		>
-			<div className="flex flex-col h-full">
-				<div className="flex-1 overflow-y-auto">
+		<>
+			<BottomSheet
+				isOpen={isOpen}
+				onClose={handleClose}
+				title="리피드할 모임 선택"
+				maxHeight="70vh"
+			>
+				<div className="overflow-y-auto pb-20">
 					{clubsLoading ? (
 						<div className="flex items-center justify-center py-8">
-							<div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mr-2"></div>
+							<div className="w-6 h-6 border-2 border-[#F5921F] border-t-transparent rounded-full animate-spin mr-2"></div>
 							<div className="text-gray-500">내 모임을 불러오는 중...</div>
 						</div>
 					) : myClubs.length > 0 ? (
 						<div className="p-4 space-y-3">
-							<div className="text-sm text-gray-600 mb-4">
-								리피드할 내 모임을 선택해주세요
-							</div>
 							{myClubs.map(club => (
 								<div
 									key={club.clubId}
 									onClick={() => handleClubSelect(club)}
 									className={`flex items-center gap-3 p-3 border rounded-lg cursor-pointer transition-colors ${
 										selectedClub?.clubId === club.clubId
-											? 'border-blue-500 bg-blue-50'
+											? 'border-[#F5921F] bg-[#F5921F]/10'
 											: 'border-gray-200 hover:bg-gray-50'
 									}`}
 								>
@@ -116,7 +113,7 @@ export const RefeedBottomSheet = ({
 										<div
 											className={`w-full h-full rounded-full border-2 flex items-center justify-center ${
 												selectedClub?.clubId === club.clubId
-													? 'border-blue-500 bg-blue-500'
+													? 'border-[#F5921F] bg-[#F5921F]'
 													: 'border-gray-300 bg-white'
 											}`}
 										>
@@ -137,7 +134,7 @@ export const RefeedBottomSheet = ({
 										value={refeedContent}
 										onChange={e => setRefeedContent(e.target.value)}
 										placeholder="이 피드에 대한 생각을 공유해보세요..."
-										className="w-full p-3 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+										className="w-full p-3 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-[#F5921F] focus:border-transparent outline-none"
 										rows={3}
 										maxLength={300}
 									/>
@@ -159,25 +156,30 @@ export const RefeedBottomSheet = ({
 						</div>
 					)}
 				</div>
+			</BottomSheet>
 
-				{myClubs.length > 0 && (
-					<div className="p-4 border-t bg-white">
-						<button
-							onClick={handleConfirm}
-							disabled={!selectedClub}
-							className={`w-full py-3 rounded-lg font-medium transition-colors ${
-								selectedClub
-									? 'bg-blue-500 text-white hover:bg-blue-600'
-									: 'bg-gray-200 text-gray-400 cursor-not-allowed'
-							}`}
-						>
-							{selectedClub
-								? `"${selectedClub.name}"으로 리피드하기`
-								: '모임을 선택해주세요'}
-						</button>
-					</div>
-				)}
-			</div>
-		</BottomSheet>
+			{/* 바텀시트 외부 플로팅 버튼 */}
+			{isOpen && (
+				<button
+					onClick={handleConfirm}
+					disabled={!selectedClub || myClubs.length === 0}
+					className={`fixed bottom-4 left-4 right-4 py-3 rounded-lg font-medium transition-all duration-200 shadow-lg ${
+						selectedClub && myClubs.length > 0
+							? 'text-white hover:shadow-xl transform hover:scale-[1.02]'
+							: 'bg-gray-200 text-gray-400 cursor-not-allowed'
+					}`}
+					style={{ 
+						zIndex: 9999,
+						...(selectedClub && myClubs.length > 0 ? { backgroundColor: '#F5921F' } : {})
+					}}
+				>
+					{myClubs.length === 0 
+						? '가입한 모임이 없습니다'
+						: selectedClub 
+							? `"${selectedClub.name}"으로 리피드하기`
+							: '모임을 선택해주세요'}
+				</button>
+			)}
+		</>
 	);
 };
