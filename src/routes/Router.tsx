@@ -205,9 +205,9 @@ export const router = createBrowserRouter([
   {
     path: '/signup',
     element: (
-      <ProtectedRoute requireActive={false}>
+      // <ProtectedRoute requireActive={false}>
         <Signup />
-      </ProtectedRoute>
+      // </ProtectedRoute>
     ),
   },
   {
