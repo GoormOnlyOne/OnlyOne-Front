@@ -23,6 +23,7 @@ interface FeedData {
 	imageUrls: string[];
 	likeCount: number;
 	commentCount: number;
+	repostCount: number;
 	nickname: string;
 	profileImage?: string;
 	created: string;
@@ -36,6 +37,7 @@ interface FeedData {
 		imageUrls: string[];
 		likeCount: number;
 		commentCount: number;
+		repostCount: number;
 		nickname: string;
 		profileImage?: string;
 		created: string;
@@ -50,6 +52,7 @@ interface FeedData {
 		imageUrls: string[];
 		likeCount: number;
 		commentCount: number;
+		repostCount: number;
 		nickname: string;
 		profileImage?: string;
 		created: string;
@@ -122,7 +125,7 @@ const FeedItem = ({ feed, onCommentClick, onLikeClick, onRefeedClick, onEditClic
 	};
 
 	return (
-		<div 
+		<div
 			className={`bg-white mb-4 shadow-sm ${!feed.isRepost ? 'cursor-pointer hover:shadow-md transition-shadow' : ''}`}
 			onClick={!feed.isRepost ? (e) => {
 				// 버튼 클릭이 아닌 경우에만 피드 상세로 이동
@@ -151,13 +154,13 @@ const FeedItem = ({ feed, onCommentClick, onLikeClick, onRefeedClick, onEditClic
 				</div>
 				{(feed.feedMine && !feed.isRepost) && (
 					<div className="flex gap-2">
-						<button 
+						<button
 							onClick={() => onEditClick(feed.feedId, feed.clubId)}
 							className="px-3 py-1 text-sm bg-gray-200 rounded hover:bg-gray-300 transition-colors"
 						>
 							수정
 						</button>
-						<button 
+						<button
 							onClick={() => onDeleteClick(feed.feedId)}
 							className="px-3 py-1 text-sm bg-red-100 text-red-600 rounded hover:bg-red-200 transition-colors"
 						>
@@ -249,12 +252,8 @@ const FeedItem = ({ feed, onCommentClick, onLikeClick, onRefeedClick, onEditClic
 									</div>
 
 									{/* ROOT FEED (깔끔한 스타일) */}
-									<div 
-										className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm mx-3 mb-3 cursor-pointer hover:shadow-md transition-shadow"
-										onClick={(e) => {
-											e.stopPropagation();
-											onOriginalFeedClick(feed.rootFeed.clubId, feed.rootFeed.feedId);
-										}}
+									<div
+										className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm mx-3 mb-3"
 									>
 										{/* rootFeed 작성자 정보 */}
 										<div className="flex items-center justify-between p-4 border-b border-gray-100">
@@ -280,7 +279,14 @@ const FeedItem = ({ feed, onCommentClick, onLikeClick, onRefeedClick, onEditClic
 										{/* rootFeed 이미지 */}
 										<div className="relative">
 											<div
-												className="aspect-square bg-gray-200 flex items-center justify-center overflow-hidden"
+												className="aspect-square bg-gray-200 flex items-center justify-center overflow-hidden cursor-pointer"
+												onClick={(e) => {
+													// 버튼이 아닌 경우에만 피드 상세로 이동
+													if (!(e.target as Element).closest('button')) {
+														e.stopPropagation();
+														onOriginalFeedClick(feed.rootFeed.clubId, feed.rootFeed.feedId);
+													}
+												}}
 												onTouchStart={e => {
 													const touch = e.touches[0];
 													e.currentTarget.dataset.startX =
@@ -330,13 +336,19 @@ const FeedItem = ({ feed, onCommentClick, onLikeClick, onRefeedClick, onEditClic
 											{feed.rootFeed.imageUrls.length > 1 && (
 												<>
 													<button
-														onClick={handlePrevRootFeedImage}
+														onClick={(e) => {
+															e.stopPropagation();
+															handlePrevRootFeedImage();
+														}}
 														className="absolute left-4 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/50 text-white rounded-full flex items-center justify-center hover:bg-opacity-70"
 													>
 														<i className="ri-arrow-left-wide-line"></i>
 													</button>
 													<button
-														onClick={handleNextRootFeedImage}
+														onClick={(e) => {
+															e.stopPropagation();
+															handleNextRootFeedImage();
+														}}
 														className="absolute right-4 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/50 text-white rounded-full flex items-center justify-center hover:bg-opacity-70"
 													>
 														<i className="ri-arrow-right-wide-line"></i>
@@ -350,10 +362,13 @@ const FeedItem = ({ feed, onCommentClick, onLikeClick, onRefeedClick, onEditClic
 													{feed.rootFeed.imageUrls.map((_, index) => (
 														<button
 															key={index}
-															onClick={() => setRootFeedImageIndex(index)}
+															onClick={(e) => {
+																e.stopPropagation();
+																setRootFeedImageIndex(index);
+															}}
 															className={`w-1.5 h-1.5 rounded-full ${index === rootFeedImageIndex
-																? 'bg-white'
-																: 'bg-white bg-opacity-50'
+																? 'bg-brand-primary'
+																: 'bg-gray-300'
 																}`}
 														/>
 													))}
@@ -376,6 +391,10 @@ const FeedItem = ({ feed, onCommentClick, onLikeClick, onRefeedClick, onEditClic
 												<i className="ri-chat-3-line text-sm text-gray-500" />
 												<span className="text-xs text-gray-600">{feed.rootFeed.commentCount}</span>
 											</div>
+											<div className="flex items-center gap-1">
+												<i className="ri-repeat-2-line text-sm text-gray-500" />
+												<span className="text-xs text-gray-600">{feed.rootFeed.repostCount}</span>
+											</div>
 										</div>
 									</div>
 								</>
@@ -393,12 +412,8 @@ const FeedItem = ({ feed, onCommentClick, onLikeClick, onRefeedClick, onEditClic
 											<span>이 피드를 리피드함</span>
 										</div>
 
-										<div 
-											className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm cursor-pointer hover:shadow-md transition-shadow"
-											onClick={(e) => {
-												e.stopPropagation();
-												onOriginalFeedClick(feed.parentFeed.clubId, feed.parentFeed.feedId);
-											}}
+										<div
+											className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm"
 										>
 											{/* 원본 피드 작성자 정보 */}
 											<div className="p-4 border-b border-gray-100">
@@ -424,7 +439,14 @@ const FeedItem = ({ feed, onCommentClick, onLikeClick, onRefeedClick, onEditClic
 											{/* 원본 피드 이미지 */}
 											<div className="relative">
 												<div
-													className="aspect-square bg-gray-200 flex items-center justify-center overflow-hidden"
+													className="aspect-square bg-gray-200 flex items-center justify-center overflow-hidden cursor-pointer"
+													onClick={(e) => {
+														// 버튼이 아닌 경우에만 피드 상세로 이동
+														if (!(e.target as Element).closest('button')) {
+															e.stopPropagation();
+															onOriginalFeedClick(feed.parentFeed.clubId, feed.parentFeed.feedId);
+														}
+													}}
 													onTouchStart={e => {
 														const touch = e.touches[0];
 														e.currentTarget.dataset.startX =
@@ -474,13 +496,19 @@ const FeedItem = ({ feed, onCommentClick, onLikeClick, onRefeedClick, onEditClic
 												{feed.parentFeed.imageUrls.length > 1 && (
 													<>
 														<button
-															onClick={handlePrevRootFeedImage}
+															onClick={(e) => {
+																e.stopPropagation();
+																handlePrevRootFeedImage();
+															}}
 															className="absolute left-4 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/50 text-white rounded-full flex items-center justify-center hover:bg-opacity-70"
 														>
 															<i className="ri-arrow-left-wide-line"></i>
 														</button>
 														<button
-															onClick={handleNextRootFeedImage}
+															onClick={(e) => {
+																e.stopPropagation();
+																handleNextRootFeedImage();
+															}}
 															className="absolute right-4 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/50 text-white rounded-full flex items-center justify-center hover:bg-opacity-70"
 														>
 															<i className="ri-arrow-right-wide-line"></i>
@@ -494,10 +522,13 @@ const FeedItem = ({ feed, onCommentClick, onLikeClick, onRefeedClick, onEditClic
 														{feed.parentFeed.imageUrls.map((_, index) => (
 															<button
 																key={index}
-																onClick={() => setRootFeedImageIndex(index)}
+																onClick={(e) => {
+																	e.stopPropagation();
+																	setRootFeedImageIndex(index);
+																}}
 																className={`w-1.5 h-1.5 rounded-full ${index === rootFeedImageIndex
-																	? 'bg-white'
-																	: 'bg-white bg-opacity-50'
+																	? 'bg-brand-primary'
+																	: 'bg-gray-300'
 																	}`}
 															/>
 														))}
@@ -510,7 +541,7 @@ const FeedItem = ({ feed, onCommentClick, onLikeClick, onRefeedClick, onEditClic
 												<p className="text-sm">{feed.parentFeed.content}</p>
 											</div>
 
-											{/* 여기에 parentFeed 좋아요/댓글 정보 추가 */}
+											{/* 여기에 rootFeed 좋아요/댓글 정보 추가 */}
 											<div className="flex items-center gap-4 px-4 py-2 border-t border-gray-100">
 												<div className="flex items-center gap-1">
 													<i className={`text-sm ${feed.parentFeed.liked ? 'ri-heart-fill text-red-500' : 'ri-heart-line text-gray-500'}`} />
@@ -519,6 +550,10 @@ const FeedItem = ({ feed, onCommentClick, onLikeClick, onRefeedClick, onEditClic
 												<div className="flex items-center gap-1">
 													<i className="ri-chat-3-line text-sm text-gray-500" />
 													<span className="text-xs text-gray-600">{feed.parentFeed.commentCount}</span>
+												</div>
+												<div className="flex items-center gap-1">
+													<i className="ri-repeat-2-line  text-sm text-gray-500" />
+													<span className="text-xs text-gray-600">{feed.parentFeed.repostCount}</span>
 												</div>
 											</div>
 										</div>
@@ -595,6 +630,7 @@ const FeedItem = ({ feed, onCommentClick, onLikeClick, onRefeedClick, onEditClic
 					onClick={() => onRefeedClick(feed.feedId)}
 				>
 					<i className="ri-repeat-2-line text-xl" />
+					<span className="text-sm">{feed.repostCount}</span>
 				</button>
 			</div>
 		</div>
@@ -611,7 +647,7 @@ export const FeedList = () => {
 	const [deleteModalOpen, setDeleteModalOpen] = useState(false);
 	const [selectedDeleteFeedId, setSelectedDeleteFeedId] = useState<number | null>(null);
 	const [moveToMeetingModalOpen, setMoveToMeetingModalOpen] = useState(false);
-	const [selectedMeetingInfo, setSelectedMeetingInfo] = useState<{clubId: number, feedId: number} | null>(null);
+	const [selectedMeetingInfo, setSelectedMeetingInfo] = useState<{ clubId: number, feedId: number } | null>(null);
 	const likeSendingRef = useRef<Set<number>>(new Set());
 	const bottomSheetScrollRef = useRef<HTMLDivElement>(null);
 	type SortMode = 'latest' | 'popular';
@@ -673,7 +709,7 @@ export const FeedList = () => {
 			await fetchFeeds();
 		} catch (error) {
 			console.error('리피드 실패:', error);
-			showApiErrorToast(error); 
+			showApiErrorToast(error);
 		}
 	};
 
@@ -697,10 +733,10 @@ export const FeedList = () => {
 			if (!feedToDelete) return;
 
 			await apiClient.delete(`/clubs/${feedToDelete.clubId}/feeds/${selectedDeleteFeedId}`);
-			
+
 			// 피드 목록에서 삭제된 피드 제거
 			setFeeds(prev => prev.filter(feed => feed.feedId !== selectedDeleteFeedId));
-			
+
 			globalToast('피드가 삭제되었습니다.', 'success', 2000);
 			setDeleteModalOpen(false);
 			setSelectedDeleteFeedId(null);
@@ -719,7 +755,7 @@ export const FeedList = () => {
 	// 모임 이동 확인 핸들러
 	const handleMoveToMeetingConfirm = () => {
 		if (!selectedMeetingInfo) return;
-		
+
 		navigate(`/meeting/${selectedMeetingInfo.clubId}`);
 		setMoveToMeetingModalOpen(false);
 		setSelectedMeetingInfo(null);
