@@ -3,7 +3,7 @@ import clsx from 'clsx';
 import defaultProfileImage from '../../assets/user_profile.jpg';
 import { uploadImage } from '../../api/upload';
 import Loading from './Loading';
-import Alert from './Alert';
+import  Modal from './Modal';
 
 export interface ProfileImage {
   file: File;
@@ -37,7 +37,7 @@ export const ProfileImageUpload: React.FC<ProfileImageUploadProps> = ({
   const [alertMessage, setAlertMessage] = useState('');
   const [alertVariant, setAlertVariant] = useState<'default' | 'danger'>('default');
 
-  const showAlert = useCallback((message: string, variant: 'default' | 'danger' = 'default') => {
+  const showModal = useCallback((message: string, variant: 'default' | 'danger' = 'default') => {
     setAlertMessage(message);
     setAlertVariant(variant);
     setIsAlertOpen(true);
@@ -207,7 +207,7 @@ export const ProfileImageUpload: React.FC<ProfileImageUploadProps> = ({
       />
     </div>
     
-    <Alert
+    <Modal
         isOpen={isAlertOpen}
         onClose={() => setIsAlertOpen(false)}
         onConfirm={() => setIsAlertOpen(false)}

@@ -37,7 +37,7 @@ export const Wallet = () => {
   return (
     <div className="flex flex-col bg-gray-50">
       {/* 고정된 탭바 */}
-      <div className="sticky top-0 z-40 bg-white shadow-sm">
+      <div className="sticky top-0 z-40">
         <TabBar
           tabs={walletTabs}
           defaultTab="all"

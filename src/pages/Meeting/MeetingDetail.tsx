@@ -5,7 +5,7 @@ import MeetingHome from './MeetingHome';
 import MeetingFeed from './MeetingFeed';
 import MeetingChat from './MeetingChat';
 import apiClient from '../../api/client';
-import Alert from '../../components/common/Alert';
+import Modal from '../../components/common/Modal';
 
 export const MeetingDetail = () => {
   const { id: meetingId } = useParams<{ id: string }>();

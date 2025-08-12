@@ -11,7 +11,7 @@ import type { ChatMessageDto } from '../../types/chat/chat.types';
 import { getUserIdFromToken } from '../../utils/auth';
 import { Image } from 'lucide-react';
 import Loading from '../../components/common/Loading';
-import Alert from '../../components/common/Alert';
+import Modal from '../../components/common/Modal';
 
 
 const formatChatTime = (iso: string) => {
@@ -264,7 +264,7 @@ const ChatRoom: React.FC = () => {
           </div>
         </form>
       </div>
-      <Alert
+      <Modal
         isOpen={isAlertOpen}
         onClose={() => {
           setIsAlertOpen(false);
