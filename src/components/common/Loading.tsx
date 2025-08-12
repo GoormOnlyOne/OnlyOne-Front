@@ -1,6 +1,3 @@
-// src/components/common/Loading.tsx
-import React from 'react';
-
 type LoadingProps = {
   text?: string;
   variant?: 'spinner' | 'dots' | 'skeleton';
@@ -21,7 +18,7 @@ function Spinner({ size = 'md' as LoadingProps['size'] }) {
     <span
       aria-hidden
       className={`inline-block rounded-full border-gray-200 animate-spin ${sizeMap[size!]}`}
-      style={{ borderTopColor: '#F5921F' }} // ★ 포인트 색상
+      style={{ borderTopColor: '#F5921F' }}
     />
   );
 }

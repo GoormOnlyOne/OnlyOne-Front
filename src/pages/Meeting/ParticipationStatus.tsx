@@ -65,9 +65,9 @@ export const ParticipationStatus: React.FC = () => {
             `/clubs/${meetingId}/schedules/${scheduleId}/settlements`,
           );
           if (!res.success) throw new Error('정산 목록 조회 실패');
-          const data = res.data.userSettlementList;
+          const data = res.data?.data?.userSettlementList || [];
           const transformed: Settlement[] = (data ?? []).map(
-            ({ userId, nickname, profileImage, settlementStatus }) => ({
+            ({ userId, nickname, profileImage, settlementStatus }: SettlementResponse) => ({
               userId,
               nickname,
               profileImage,

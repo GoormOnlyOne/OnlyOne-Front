@@ -112,10 +112,7 @@ export function useNotification(
     setError(null);
 
     try {
-      const response = await getNotifications({
-        userId,
-        size: 50,
-      });
+      const response = await getNotifications();
 
       // CommonResponse에서 data 추출 후 사용
       setNotifications(response.notifications);

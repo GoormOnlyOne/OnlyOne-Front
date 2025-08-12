@@ -90,7 +90,7 @@ const WalletHistory = ({ type }: WalletHistoryProps) => {
         [];
 
       const transformed: WalletTransaction[] = list.map(
-        ({ type, title, amount, status, mainImage, createdAt }) => ({
+        ({ type, title, amount, status, mainImage, createdAt }: WalletTransactionResponse) => ({
           type,
           title,
           amount,

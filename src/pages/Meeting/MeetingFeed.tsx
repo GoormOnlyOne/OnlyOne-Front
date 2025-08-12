@@ -20,7 +20,11 @@ export const MeetingFeed: React.FC<Props> = ({ readOnly = false}) => {
           type="button"
           onClick={() => navigate(`/meeting/${id}/feed/create`)}
           aria-label="피드 등록"
-          className="fixed bottom-4 right-4 z-50 bg-blue-500 hover:bg-blue-600 text-white rounded-full w-16 h-16 flex flex-col items-center justify-center shadow-lg"
+          className="fixed bottom-4 right-4 z-50
+          bg-gradient-to-br from-brand-primary to-brand-secondary
+          transition-all duration-300 transform
+          hover:scale-110
+          text-white rounded-full w-16 h-16 flex flex-col items-center justify-center shadow-lg"
         >
           <span className="text-2xl leading-none">+</span>
           <span className="text-xs mt-1">등록</span>

@@ -13,12 +13,12 @@ const MeetingFeedCreate = () => {
   const { meetingId } = useParams<{ meetingId: string }>();
   const navigate = useNavigate();
 
-  const handleSubmit = async (data: MeetingFeedFormData) => {
+  const handleSubmit = async (data: { content: string; feedUrls?: string[] }) => {
     // 피드 생성 API 호출
     try {
       console.log('Submitting feed data:', data);
       await apiClient.post(`/clubs/${meetingId}/feeds`, {
-        feedUrls: data.feedUrls,
+        feedUrls: data.feedUrls || [],
         content: data.content,
       });
       // 성공 시 모임 상세 페이지로 이동
