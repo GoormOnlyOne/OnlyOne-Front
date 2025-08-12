@@ -143,7 +143,7 @@ export const Mypage = () => {
         </div>
 
         {/* 포인트 섹션 */}
-        <div className="mb-4 mx-4 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden transition-shadow hover:shadow-md">
+        <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
           <div className="py-6 px-6 flex items-center justify-between">
             <div className="flex flex-col">
               <h3 className="text-base font-semibold text-gray-800 leading-snug">
@@ -157,7 +157,10 @@ export const Mypage = () => {
             {/* 충전하기 버튼 */}
             <Link
               to="/payment/charge"
-              className="bg-blue-500 text-white text-sm px-6 py-2 rounded-full hover:bg-blue-700 cursor-pointer hover:shadow-md transition-shadow flex items-center gap-1"
+              className="bg-gradient-to-br from-brand-primary to-brand-secondary text-white text-sm
+              px-6 py-2 rounded-full
+              hover:from-brand-secondary hover:to-brand-primary transition-all duration-200 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed
+              flex items-center gap-1"
             >
               <i className="ri-coins-line text-lg"></i>
               <span>충전하기</span>
