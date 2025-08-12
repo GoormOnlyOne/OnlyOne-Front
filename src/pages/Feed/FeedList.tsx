@@ -336,13 +336,19 @@ const FeedItem = ({ feed, onCommentClick, onLikeClick, onRefeedClick, onEditClic
 											{feed.rootFeed.imageUrls.length > 1 && (
 												<>
 													<button
-														onClick={handlePrevRootFeedImage}
+														onClick={(e) => {
+															e.stopPropagation();
+															handlePrevRootFeedImage();
+														}}
 														className="absolute left-4 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/50 text-white rounded-full flex items-center justify-center hover:bg-opacity-70"
 													>
 														<i className="ri-arrow-left-wide-line"></i>
 													</button>
 													<button
-														onClick={handleNextRootFeedImage}
+														onClick={(e) => {
+															e.stopPropagation();
+															handleNextRootFeedImage();
+														}}
 														className="absolute right-4 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/50 text-white rounded-full flex items-center justify-center hover:bg-opacity-70"
 													>
 														<i className="ri-arrow-right-wide-line"></i>
@@ -356,7 +362,10 @@ const FeedItem = ({ feed, onCommentClick, onLikeClick, onRefeedClick, onEditClic
 													{feed.rootFeed.imageUrls.map((_, index) => (
 														<button
 															key={index}
-															onClick={() => setRootFeedImageIndex(index)}
+															onClick={(e) => {
+																e.stopPropagation();
+																setRootFeedImageIndex(index);
+															}}
 															className={`w-1.5 h-1.5 rounded-full ${index === rootFeedImageIndex
 																? 'bg-brand-primary'
 																: 'bg-gray-300'
@@ -404,11 +413,7 @@ const FeedItem = ({ feed, onCommentClick, onLikeClick, onRefeedClick, onEditClic
 										</div>
 
 										<div
-											className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm cursor-pointer hover:shadow-md transition-shadow"
-											onClick={(e) => {
-												e.stopPropagation();
-												onOriginalFeedClick(feed.parentFeed.clubId, feed.parentFeed.feedId);
-											}}
+											className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm"
 										>
 											{/* 원본 피드 작성자 정보 */}
 											<div className="p-4 border-b border-gray-100">
@@ -491,13 +496,19 @@ const FeedItem = ({ feed, onCommentClick, onLikeClick, onRefeedClick, onEditClic
 												{feed.parentFeed.imageUrls.length > 1 && (
 													<>
 														<button
-															onClick={handlePrevRootFeedImage}
+															onClick={(e) => {
+																e.stopPropagation();
+																handlePrevRootFeedImage();
+															}}
 															className="absolute left-4 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/50 text-white rounded-full flex items-center justify-center hover:bg-opacity-70"
 														>
 															<i className="ri-arrow-left-wide-line"></i>
 														</button>
 														<button
-															onClick={handleNextRootFeedImage}
+															onClick={(e) => {
+																e.stopPropagation();
+																handleNextRootFeedImage();
+															}}
 															className="absolute right-4 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/50 text-white rounded-full flex items-center justify-center hover:bg-opacity-70"
 														>
 															<i className="ri-arrow-right-wide-line"></i>
@@ -511,7 +522,10 @@ const FeedItem = ({ feed, onCommentClick, onLikeClick, onRefeedClick, onEditClic
 														{feed.parentFeed.imageUrls.map((_, index) => (
 															<button
 																key={index}
-																onClick={() => setRootFeedImageIndex(index)}
+																onClick={(e) => {
+																	e.stopPropagation();
+																	setRootFeedImageIndex(index);
+																}}
 																className={`w-1.5 h-1.5 rounded-full ${index === rootFeedImageIndex
 																	? 'bg-brand-primary'
 																	: 'bg-gray-300'
