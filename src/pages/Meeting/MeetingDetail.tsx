@@ -5,7 +5,7 @@ import MeetingHome from './MeetingHome';
 import MeetingFeed from './MeetingFeed';
 import MeetingChat from './MeetingChat';
 import apiClient from '../../api/client';
-import Modal from '../../components/common/Modal';
+import Alert from '../../components/common/Alert';
 import { showToast } from '../../components/common/Toast/ToastProvider';
 
 export const MeetingDetail = () => {
@@ -33,12 +33,12 @@ export const MeetingDetail = () => {
 
   // 💡 URL 쿼리에서 탭 읽기 + 게스트 접근 제한 처리
   const requestedTab = (searchParams.get('tab') as 'home' | 'feed' | 'chat' | null) ?? null;
-  const isRestricted = (t: string) => clubRole === 'GUEST' && (t === 'feed' || t === 'chat');
+  const isRestricted = (t: string) => clubRole === 'GUEST' && t === 'chat';
   const defaultTab = requestedTab && !isRestricted(requestedTab) ? requestedTab : 'home';
 
   const handleTabChange = (tabId: string) => {
     if (clubRole === 'GUEST' && tabId === 'chat') {
-      showToast('모임에 가입해야 볼 수 있습니다.', 'error');
+      showToast('모임에 가입해서 대화를 나눠보세요.', 'warning', 2000);
       return false; // 탭 변경 방지
     }
     // URL 동기화: home이면 tab 제거, 그 외엔 설정
