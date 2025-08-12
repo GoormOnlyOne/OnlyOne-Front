@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import 'tailwindcss';
 import Navigation from '../../components/common/Navigation';
-import Alert from '../../components/common/Alert';
+import Modal from '../../components/common/Modal';
 import ProfileImageUpload, {
   type ProfileImage,
 } from '../../components/common/ProfileImage';

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { Category } from '../meeting/MeetingForm';
-import Alert from '../../../components/common/Alert';
+import Modal from '../../../components/common/Modal';
 
 // 카테고리 동작 모드 타입 정의
 export type CategoryMode = 'navigation' | 'single-select' | 'multi-select';
@@ -205,7 +205,7 @@ export default function CategorySection({
       )}
     </div>
 
-    <Alert
+    <Modal
         isOpen={isAlertOpen}
         onClose={() => setIsAlertOpen(false)}
         onConfirm={() => setIsAlertOpen(false)}

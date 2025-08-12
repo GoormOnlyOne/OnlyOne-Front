@@ -11,7 +11,7 @@ import type {
 } from '../../types/endpoints/user.api';
 import { useToast } from '../../components/common/Toast/ToastContext';
 import Loading from '../../components/common/Loading';
-import Alert from '../../components/common/Alert';
+import Modal from '../../components/common/Modal';
 
 export const Profile = () => {
   const navigate = useNavigate();
@@ -355,7 +355,7 @@ export const Profile = () => {
         </button>
       </div>
 
-      <Alert
+      <Modal
         isOpen={isAlertOpen}
         onClose={() => setIsAlertOpen(false)}
         onConfirm={() => {

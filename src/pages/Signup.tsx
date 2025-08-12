@@ -8,7 +8,7 @@ import SignupComplete from '../components/domain/signup/Complete';
 import type { AddressData } from '../components/common/AddressSelector';
 import { signup } from '../api/auth';
 import type { SignupRequest } from '../api/auth';
-import Alert from '../components/common/Alert';
+import Modal from '../components/common/Modal';
 
 export const Signup = () => {
   const navigate = useNavigate();
@@ -276,7 +276,7 @@ export const Signup = () => {
         </div>
       )}
 
-      <Alert
+      <Modal
         isOpen={isAlertOpen}
         onClose={() => setIsAlertOpen(false)}
         onConfirm={() => setIsAlertOpen(false)}
