@@ -14,7 +14,7 @@ const MyMeeting = () => {
         <div className="px-4 pt-4">
           <CreateMeetingCard />
           <div className="mt-4">
-            <MeetingList />
+            <MeetingList mode="my" />
           </div>
         </div>
       </main>

@@ -17,7 +17,7 @@ interface Meeting {
 }
 
 interface MeetingListProps {
-  mode?: 'home' | 'full';
+  mode?: 'home' | 'full' | 'my';
   apiEndpoint?: string;
   showHomeSpecialSections?: boolean;
 }
@@ -34,15 +34,25 @@ export default function MeetingList({
   const [hasMore, setHasMore] = useState(true);
   const navigate = useNavigate();
 
+  // 모드별 엔드포인트/사이즈 선택
+  const getEndpointAndSize = () => {
+    switch (mode) {
+      case 'my':
+        return { endpoint: '/search/user', size: 20 };
+      case 'full':
+        return { endpoint: apiEndpoint ?? '/search/recommendations', size: 20 };
+      case 'home':
+        return { endpoint: apiEndpoint ?? '/search/recommendations', size: 20 };
+    }
+  };
+
   // 데이터 로드 함수
   const loadMeetings = async (pageNum: number, isNewLoad = false) => {
     if (loading) return;
 
     setLoading(true);
     try {
-      const endpoint =
-        mode === 'full' ? apiEndpoint! : '/search/recommendations';
-      const size = mode === 'full' ? 20 : 5;
+      const { endpoint, size } = getEndpointAndSize();
 
       const response = await apiClient.get<Meeting[]>(endpoint, {
         params: { page: pageNum, size },
@@ -95,6 +105,7 @@ export default function MeetingList({
     if (showHomeSpecialSections) {
       loadPartnerMeetings();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mode, apiEndpoint, showHomeSpecialSections]);
 
   // 무한 스크롤 (전체 모드에서만)
@@ -119,6 +130,7 @@ export default function MeetingList({
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, hasMore, loading, mode]);
 
   const handleViewMore = () => {
@@ -227,7 +239,7 @@ export default function MeetingList({
     );
   }
 
-  // 전체 모드 렌더링
+  // 전체/내 모드 렌더링
   return (
     <div className="h-[calc(100vh-56px)] overflow-y-auto bg-gray-50 relative">
       {loading && meetings.length === 0 && (
@@ -255,9 +267,13 @@ export default function MeetingList({
         {/* 데이터가 없을 때 */}
         {!loading && meetings.length === 0 && (
           <EmptyState
-            title="모임이 없습니다"
-            description="새로운 모임을 만들어보시거나 다른 조건으로 검색해보세요"
-            showCreateButton={true}
+            title={mode === 'my' ? '가입한 모임이 없습니다' : '모임이 없습니다'}
+            description={
+              mode === 'my'
+                ? '관심 있는 모임에 가입해보세요!'
+                : '새로운 모임을 만들어보시거나 다른 조건으로 검색해보세요'
+            }
+            showCreateButton={mode !== 'my'}
           />
         )}
       </div>
