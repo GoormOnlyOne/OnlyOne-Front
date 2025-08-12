@@ -75,6 +75,15 @@ const MeetingHome: React.FC = () => {
     fetchMeetingDetail();
   }, [meetingId, navigate]);
 
+  // 페이지 로드 후 가입 성공 토스트 표시
+  useEffect(() => {
+    const showJoinToast = sessionStorage.getItem('showJoinSuccessToast');
+    if (showJoinToast === 'true') {
+      sessionStorage.removeItem('showJoinSuccessToast');
+      globalToast('모임에 가입하였습니다.', 'success', 2000);
+    }
+  }, []);
+
   // GUEST용 가입하기 버튼
   useEffect(() => {
     if (meeting?.role === 'GUEST') {
@@ -98,9 +107,10 @@ const MeetingHome: React.FC = () => {
         `/clubs/${meetingId}/join`,
       );
       if (res.success) {
-        globalToast('모임에 가입하였습니다.', 'success', 2000);
-        // 새로 고침 혹은 리다이렉트
-        navigate(`/meeting/${meetingId}`);
+        // 세션 스토리지에 토스트 메시지 저장
+        sessionStorage.setItem('showJoinSuccessToast', 'true');
+        // 페이지 리로드
+        window.location.reload();
       } else {
         throw new Error('가입에 실패했습니다.');
       }
