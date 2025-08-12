@@ -15,15 +15,16 @@ export const MeetingScheduleCreate = () => {
 
   const handleSubmit = async (data: ScheduleFormData) => {
     try {
+      const koreaTime = new Date(`${data.meetingDate}T${data.meetingTime}`);
+      koreaTime.setHours(koreaTime.getHours() + 9);
+
       const payload = {
         name: data.meetingName,
         location: data.location,
         cost: data.costPerPerson,
         userLimit: data.userLimit,
-        scheduleTime: new Date(
-          `${data.meetingDate}T${data.meetingTime}`,
-        ).toISOString(),
-      };
+        scheduleTime: koreaTime.toISOString(),
+      }; 
 
       const response = await apiClient.post<{
         success: boolean;
