@@ -413,7 +413,7 @@ export default function ScheduleList({ clubRole }: ScheduleListProps) {
         <h2 className="font-bold text-xl">정기 모임</h2>
 
         {/* ✅ 로딩 오버레이 */}
-        {loading && <Loading overlay text="정기 모임 불러오는 중..." />}
+        {loading && <Loading overlay text="로딩 중..." />}
 
         {/* 에러 */}
         {error && !loading && (

@@ -10,6 +10,8 @@ import type {
   ProfileUpdateRequest,
 } from '../../types/endpoints/user.api';
 import { useToast } from '../../components/common/Toast/ToastContext';
+import Loading from '../../components/common/Loading';
+import Alert from '../../components/common/Alert';
 
 export const Profile = () => {
   const navigate = useNavigate();
@@ -35,6 +37,9 @@ export const Profile = () => {
       isComplete: false,
     },
   });
+
+  const [isAlertOpen, setIsAlertOpen] = useState(false);
+  const [alertMsg, setAlertMsg] = useState('');
 
   // 소문자 관심사를 대문자로 변환하는 함수
   const mapInterestsToCategories = (interests: string[]): string[] => {
@@ -213,9 +218,8 @@ export const Profile = () => {
 
   // 취소 버튼
   const handleCancel = () => {
-    if (window.confirm('수정사항을 저장하지 않고 나가시겠습니까?')) {
-      navigate('/mypage');
-    }
+    setAlertMsg('수정사항을 저장하지 않고 나가시겠습니까?');
+    setIsAlertOpen(true);
   };
 
   // 카테고리 선택 핸들러
@@ -279,20 +283,14 @@ export const Profile = () => {
     );
   };
 
-  // 로딩 중 표시
-  if (loading) {
-    return (
-      <div className="min-h-screen w-full bg-white px-4 py-8 sm:px-6 md:px-8 lg:max-w-2xl lg:mx-auto flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">프로필 정보를 불러오는 중...</p>
-        </div>
-      </div>
-    );
-  }
+  const loadingText = profileData
+    ? '처리 중...'
+    : '로딩 중...';
 
   return (
     <div className="min-h-screen w-full bg-white px-4 py-8 sm:px-6 md:px-8 lg:max-w-2xl lg:mx-auto">
+      {loading && <Loading overlay text={loadingText} />}
+
       <Stepper />
 
       {/* Step별 콘텐츠 */}
@@ -314,7 +312,7 @@ export const Profile = () => {
           <Step3
             formData={formData}
             onFormChange={handleFormChange}
-            onProfileImageChange={handleProfileImageChange} // ProfileImageUpload의 실제 props 확인 필요
+            onProfileImageChange={handleProfileImageChange}
           />
         )}
       </div>
@@ -360,8 +358,21 @@ export const Profile = () => {
               : '다음'}
         </button>
       </div>
+
+      <Alert
+        isOpen={isAlertOpen}
+        onClose={() => setIsAlertOpen(false)}
+        onConfirm={() => {
+          setIsAlertOpen(false);
+          navigate('/mypage');
+        }}
+        title={alertMsg}
+        cancelText="취소"
+        confirmText="나가기"
+        variant="default"
+      />
     </div>
   );
 };
 
-export { Profile as default } from './Profile';
+export default Profile;
