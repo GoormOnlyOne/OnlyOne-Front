@@ -39,12 +39,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   // 초기화: localStorage에서 토큰과 사용자 정보 로드
   useEffect(() => {
+    let isMounted = true;
+
     const initializeAuth = async () => {
       try {
         const storedAccessToken = localStorage.getItem('accessToken');
         const storedRefreshToken = localStorage.getItem('refreshToken');
 
-        if (storedAccessToken) {
+        if (storedAccessToken && isMounted) {
           setAccessToken(storedAccessToken);
           setRefreshToken(storedRefreshToken);
           setIsAuthenticated(true);
@@ -52,30 +54,42 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           // 사용자 정보 조회
           try {
             const userResponse = await getCurrentUser();
-            if (userResponse.success) {
+            if (userResponse.success && isMounted) {
               setUser(userResponse.data);
             }
           } catch (error) {
             console.error('사용자 정보 조회 실패:', error);
-            // 토큰이 유효하지 않으면 로그아웃 처리
-            localStorage.removeItem('accessToken');
-            localStorage.removeItem('refreshToken');
-            setIsAuthenticated(false);
-            setAccessToken(null);
-            setRefreshToken(null);
+            // 토큰이 유효하지 않으면 로그아웃 처리 (컴포넌트가 마운트된 상태에서만)
+            if (isMounted) {
+              localStorage.removeItem('accessToken');
+              localStorage.removeItem('refreshToken');
+              setIsAuthenticated(false);
+              setAccessToken(null);
+              setRefreshToken(null);
+            }
           }
         }
       } catch (error) {
         console.error('인증 정보 로드 실패:', error);
         // 잘못된 데이터가 있으면 제거
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
+        if (isMounted) {
+          localStorage.removeItem('accessToken');
+          localStorage.removeItem('refreshToken');
+        }
       } finally {
-        setIsLoading(false);
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
     };
 
-    initializeAuth();
+    // 짧은 지연으로 초기화 안정성 증대
+    const timeoutId = setTimeout(initializeAuth, 50);
+    
+    return () => {
+      isMounted = false;
+      clearTimeout(timeoutId);
+    };
   }, []);
 
   // 로그인 함수

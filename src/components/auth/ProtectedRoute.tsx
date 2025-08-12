@@ -1,5 +1,5 @@
-import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useRef } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 
 interface ProtectedRouteProps {
@@ -13,22 +13,31 @@ const ProtectedRoute = ({
 }: ProtectedRouteProps) => {
   const { isAuthenticated, user, isLoading, isGuest } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const navigationLock = useRef(false);
 
   useEffect(() => {
-    if (isLoading) return; // 로딩 중이면 대기
+    if (isLoading) return;
 
-    // 인증되지 않은 경우 로그인 페이지로
-    if (!isAuthenticated) {
-      navigate('/login');
+    // 이미 네비게이션이 진행 중이면 방지
+    if (navigationLock.current) return;
+
+    // 인증되지 않은 경우 로그인 페이지로 (현재 페이지가 로그인이 아닐 때만)
+    if (!isAuthenticated && location.pathname !== '/login') {
+      navigationLock.current = true;
+      navigate('/login', { replace: true });
+      setTimeout(() => { navigationLock.current = false; }, 1000);
       return;
     }
 
-    // ACTIVE 상태가 필요한데 GUEST 상태인 경우 회원가입 페이지로
-    if (requireActive && isGuest) {
-      navigate('/signup');
+    // GUEST 상태에서 ACTIVE가 필요한 경우 회원가입으로 (현재 페이지가 회원가입이 아닐 때만)
+    if (requireActive && isGuest && location.pathname !== '/signup') {
+      navigationLock.current = true;
+      navigate('/signup', { replace: true });
+      setTimeout(() => { navigationLock.current = false; }, 1000);
       return;
     }
-  }, [isAuthenticated, user, isLoading, isGuest, navigate, requireActive]);
+  }, [isAuthenticated, user, isLoading, isGuest, navigate, requireActive, location.pathname]);
 
   // 로딩 중이면 로딩 화면
   if (isLoading) {

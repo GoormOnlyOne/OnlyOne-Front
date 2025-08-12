@@ -42,7 +42,7 @@ const KakaoCallback: React.FC = () => {
         if (!code) {
           setError('인증 코드가 없습니다.');
           showToast('인증 코드가 없습니다.', 'error');
-          navigate('/login');
+          setTimeout(() => navigate('/login', { replace: true }), 2000);
           return;
         }
 
@@ -72,16 +72,16 @@ const KakaoCallback: React.FC = () => {
           // 신규 사용자인 경우 회원가입 페이지로, 아니면 홈으로
           if (response.data.newUser) {
             // backend에서 newUser 필드가 true인 경우
-            navigate('/signup');
+            setTimeout(() => navigate('/signup', { replace: true }), 100);
           } else {
-            navigate('/');
+            setTimeout(() => navigate('/', { replace: true }), 100);
           }
         } else {
           const msg = response.data.error || '로그인 처리 중 오류가 발생했습니다.';
           setError(msg);
           showToast(msg, 'error');
-          navigate('/login');
-            return;
+          setTimeout(() => navigate('/login', { replace: true }), 2000);
+          return;
         }
       } catch (error: any) {
         console.error('카카오 로그인 실패:', error);
@@ -90,15 +90,15 @@ const KakaoCallback: React.FC = () => {
           const msg = '탈퇴한 계정입니다. 탈퇴한 계정은 다시 로그인할 수 없습니다.';
           setError(msg);
           showToast(msg, 'error');
-          navigate('/login');
-            return;
+          setTimeout(() => navigate('/login', { replace: true }), 2000);
+          return;
         }
 
         const msg = error?.message || '카카오 로그인 처리 중 오류가 발생했습니다.';
         setError(msg);
         showToast(msg, 'error');
-        navigate('/login');
-            return;
+        setTimeout(() => navigate('/login', { replace: true }), 2000);
+        return;
         } finally {
         setLoading(false);
       }
