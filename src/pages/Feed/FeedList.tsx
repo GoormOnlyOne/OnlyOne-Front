@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import ScrollToTopButton from '../../components/common/ScrollToTopButton';
 import { BottomSheet } from '../../components/common/BottomSheet';
 import { RefeedBottomSheet } from '../../components/common/RefeedBottomSheet';
@@ -595,40 +595,35 @@ export const FeedList = () => {
 	const [selectedRefeedFeedId, setSelectedRefeedFeedId] = useState<number | null>(null);
 
 
-	useEffect(() => {
-		let cancelled = false;
-		const fetchFeeds = async () => {
-			try {
-				setLoading(true);
+	const fetchFeeds = useCallback(async () => {
+		try {
+			setLoading(true);
 
-				const path = sortMode === 'popular' ? '/feeds/popular' : '/feeds';
-				const response = await apiClient.get(`${path}?page=0&limit=20`);
+			const path = sortMode === 'popular' ? '/feeds/popular' : '/feeds';
+			const response = await apiClient.get(`${path}?page=0&limit=20`);
 
-				// API 응답 데이터를 FeedData 형태로 변환
-				const rawFeeds =
-					response.data?.data || response.data?.content || response.data || [];
+			// API 응답 데이터를 FeedData 형태로 변환
+			const rawFeeds =
+				response.data?.data || response.data?.content || response.data || [];
 
-				if (cancelled) return;
+			const feedsData = rawFeeds.map((feed: any) => ({
+				...feed,
+				comments: [], // API에서 댓글은 별도로 로드
+				isRepost: !!(feed.parentFeed || feed.rootFeed), // repost 여부 판단
+			}));
 
-				const feedsData = rawFeeds.map((feed: any) => ({
-					...feed,
-					comments: [], // API에서 댓글은 별도로 로드
-					isRepost: !!(feed.parentFeed || feed.rootFeed), // repost 여부 판단
-				}));
-
-				setFeeds(feedsData);
-			} catch (error) {
-				if (cancelled) return;
-				console.error('피드 로드 실패:', error);
-				setFeeds([]);
-			} finally {
-				if (!cancelled) setLoading(false);
-			}
-		};
-
-		fetchFeeds();
-		return () => { cancelled = true; };
+			setFeeds(feedsData);
+		} catch (error) {
+			console.error('피드 로드 실패:', error);
+			setFeeds([]);
+		} finally {
+			setLoading(false);
+		}
 	}, [sortMode]);
+
+	useEffect(() => {
+		fetchFeeds();
+	}, [fetchFeeds]);
 
 	const handleRefeedClick = (feedId: number) => {
 		setSelectedRefeedFeedId(feedId);
@@ -641,7 +636,7 @@ export const FeedList = () => {
 
 		try {
 			// 리피드 API 호출
-			await apiClient.post(`/feeds/${selectedRefeedFeedId}/${selectedClub.clubId}`, {
+			const response = await apiClient.post(`/feeds/${selectedRefeedFeedId}/${selectedClub.clubId}`, {
 				content: refeedContent
 			});
 
@@ -649,6 +644,9 @@ export const FeedList = () => {
 			globalToast('리피드가 완료되었습니다.', 'success', 2000);
 			setRefeedBottomSheetOpen(false);
 			setSelectedRefeedFeedId(null);
+
+			// 피드 목록 새로고침
+			await fetchFeeds();
 		} catch (error) {
 			console.error('리피드 실패:', error);
 			showApiErrorToast(error);
