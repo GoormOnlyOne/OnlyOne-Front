@@ -115,7 +115,7 @@ const ListCard: React.FC<ListCardProps> = ({
                 </div>
               </div>
 
-              <div className="flex flex-col items-end gap-1 w-20">
+              <div className="flex flex-col items-end gap-1 w-30">
                 {item.badge && (
                   <div
                     className={clsx(

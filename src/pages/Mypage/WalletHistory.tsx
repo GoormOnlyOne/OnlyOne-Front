@@ -172,29 +172,15 @@ const WalletHistory = ({ type }: WalletHistoryProps) => {
     ),
   }));
 
-  const getTitle = () => {
-    switch (type) {
-      case 'all':
-        return '전체 내역';
-      case 'charge':
-        return '충전 내역';
-      case 'settlement':
-        return '정산 내역';
-      default:
-        return '';
-    }
-  };
-
   return (
-    <>
+    <div className="bg-white min-h-screen px-4 py-4">
       <ListCard
-        title={getTitle()}
         items={listItems}
         emptyMessage="거래 내역이 없습니다."
         loading={loading}
       />
       <ScrollToTopButton />
-    </>
+    </div>
   );
 };
 
