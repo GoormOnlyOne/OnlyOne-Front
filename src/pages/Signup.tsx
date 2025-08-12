@@ -12,14 +12,14 @@ import Modal from '../components/common/Modal';
 
 export const Signup = () => {
   const navigate = useNavigate();
-  const { refreshUser, isAuthenticated } = useAuth();
+  const { refreshUser, isAuthenticated, isGuest, isLoading } = useAuth();
 
-  // 로그인 상태일 때 접근 차단
-  // useEffect(() => {
-  //   if (isAuthenticated) {
-  //     navigate('/', { replace: true });
-  //   }
-  // }, [isAuthenticated]);
+  // 로그인 상태일 때 접근 차단 (GUEST 상태는 허용)
+  useEffect(() => {
+    if (!isLoading && isAuthenticated && !isGuest) {
+      navigate('/', { replace: true });
+    }
+  }, [isAuthenticated, isGuest, isLoading, navigate]);
 
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
