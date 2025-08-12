@@ -17,6 +17,7 @@ interface FeedDetail {
 	imageUrls: string[];
 	likeCount: number;
 	commentCount: number;
+	repostCount: number;
 	userId: number;
 	nickname: string;
 	profileImage: string;
@@ -347,6 +348,7 @@ const MeetingFeedDetail = () => {
 					onClick={handleRefeedClick}
 				>
 					<i className="ri-repeat-2-line text-xl" />
+					<span className="text-sm">{feedData.repostCount}</span>
 				</button>
 			</div>
 
