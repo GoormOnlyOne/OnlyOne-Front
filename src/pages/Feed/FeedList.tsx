@@ -253,11 +253,7 @@ const FeedItem = ({ feed, onCommentClick, onLikeClick, onRefeedClick, onEditClic
 
 									{/* ROOT FEED (깔끔한 스타일) */}
 									<div
-										className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm mx-3 mb-3 cursor-pointer hover:shadow-md transition-shadow"
-										onClick={(e) => {
-											e.stopPropagation();
-											onOriginalFeedClick(feed.rootFeed.clubId, feed.rootFeed.feedId);
-										}}
+										className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm mx-3 mb-3"
 									>
 										{/* rootFeed 작성자 정보 */}
 										<div className="flex items-center justify-between p-4 border-b border-gray-100">
@@ -283,7 +279,14 @@ const FeedItem = ({ feed, onCommentClick, onLikeClick, onRefeedClick, onEditClic
 										{/* rootFeed 이미지 */}
 										<div className="relative">
 											<div
-												className="aspect-square bg-gray-200 flex items-center justify-center overflow-hidden"
+												className="aspect-square bg-gray-200 flex items-center justify-center overflow-hidden cursor-pointer"
+												onClick={(e) => {
+													// 버튼이 아닌 경우에만 피드 상세로 이동
+													if (!(e.target as Element).closest('button')) {
+														e.stopPropagation();
+														onOriginalFeedClick(feed.rootFeed.clubId, feed.rootFeed.feedId);
+													}
+												}}
 												onTouchStart={e => {
 													const touch = e.touches[0];
 													e.currentTarget.dataset.startX =
@@ -355,8 +358,8 @@ const FeedItem = ({ feed, onCommentClick, onLikeClick, onRefeedClick, onEditClic
 															key={index}
 															onClick={() => setRootFeedImageIndex(index)}
 															className={`w-1.5 h-1.5 rounded-full ${index === rootFeedImageIndex
-																? 'bg-white'
-																: 'bg-white bg-opacity-50'
+																? 'bg-brand-primary'
+																: 'bg-gray-300'
 																}`}
 														/>
 													))}
@@ -431,7 +434,14 @@ const FeedItem = ({ feed, onCommentClick, onLikeClick, onRefeedClick, onEditClic
 											{/* 원본 피드 이미지 */}
 											<div className="relative">
 												<div
-													className="aspect-square bg-gray-200 flex items-center justify-center overflow-hidden"
+													className="aspect-square bg-gray-200 flex items-center justify-center overflow-hidden cursor-pointer"
+													onClick={(e) => {
+														// 버튼이 아닌 경우에만 피드 상세로 이동
+														if (!(e.target as Element).closest('button')) {
+															e.stopPropagation();
+															onOriginalFeedClick(feed.parentFeed.clubId, feed.parentFeed.feedId);
+														}
+													}}
 													onTouchStart={e => {
 														const touch = e.touches[0];
 														e.currentTarget.dataset.startX =
@@ -503,8 +513,8 @@ const FeedItem = ({ feed, onCommentClick, onLikeClick, onRefeedClick, onEditClic
 																key={index}
 																onClick={() => setRootFeedImageIndex(index)}
 																className={`w-1.5 h-1.5 rounded-full ${index === rootFeedImageIndex
-																	? 'bg-white'
-																	: 'bg-white bg-opacity-50'
+																	? 'bg-brand-primary'
+																	: 'bg-gray-300'
 																	}`}
 															/>
 														))}
