@@ -10,8 +10,8 @@ const SignupComplete = ({
   return (
     <div className="text-center animate-fade-in">
       <div className="mb-8">
-        <div className="w-32 h-32 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
-          <i className="ri-check-line text-blue-600 text-6xl"></i>
+        <div className="w-32 h-32 bg-[var(--color-brand-light)] rounded-full flex items-center justify-center mx-auto mb-6">
+          <i className="ri-check-line text-[var(--color-brand-primary)] text-6xl"></i>
         </div>
 
         <h2 className="text-2xl font-bold mb-2">회원가입 완료!</h2>
@@ -32,7 +32,7 @@ const SignupComplete = ({
 
         <button
           onClick={onComplete}
-          className="w-full max-w-sm bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors cursor-pointer"
+          className="w-full max-w-sm bg-[var(--color-brand-primary)] text-white py-3 rounded-lg font-medium hover:bg-[var(--color-brand-secondary)] transition-colors cursor-pointer"
         >
           시작하기
         </button>
