@@ -103,7 +103,7 @@ const Step3 = ({
                 w-full py-3 px-4 border rounded-lg text-center cursor-pointer transition-all
                 ${
                   formData.gender === 'MALE'
-                    ? 'bg-blue-600 text-white border-blue-600'
+                    ? 'bg-[var(--color-brand-primary)] text-white border-[var(--color-brand-primary)]'
                     : 'bg-white text-gray-700 border-gray-300 hover:border-blue-300'
                 }
               `}
@@ -125,7 +125,7 @@ const Step3 = ({
                 w-full py-3 px-4 border rounded-lg text-center cursor-pointer transition-all
                 ${
                   formData.gender === 'FEMALE'
-                    ? 'bg-blue-600 text-white border-blue-600'
+                    ? 'bg-[var(--color-brand-primary)] text-white border-[var(--color-brand-primary)]'
                     : 'bg-white text-gray-700 border-gray-300 hover:border-blue-300'
                 }
               `}
