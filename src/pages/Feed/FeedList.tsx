@@ -2,6 +2,10 @@ import { useState, useEffect, useRef } from 'react';
 import ScrollToTopButton from '../../components/common/ScrollToTopButton';
 import { BottomSheet } from '../../components/common/BottomSheet';
 import { RefeedBottomSheet } from '../../components/common/RefeedBottomSheet';
+import Loading from '../../components/common/Loading';
+import Modal from '../../components/common/Modal';
+import { showToast as globalToast } from '../../components/common/Toast/ToastProvider';
+import { useNavigate } from 'react-router-dom';
 import CommentSection, {
 	type Comment,
 } from '../../components/common/CommentSection';
@@ -61,9 +65,11 @@ interface FeedItemProps {
 	onCommentClick: (feedId: number) => void;
 	onLikeClick: (feedId: number) => void;
 	onRefeedClick: (feedId: number) => void;
+	onEditClick: (feedId: number, clubId: number) => void;
+	onDeleteClick: (feedId: number) => void;
 }
 
-const FeedItem = ({ feed, onCommentClick, onLikeClick, onRefeedClick }: FeedItemProps) => {
+const FeedItem = ({ feed, onCommentClick, onLikeClick, onRefeedClick, onEditClick, onDeleteClick }: FeedItemProps) => {
 	const [currentImageIndex, setCurrentImageIndex] = useState(0);
 	const [rootFeedImageIndex, setRootFeedImageIndex] = useState(0);
 
@@ -133,12 +139,18 @@ const FeedItem = ({ feed, onCommentClick, onLikeClick, onRefeedClick }: FeedItem
 						</div>
 					</div>
 				</div>
-				{feed.feedMine && (
+				{(feed.feedMine && !feed.isRepost) && (
 					<div className="flex gap-2">
-						<button className="px-3 py-1 text-sm bg-gray-200 rounded hover:bg-gray-300 transition-colors">
+						<button 
+							onClick={() => onEditClick(feed.feedId, feed.clubId)}
+							className="px-3 py-1 text-sm bg-gray-200 rounded hover:bg-gray-300 transition-colors"
+						>
 							수정
 						</button>
-						<button className="px-3 py-1 text-sm bg-red-100 text-red-600 rounded hover:bg-red-200 transition-colors">
+						<button 
+							onClick={() => onDeleteClick(feed.feedId)}
+							className="px-3 py-1 text-sm bg-red-100 text-red-600 rounded hover:bg-red-200 transition-colors"
+						>
 							삭제
 						</button>
 					</div>
@@ -194,7 +206,7 @@ const FeedItem = ({ feed, onCommentClick, onLikeClick, onRefeedClick }: FeedItem
 									{/* Parent Feed 헤더 */}
 									<div className="bg-gray-100 border-b border-gray-200 p-3">
 										<div className="flex items-center gap-1 text-xs text-gray-600 mb-2">
-											<i className="ri-repeat-line"></i>
+											<i className="ri-repeat-2-line"></i>
 											<span>이 피드를 리피드함</span>
 										</div>
 
@@ -361,7 +373,7 @@ const FeedItem = ({ feed, onCommentClick, onLikeClick, onRefeedClick }: FeedItem
 									<div className="bg-gray-100 p-3">
 										{/* 리피드 표시 */}
 										<div className="flex items-center gap-1 text-xs text-gray-600 mb-3">
-											<i className="ri-repeat-line"></i>
+											<i className="ri-repeat-2-line"></i>
 											<span>이 피드를 리피드함</span>
 										</div>
 
@@ -560,7 +572,7 @@ const FeedItem = ({ feed, onCommentClick, onLikeClick, onRefeedClick }: FeedItem
 					className="flex items-center gap-2"
 					onClick={() => onRefeedClick(feed.feedId)}
 				>
-					<i className="ri-repeat-line text-xl" />
+					<i className="ri-repeat-2-line text-xl" />
 				</button>
 			</div>
 		</div>
@@ -568,11 +580,14 @@ const FeedItem = ({ feed, onCommentClick, onLikeClick, onRefeedClick }: FeedItem
 };
 
 export const FeedList = () => {
+	const navigate = useNavigate();
 	const [feeds, setFeeds] = useState<FeedData[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [commentBottomSheetOpen, setCommentBottomSheetOpen] = useState(false);
 	const [refeedBottomSheetOpen, setRefeedBottomSheetOpen] = useState(false);
 	const [selectedFeed, setSelectedFeed] = useState<FeedData | null>(null);
+	const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+	const [selectedDeleteFeedId, setSelectedDeleteFeedId] = useState<number | null>(null);
 	const likeSendingRef = useRef<Set<number>>(new Set());
 	const bottomSheetScrollRef = useRef<HTMLDivElement>(null);
 	type SortMode = 'latest' | 'popular';
@@ -631,10 +646,44 @@ export const FeedList = () => {
 			});
 
 			console.log('리피드 성공!');
+			globalToast('리피드가 완료되었습니다.', 'success', 2000);
 			setRefeedBottomSheetOpen(false);
 			setSelectedRefeedFeedId(null);
 		} catch (error) {
 			console.error('리피드 실패:', error);
+			showApiErrorToast(error);
+		}
+	};
+
+	// 피드 수정 핸들러
+	const handleEditClick = (feedId: number, clubId: number) => {
+		navigate(`/meeting/${clubId}/feed/${feedId}/edit`);
+	};
+
+	// 피드 삭제 클릭 핸들러
+	const handleDeleteClick = (feedId: number) => {
+		setSelectedDeleteFeedId(feedId);
+		setDeleteModalOpen(true);
+	};
+
+	// 피드 삭제 확인 핸들러
+	const handleDeleteConfirm = async () => {
+		if (!selectedDeleteFeedId) return;
+
+		try {
+			const feedToDelete = feeds.find(f => f.feedId === selectedDeleteFeedId);
+			if (!feedToDelete) return;
+
+			await apiClient.delete(`/clubs/${feedToDelete.clubId}/feeds/${selectedDeleteFeedId}`);
+			
+			// 피드 목록에서 삭제된 피드 제거
+			setFeeds(prev => prev.filter(feed => feed.feedId !== selectedDeleteFeedId));
+			
+			globalToast('피드가 삭제되었습니다.', 'success', 2000);
+			setDeleteModalOpen(false);
+			setSelectedDeleteFeedId(null);
+		} catch (error) {
+			console.error('피드 삭제 실패:', error);
 			showApiErrorToast(error);
 		}
 	};
@@ -737,8 +786,8 @@ export const FeedList = () => {
 
 	if (loading) {
 		return (
-			<div className="min-h-screen bg-gray-50 flex items-center justify-center">
-				<div className="text-gray-500">피드를 불러오는 중...</div>
+			<div className="h-full flex items-center justify-center bg-gray-50">
+				<Loading text="피드를 불러오는 중..." />
 			</div>
 		);
 	}
@@ -757,6 +806,8 @@ export const FeedList = () => {
 						onCommentClick={handleCommentClick}
 						onLikeClick={handleLikeClick}
 						onRefeedClick={handleRefeedClick}
+						onEditClick={handleEditClick}
+						onDeleteClick={handleDeleteClick}
 					/>
 				))}
 			</div>
@@ -822,6 +873,17 @@ export const FeedList = () => {
 				}}
 				onConfirm={handleRefeedConfirm}
 				feedId={selectedRefeedFeedId}
+			/>
+
+			{/* 피드 삭제 확인 모달 */}
+			<Modal
+				isOpen={deleteModalOpen}
+				onClose={() => {
+					setDeleteModalOpen(false);
+					setSelectedDeleteFeedId(null);
+				}}
+				onConfirm={handleDeleteConfirm}
+				title="피드를 삭제하시겠습니까?"
 			/>
 		</div>
 	);
