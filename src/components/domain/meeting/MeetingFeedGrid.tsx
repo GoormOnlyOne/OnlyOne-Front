@@ -69,8 +69,8 @@ const MeetingFeedGrid: React.FC<MeetingFeedGridProps> = ({ clubId, readOnly = fa
         console.log('Full API response:', response);
         console.log('response.data:', response?.data);
         
-        // 실제 API 구조에 맞게 수정
-        const content = response?.data?.content ?? [];
+        // 타입 정의에 맞게 수정: CommonResponse<PageResponse<FeedSummaryDto>>
+        const content = response?.data?.data?.content ?? [];
         
         console.log('Extracted content:', content);
         
