@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import Step1 from '../components/domain/signup/Step1';
@@ -12,7 +12,15 @@ import Alert from '../components/common/Alert';
 
 export const Signup = () => {
   const navigate = useNavigate();
-  const { refreshUser } = useAuth();
+  const { refreshUser, isAuthenticated } = useAuth();
+
+  // 로그인 상태일 때 접근 차단
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/', { replace: true });
+    }
+  }, [isAuthenticated, navigate]);
+
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedAddress, setSelectedAddress] = useState<
