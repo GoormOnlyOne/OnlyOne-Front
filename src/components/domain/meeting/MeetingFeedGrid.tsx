@@ -3,6 +3,7 @@ import apiClient from '../../../api/client';
 import { Link } from 'react-router-dom';
 import EmptyState from '../search/EmptyState';
 import Loading from '../../common/Loading';
+import Modal from '../../common/Modal';
 
 interface FeedItem {
   id: number;
@@ -49,6 +50,9 @@ const MeetingFeedGrid: React.FC<MeetingFeedGridProps> = ({ clubId, readOnly = fa
   const [firstPageEmpty, setFirstPageEmpty] = useState(false);
 
   const loadingRef = useRef(false);
+
+  const [isAlertOpen, setIsAlertOpen] = useState(false);
+  const alertMsg = '모임에 가입해야 자세히 볼 수 있어요.';
 
   const loadMore = useCallback(() => {
     if (loadingRef.current || !hasMore) return;
@@ -125,7 +129,7 @@ const MeetingFeedGrid: React.FC<MeetingFeedGridProps> = ({ clubId, readOnly = fa
       <div className="grid grid-cols-3 gap-2 p-4 relative min-h-[200px]">
         {loading && items.length === 0 && (
           <div className="absolute inset-0 flex items-center justify-center">
-            <Loading text="피드를 불러오는 중..." />
+            <Loading text="로딩 중..." />
           </div>
         )}
         {items.map(item => (
@@ -137,7 +141,7 @@ const MeetingFeedGrid: React.FC<MeetingFeedGridProps> = ({ clubId, readOnly = fa
               if (readOnly) {
                 e.preventDefault();
                 e.stopPropagation();
-                alert('모임에 가입해야 자세히 볼 수 있어요.');
+                setIsAlertOpen(true);
               }
             }}
             tabIndex={readOnly ? -1 : 0}
@@ -193,6 +197,16 @@ const MeetingFeedGrid: React.FC<MeetingFeedGridProps> = ({ clubId, readOnly = fa
           <Loading text="불러오는 중..." overlay={false} />
         </div>
       )}
+
+      <Modal
+        isOpen={isAlertOpen}
+        onClose={() => setIsAlertOpen(false)}
+        onConfirm={() => setIsAlertOpen(false)}
+        title={alertMsg}
+        confirmText="확인"
+        cancelText="닫기"
+        variant="default"
+      />
     </>
   );
 };

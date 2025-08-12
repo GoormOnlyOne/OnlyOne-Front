@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import userProfile from '../../assets/user_profile.jpg';
 import apiClient from '../../api/client';
-import Alert from '../common/Alert';
+import Modal from '../common/Modal';
 
 export interface Comment {
 	commentId: number;
@@ -327,12 +327,12 @@ export const CommentSection = ({
 					</button>
 				</div>
 			</div>
-			<Alert
+			<Modal
 				isOpen={isDeleteModalOpen}
 				onClose={handleModalClose}
 				onConfirm={handleDeleteConfirm}
 				title="댓글을 삭제하시겠습니까?"
-				variant="danger"
+				variant="default"
 				confirmText="삭제"
 			/>
 		</div>
