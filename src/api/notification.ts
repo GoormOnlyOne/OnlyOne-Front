@@ -9,26 +9,9 @@ import type {
 export type NotificationResponse = NotificationListResponse;
 
 // 알림 목록 조회 (첫 페이지 조회 시 자동으로 모든 알림 읽음 처리)
-export const getNotifications = async (params: {
-  userId: number;
-  cursor?: number;
-  size?: number;
-}): Promise<NotificationListResponse> => {
-  const searchParams = new URLSearchParams({
-    userId: params.userId.toString(),
-  });
-
-  if (params.cursor) {
-    searchParams.append('cursor', params.cursor.toString());
-  }
-  if (params.size) {
-    searchParams.append('size', params.size.toString());
-  }
-
-  const response = await apiClient.get<NotificationListResponse>(
-    `/notifications?${searchParams.toString()}`,
-  );
-
+export const getNotifications = async (): Promise<NotificationListResponse> => {
+  const response =
+    await apiClient.get<NotificationListResponse>(`/notifications`);
   return response.data; // ApiResponse에서 data 추출
 };
 
@@ -72,9 +55,7 @@ export const deleteNotification = async (params: {
 
 // 읽지 않은 알림 개수 조회
 export const getUnreadCount = async (): Promise<number> => {
-  const response = await apiClient.get<number>(
-    `/notifications/unread-count`
-  );
+  const response = await apiClient.get<number>(`/notifications/unread-count`);
   return response.data;
 };
 
