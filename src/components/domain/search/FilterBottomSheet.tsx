@@ -122,7 +122,7 @@ export const FilterBottomSheet = ({
               onClick={() => handleFilterChange('sortBy', 'MEMBER_COUNT')}
               className={`flex-1 py-3 px-4 rounded-xl border text-sm font-medium transition-all ${
                 tempFilters.sortBy === 'MEMBER_COUNT'
-                  ? 'border-blue-500 bg-blue-50 text-blue-700'
+                  ? 'border-brand-primary bg-brand-primary text-white'
                   : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50'
               }`}
             >
@@ -132,7 +132,7 @@ export const FilterBottomSheet = ({
               onClick={() => handleFilterChange('sortBy', 'LATEST')}
               className={`flex-1 py-3 px-4 rounded-xl border text-sm font-medium transition-all ${
                 tempFilters.sortBy === 'LATEST'
-                  ? 'border-blue-500 bg-blue-50 text-blue-700'
+                  ? 'border-brand-primary bg-brand-primary text-white'
                   : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50'
               }`}
             >
@@ -147,31 +147,37 @@ export const FilterBottomSheet = ({
             지역
           </label>
           <div className="space-y-3">
-            <select
-              value={tempFilters.city}
-              onChange={e => handleFilterChange('city', e.target.value)}
-              className="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              <option value="">전체 지역</option>
-              {getCities().map(city => (
-                <option key={city.name} value={city.name}>
-                  {city.name}
-                </option>
-              ))}
-            </select>
-
-            {tempFilters.city && (
+            <div className="relative">
               <select
-                value={tempFilters.district}
-                onChange={e => handleFilterChange('district', e.target.value)}
-                className="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                value={tempFilters.city}
+                onChange={e => handleFilterChange('city', e.target.value)}
+                className="w-full pl-4 pr-10 py-3 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary appearance-none"
               >
-                {availableDistricts.map(district => (
-                  <option key={district} value={district}>
-                    {district}
+                <option value="">전체 지역</option>
+                {getCities().map(city => (
+                  <option key={city.name} value={city.name}>
+                    {city.name}
                   </option>
                 ))}
               </select>
+              <i className="ri-arrow-down-s-line absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"></i>
+            </div>
+
+            {tempFilters.city && (
+              <div className="relative">
+                <select
+                  value={tempFilters.district}
+                  onChange={e => handleFilterChange('district', e.target.value)}
+                  className="w-full pl-4 pr-10 py-3 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary appearance-none"
+                >
+                  {availableDistricts.map(district => (
+                    <option key={district} value={district}>
+                      {district}
+                    </option>
+                  ))}
+                </select>
+                <i className="ri-arrow-down-s-line absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"></i>
+              </div>
             )}
           </div>
         </div>
@@ -181,23 +187,26 @@ export const FilterBottomSheet = ({
           <label className="block text-sm font-semibold text-gray-900">
             관심사
           </label>
-          <select
-            value={tempFilters.interestId || ''}
-            onChange={e =>
-              handleFilterChange(
-                'interestId',
-                e.target.value ? Number(e.target.value) : null,
-              )
-            }
-            className="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          >
-            <option value="">전체 관심사</option>
-            {interests.map(interest => (
-              <option key={interest.interestId} value={interest.interestId}>
-                {interest.category}
-              </option>
-            ))}
-          </select>
+          <div className="relative">
+            <select
+              value={tempFilters.interestId || ''}
+              onChange={e =>
+                handleFilterChange(
+                  'interestId',
+                  e.target.value ? Number(e.target.value) : null,
+                )
+              }
+              className="w-full pl-4 pr-10 py-3 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary appearance-none"
+            >
+              <option value="">전체 관심사</option>
+              {interests.map(interest => (
+                <option key={interest.interestId} value={interest.interestId}>
+                  {interest.category}
+                </option>
+              ))}
+            </select>
+            <i className="ri-arrow-down-s-line absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"></i>
+          </div>
         </div>
 
         {/* 하단 버튼 */}
@@ -211,7 +220,7 @@ export const FilterBottomSheet = ({
             </button>
             <button
               onClick={handleApply}
-              className="flex-2 py-3 px-6 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 transition-colors"
+              className="flex-2 py-3 px-6 bg-brand-primary hover:bg-brand-secondary text-white rounded-xl font-medium transition-colors"
             >
               결과 보기
             </button>
