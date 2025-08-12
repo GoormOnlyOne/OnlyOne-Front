@@ -5,11 +5,15 @@ import MeetingHome from './MeetingHome';
 import MeetingFeed from './MeetingFeed';
 import MeetingChat from './MeetingChat';
 import apiClient from '../../api/client';
+import Alert from '../../components/common/Alert';
 
 export const MeetingDetail = () => {
   const { id: meetingId } = useParams<{ id: string }>();
   const [searchParams, setSearchParams] = useSearchParams();          // 👈 추가
   const [clubRole, setClubRole] = useState<'LEADER' | 'MEMBER' | 'GUEST' | null>(null);
+
+  const [isAlertOpen, setIsAlertOpen] = useState(false);
+  const [alertMsg, setAlertMsg] = useState('');
 
   useEffect(() => {
     if (!meetingId) return;
@@ -33,7 +37,8 @@ export const MeetingDetail = () => {
 
   const handleTabChange = (tabId: string) => {
     if (clubRole === 'GUEST' && (tabId === 'feed' || tabId === 'chat')) {
-      alert('모임에 가입해야 볼 수 있습니다.');
+      setAlertMsg('모임에 가입해야 볼 수 있습니다.');
+      setIsAlertOpen(true);
       return false; // 탭 변경 방지
     }
     // URL 동기화: home이면 tab 제거, 그 외엔 설정
@@ -62,4 +67,4 @@ export const MeetingDetail = () => {
   );
 };
 
-export { MeetingDetail as default } from './MeetingDetail';
+export default MeetingDetail;

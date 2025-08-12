@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import apiClient from '../api/client';
 import { useAuth } from '../contexts/AuthContext';
 import Loading from '../components/common/Loading';
+import Alert from '../components/common/Alert';
 
 // 백엔드 응답 타입 정의
 interface KakaoLoginResponse {
@@ -20,6 +21,21 @@ const KakaoCallback: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const isProcessing = useRef(false);
 
+  const [isAlertOpen, setIsAlertOpen] = useState(false);
+  const [alertMsg, setAlertMsg] = useState('');
+  const [alertVariant, setAlertVariant] = useState<'default' | 'danger'>('default');
+  const [alertConfirm, setAlertConfirm] = useState<(() => void) | undefined>(undefined);
+
+  const openAlert = (
+    msg: string,
+    options?: { variant?: 'default' | 'danger'; onConfirm?: () => void }
+  ) => {
+    setAlertMsg(msg);
+    setAlertVariant(options?.variant ?? 'default');
+    setAlertConfirm(() => options?.onConfirm);
+    setIsAlertOpen(true);
+  };
+
   useEffect(() => {
     const handleKakaoCallback = async () => {
       // 이미 요청이 진행 중이면 중단
@@ -34,7 +50,10 @@ const KakaoCallback: React.FC = () => {
 
         if (!code) {
           setError('인증 코드가 없습니다.');
-          setTimeout(() => navigate('/login'), 2000);
+          openAlert('인증 코드가 없습니다.', {
+            variant: 'danger',
+            onConfirm: () => navigate('/login'),
+          });
           return;
         }
 
@@ -69,24 +88,23 @@ const KakaoCallback: React.FC = () => {
             navigate('/');
           }
         } else {
-          setError(
-            response.data.error || '로그인 처리 중 오류가 발생했습니다.',
-          );
-          setTimeout(() => navigate('/login'), 2000);
+          const msg = response.data.error || '로그인 처리 중 오류가 발생했습니다.';
+          setError(msg);
+          openAlert(msg, { variant: 'danger', onConfirm: () => navigate('/login') });
         }
       } catch (error: any) {
         console.error('카카오 로그인 실패:', error);
 
-        // 탈퇴한 사용자 에러 처리
-        if (error.status === 403) {
-          setLoading(false);
-          alert('탈퇴한 계정입니다. 탈퇴하면 다시 로그인할 수 없습니다.');
-          navigate('/login');
+        if (error?.status === 403) {
+          const msg = '탈퇴한 계정입니다. 탈퇴한 계정은 다시 로그인할 수 없습니다.';
+          setError(msg);
+          openAlert(msg, { variant: 'danger', onConfirm: () => navigate('/login') });
           return;
         }
 
-        setError(error.message || '카카오 로그인 처리 중 오류가 발생했습니다.');
-        setTimeout(() => navigate('/login'), 2000);
+        const msg = error?.message || '카카오 로그인 처리 중 오류가 발생했습니다.';
+        setError(msg);
+        openAlert(msg, { variant: 'danger', onConfirm: () => navigate('/login') });
       } finally {
         setLoading(false);
       }
@@ -108,6 +126,19 @@ const KakaoCallback: React.FC = () => {
           </div>
         </div>
       )}
+
+      <Alert
+        isOpen={isAlertOpen}
+        onClose={() => setIsAlertOpen(false)}
+        onConfirm={() => {
+          setIsAlertOpen(false);
+          alertConfirm?.();
+        }}
+        title={alertMsg}
+        variant={alertVariant}
+        cancelText="닫기"
+        confirmText="확인"
+      />
     </div>
   );
 };
