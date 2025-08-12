@@ -12,7 +12,7 @@ type LoadingProps = {
 
 const sizeMap = {
   sm: 'w-5 h-5 border-2',
-  md: 'w-8 h-8 border-3',
+  md: 'w-8 h-8 border-[3px]',
   lg: 'w-12 h-12 border-4',
 } as const;
 
@@ -90,7 +90,7 @@ export default function Loading({
   if (!overlay) return content;
 
   return (
-    <div className="absolute inset-0 z-50 flex items-center justify-center bg-white/70 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/70 backdrop-blur-sm">
       {content}
     </div>
   );
