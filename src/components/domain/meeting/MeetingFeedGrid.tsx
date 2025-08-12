@@ -3,6 +3,7 @@ import apiClient from '../../../api/client';
 import { Link } from 'react-router-dom';
 import EmptyState from '../search/EmptyState';
 import Loading from '../../common/Loading';
+import { showToast } from '../../common/Toast/ToastProvider';
 
 interface FeedItem {
   id: number;
@@ -137,7 +138,7 @@ const MeetingFeedGrid: React.FC<MeetingFeedGridProps> = ({ clubId, readOnly = fa
               if (readOnly) {
                 e.preventDefault();
                 e.stopPropagation();
-                alert('모임에 가입해야 자세히 볼 수 있어요.');
+                showToast('모임에 가입해서 콘텐츠를 상세하게 즐기세요', 'warning', 2000)
               }
             }}
             tabIndex={readOnly ? -1 : 0}
