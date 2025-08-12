@@ -115,7 +115,13 @@ const MeetingHome: React.FC = () => {
         throw new Error('가입에 실패했습니다.');
       }
     } catch (err: any) {
-      showApiErrorToast(err);
+      console.error('모임 가입 실패:', err);
+      const error = err as any;
+      globalToast(
+        error.response?.data?.message || '모임 가입에 실패했습니다.',
+        'error',
+        2000
+      );
     } finally {
       handleModalClose();
     }

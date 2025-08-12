@@ -13,17 +13,26 @@ export function setGlobalToastFunction(
 /* API 에러 응답 토스트 */
 export function showApiErrorToast(error: unknown) {
   let msg = '알 수 없는 오류가 발생했습니다.';
-  if (typeof error === 'object' && error !== null && 'data' in error) {
-    // @ts-ignore
-    msg = (error as any).data?.message ?? msg;
+  
+  // API 에러 메시지 추출
+  if (typeof error === 'object' && error !== null) {
+    const err = error as any;
+    if (err.response?.data?.message) {
+      msg = err.response.data.message;
+    } else if (err.data?.message) {
+      msg = err.data.message;
+    } else if (err.message) {
+      msg = err.message;
+    }
   } else if (error instanceof Error) {
     msg = error.message;
   }
+  
   if (globalShowToast) {
     globalShowToast(msg, 'error', 3000);
   } else {
-    console.log('여기니1');
-    alert(msg);
+    // Toast가 준비되지 않은 경우 콘솔 로그로 대체
+    console.error('Toast not ready, error message:', msg);
   }
 }
 
@@ -36,7 +45,7 @@ export function showToast(
   if (globalShowToast) {
     globalShowToast(message, type, durationMs);
   } else {
-    console.log('여기니2');
-    alert(message);
+    // Toast가 준비되지 않은 경우 콘솔 로그로 대체
+    console.warn('Toast not ready, message:', message, 'type:', type);
   }
 }
