@@ -34,11 +34,7 @@ export const useNotifications = ({
         setLoading(true);
         setError(null);
 
-        const response = await getNotifications({
-          userId,
-          cursor: reset ? undefined : cursor || undefined,
-          size: pageSize,
-        });
+        const response = await getNotifications();
 
         const newNotifications = response.notifications;
         

@@ -45,7 +45,7 @@ export const getPresignedUrl = async (
   }>(`/${imageFolderType}/presigned-url`, request);
 
   console.log('Presigned URL Response:', response.data);
-  return response.data;
+  return response.data.data;
 };
 
 // presigned URL 발급 (다중 이미지)

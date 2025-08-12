@@ -284,7 +284,7 @@ const FeedItem = ({ feed, onCommentClick, onLikeClick, onRefeedClick, onEditClic
 													// 버튼이 아닌 경우에만 피드 상세로 이동
 													if (!(e.target as Element).closest('button')) {
 														e.stopPropagation();
-														onOriginalFeedClick(feed.rootFeed.clubId, feed.rootFeed.feedId);
+														feed.rootFeed && (feed.rootFeed as any).clubId && onOriginalFeedClick((feed.rootFeed as any).clubId, feed.rootFeed.feedId);
 													}
 												}}
 												onTouchStart={e => {
@@ -444,7 +444,7 @@ const FeedItem = ({ feed, onCommentClick, onLikeClick, onRefeedClick, onEditClic
 														// 버튼이 아닌 경우에만 피드 상세로 이동
 														if (!(e.target as Element).closest('button')) {
 															e.stopPropagation();
-															onOriginalFeedClick(feed.parentFeed.clubId, feed.parentFeed.feedId);
+															feed.parentFeed && (feed.parentFeed as any).clubId && onOriginalFeedClick((feed.parentFeed as any).clubId, feed.parentFeed.feedId);
 														}
 													}}
 													onTouchStart={e => {
@@ -649,7 +649,7 @@ export const FeedList = () => {
 	const [moveToMeetingModalOpen, setMoveToMeetingModalOpen] = useState(false);
 	const [selectedMeetingInfo, setSelectedMeetingInfo] = useState<{ clubId: number, feedId: number } | null>(null);
 	const likeSendingRef = useRef<Set<number>>(new Set());
-	const bottomSheetScrollRef = useRef<HTMLDivElement>(null);
+	const bottomSheetScrollRef = useRef<HTMLDivElement | null>(null);
 	type SortMode = 'latest' | 'popular';
 	const [sortMode, setSortMode] = useState<SortMode>('latest');
 	const [selectedRefeedFeedId, setSelectedRefeedFeedId] = useState<number | null>(null);

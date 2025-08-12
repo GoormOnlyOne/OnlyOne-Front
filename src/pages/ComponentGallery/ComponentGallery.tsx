@@ -185,7 +185,7 @@ export const ComponentGallery = () => {
       />
 
       {/* 일정 리스트 */}
-      <ScheduleList />
+      <ScheduleList clubRole="GUEST" />
 
       {/* 참여 현황 리스트 */}
       <ParticipantInfo nickname="홍길동" profileImage={DefaultImage} />

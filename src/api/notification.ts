@@ -34,7 +34,7 @@ export const markAllAsRead = async (
 ): Promise<{ success: boolean; data: null }> => {
   // 백엔드에서 getNotifications 첫 페이지 호출 시 자동 처리
   // 호환성을 위해 함수는 유지하되 실제로는 getNotifications를 호출
-  await getNotifications({ userId, cursor: undefined, size: 1 });
+  await getNotifications();
   return { success: true, data: null };
 };
 

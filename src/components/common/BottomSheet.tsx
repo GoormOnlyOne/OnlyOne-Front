@@ -7,7 +7,7 @@ interface BottomSheetProps {
   children: React.ReactNode;
   showCloseButton?: boolean;
   maxHeight?: string;
-  scrollRef?: React.RefObject<HTMLDivElement>;
+  scrollRef?: React.RefObject<HTMLDivElement | null>;
 }
 
 export const BottomSheet = ({
