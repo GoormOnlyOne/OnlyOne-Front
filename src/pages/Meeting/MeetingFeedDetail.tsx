@@ -10,6 +10,7 @@ import CommentSection, {
 } from '../../components/common/CommentSection';
 import { type Meeting } from '../../components/domain/meeting/MeetingCard';
 import { RefeedBottomSheet } from '../../components/common/RefeedBottomSheet';
+import Loading from '../../components/common/Loading';
 
 interface FeedDetail {
 	content: string;
@@ -174,18 +175,17 @@ const MeetingFeedDetail = () => {
 		setRefeedBottomSheetOpen(true);
 	};
 
-
 	if (loading) {
 		return (
-			<div className="min-h-screen bg-white flex items-center justify-center">
-				<div className="text-gray-500">로딩 중...</div>
+			<div className="h-full flex items-center justify-center bg-white">
+				<Loading text="피드를 불러오는 중..." />
 			</div>
 		);
 	}
 
 	if (!feedData) {
 		return (
-			<div className="min-h-screen bg-white flex items-center justify-center">
+			<div className="h-full flex items-center justify-center bg-white">
 				<div className="text-gray-500">피드를 불러올 수 없습니다.</div>
 			</div>
 		);
@@ -313,8 +313,8 @@ const MeetingFeedDetail = () => {
               />
             ))}
           </div>
-        )}
-      </div>
+				)}
+			</div>
 
 			{/* 피드 내용 */}
 			<div className="px-4 py-3">
@@ -346,7 +346,7 @@ const MeetingFeedDetail = () => {
 					className="flex items-center gap-2"
 					onClick={handleRefeedClick}
 				>
-					<i className="ri-repeat-line text-xl" />
+					<i className="ri-repeat-2-line text-xl" />
 				</button>
 			</div>
 
