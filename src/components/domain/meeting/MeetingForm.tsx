@@ -61,11 +61,13 @@ export const MeetingForm = ({
 
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
-  const [selectedAddress, setSelectedAddress] = useState<AddressData>({
-    city: '',
-    district: '',
-    isComplete: false,
-  });
+  const [selectedAddress, setSelectedAddress] = useState<AddressData>(
+    initialData?.address || {
+      city: '',
+      district: '',
+      isComplete: false,
+    }
+  );
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
