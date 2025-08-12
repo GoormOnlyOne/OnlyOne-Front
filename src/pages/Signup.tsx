@@ -15,11 +15,11 @@ export const Signup = () => {
   const { refreshUser, isAuthenticated } = useAuth();
 
   // 로그인 상태일 때 접근 차단
-  useEffect(() => {
-    if (isAuthenticated) {
-      navigate('/', { replace: true });
-    }
-  }, [isAuthenticated]);
+  // useEffect(() => {
+  //   if (isAuthenticated) {
+  //     navigate('/', { replace: true });
+  //   }
+  // }, [isAuthenticated]);
 
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
