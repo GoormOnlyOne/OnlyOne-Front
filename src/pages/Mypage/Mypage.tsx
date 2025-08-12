@@ -173,7 +173,9 @@ export const Mypage = () => {
       <div className="bg-white mt-2">
         <div className="px-4 py-6">
           <div className="divide-y divide-gray-100">
-            <Link
+
+            {/* @TODO: MVP에서 안보여줌 */}
+            {/* <Link
               to="/mypage/interest"
               className="flex items-center justify-between py-3 hover:bg-gray-50 cursor-pointer"
             >
@@ -184,7 +186,7 @@ export const Mypage = () => {
                 </span>
               </div>
               <i className="ri-arrow-right-s-line text-xl text-gray-400"></i>
-            </Link>
+            </Link> */}
 
             <Link
               to="/mypage/profile"
