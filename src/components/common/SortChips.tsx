@@ -10,8 +10,8 @@ interface Props {
 
 export default function SortChips({ value, onChange, className = '' }: Props) {
   const options: { key: SortKey; label: string }[] = [
-    { key: 'latest', label: '최신순' },   // 왼쪽
-    { key: 'popular', label: '인기순' },  // 오른쪽
+    { key: 'latest', label: '최신순' }, // 왼쪽
+    { key: 'popular', label: '인기순' }, // 오른쪽
   ];
 
   return (
@@ -22,9 +22,11 @@ export default function SortChips({ value, onChange, className = '' }: Props) {
           type="button"
           onClick={() => value !== o.key && onChange(o.key)}
           className={`inline-flex items-center px-3 py-1.5 rounded-full text-sm border transition
-            ${value === o.key
-              ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
-              : 'bg-gray-100 text-gray-700 border-gray-200 hover:bg-gray-200'}`}
+            ${
+              value === o.key
+                ? 'bg-[var(--color-brand-primary)] text-white shadow-sm hover:bg-[color-mix(in srgb, var(--color-brand-primary) 90%, black)]'
+                : 'bg-gray-100 text-gray-700 border-gray-200 hover:bg-gray-200'
+            }`}
           aria-pressed={value === o.key}
         >
           {o.label}
