@@ -23,9 +23,8 @@ export default function SortChips({ value, onChange, className = '' }: Props) {
           onClick={() => value !== o.key && onChange(o.key)}
           className={`inline-flex items-center px-3 py-1.5 rounded-full text-sm border transition
             ${value === o.key
-              ? 'text-white border-[#F5921F] shadow-sm'
+              ? 'text-white bg-brand-primary border-brand-primary shadow-sm'
               : 'bg-gray-100 text-gray-700 border-gray-200 hover:bg-gray-200'}`}
-          style={value === o.key ? { backgroundColor: '#F5921F' } : {}}
           aria-pressed={value === o.key}
         >
           {o.label}

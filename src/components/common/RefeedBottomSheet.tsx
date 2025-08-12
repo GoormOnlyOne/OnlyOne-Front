@@ -71,7 +71,7 @@ export const RefeedBottomSheet = ({
 				<div className="overflow-y-auto pb-20">
 					{clubsLoading ? (
 						<div className="flex items-center justify-center py-8">
-							<div className="w-6 h-6 border-2 border-[#F5921F] border-t-transparent rounded-full animate-spin mr-2"></div>
+							<div className="w-6 h-6 border-2 border-brand-primary border-t-transparent rounded-full animate-spin mr-2"></div>
 							<div className="text-gray-500">내 모임을 불러오는 중...</div>
 						</div>
 					) : myClubs.length > 0 ? (
@@ -82,7 +82,7 @@ export const RefeedBottomSheet = ({
 									onClick={() => handleClubSelect(club)}
 									className={`flex items-center gap-3 p-3 border rounded-lg cursor-pointer transition-colors ${
 										selectedClub?.clubId === club.clubId
-											? 'border-[#F5921F] bg-[#F5921F]/10'
+											? 'border-brand-primary bg-brand-light'
 											: 'border-gray-200 hover:bg-gray-50'
 									}`}
 								>
@@ -113,7 +113,7 @@ export const RefeedBottomSheet = ({
 										<div
 											className={`w-full h-full rounded-full border-2 flex items-center justify-center ${
 												selectedClub?.clubId === club.clubId
-													? 'border-[#F5921F] bg-[#F5921F]'
+													? 'border-brand-primary bg-brand-primary'
 													: 'border-gray-300 bg-white'
 											}`}
 										>
@@ -134,12 +134,12 @@ export const RefeedBottomSheet = ({
 										value={refeedContent}
 										onChange={e => setRefeedContent(e.target.value)}
 										placeholder="이 피드에 대한 생각을 공유해보세요..."
-										className="w-full p-3 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-[#F5921F] focus:border-transparent outline-none"
+										className="w-full p-3 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary outline-none"
 										rows={3}
-										maxLength={300}
+										maxLength={50}
 									/>
 									<div className="text-right text-xs text-gray-500 mt-1">
-										{refeedContent.length}/300
+										{refeedContent.length}/50
 									</div>
 								</div>
 							</div>
@@ -165,13 +165,10 @@ export const RefeedBottomSheet = ({
 					disabled={!selectedClub || myClubs.length === 0}
 					className={`fixed bottom-4 left-4 right-4 py-3 rounded-lg font-medium transition-all duration-200 shadow-lg ${
 						selectedClub && myClubs.length > 0
-							? 'text-white hover:shadow-xl transform hover:scale-[1.02]'
+							? 'bg-brand-primary hover:bg-brand-secondary text-white hover:shadow-xl transform hover:scale-[1.02]'
 							: 'bg-gray-200 text-gray-400 cursor-not-allowed'
 					}`}
-					style={{ 
-						zIndex: 9999,
-						...(selectedClub && myClubs.length > 0 ? { backgroundColor: '#F5921F' } : {})
-					}}
+					style={{ zIndex: 9999 }}
 				>
 					{myClubs.length === 0 
 						? '가입한 모임이 없습니다'
