@@ -96,8 +96,8 @@ export const Notice = () => {
             <div
               key={notification.notificationId}
               onClick={() => handleClick(notification)}
-              className={`p-4 border-b cursor-pointer hover:bg-gray-50 ${
-                !notification.isRead ? 'bg-blue-50 border-blue-200' : ''
+              className={`p-4 mb-0 border-b border-gray-200 cursor-pointer hover:bg-neutral-100 ${
+                notification.isRead ? 'bg-neutral-50 border-blue-200' : ''
               }`}
             >
               <div className="flex justify-between items-start mb-2">
@@ -130,7 +130,7 @@ export const Notice = () => {
               </div>
               <p className="text-sm text-gray-700">{notification.content}</p>
               {!notification.isRead && (
-                <div className="w-2 h-2 bg-blue-500 rounded-full mt-2" />
+                <div className="w-2 h-2 bg-neutral-50 rounded-full mt-2" />
               )}
             </div>
           ))}

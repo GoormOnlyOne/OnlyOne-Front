@@ -65,9 +65,13 @@ const ChatRoomList = () => {
   };
 
   return (
-    <div className="p-4 relative" aria-busy={loading}> 
-      {loading && <Loading overlay text="로딩 중..." />}
-      
+    <div className="p-4 relative" aria-busy={loading}>
+      {' '}
+      {/* ★ 변경: relative + aria-busy */}
+      {loading && <Loading overlay text="불러오는 중..." />}{' '}
+      {/* ★ 변경: 공통 로딩 오버레이 */}
+      <h2 className="text-xl font-bold mb-4">채팅방 목록</h2>
+      {/* ★ 변경: 기존 텍스트 로더 제거 */}
       {!loading && rooms.length === 0 && (
         <div className="flex flex-col items-center justify-center py-12">
           <i className="ri-chat-3-line text-4xl text-gray-400 mb-4"></i>
