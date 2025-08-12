@@ -31,21 +31,31 @@ export const getPresignedUrl = async (
   file: File,
   imageFolderType: string,
 ): Promise<PresignedUrlResponse> => {
-  validateFileType(file);
+  try {
+    validateFileType(file);
 
-  const request: PresignedUrlRequest = {
-    fileName: file.name,
-    contentType: normalizeContentType(file.type),
-    imageSize: Number(file.size), // Long 타입으로 명시적 변환
-  };
+    const request: PresignedUrlRequest = {
+      fileName: file.name,
+      contentType: normalizeContentType(file.type),
+      imageSize: Number(file.size), // Long 타입으로 명시적 변환
+    };
 
-  const response = await apiClient.post<{
-    success: boolean;
-    data: PresignedUrlResponse;
-  }>(`/${imageFolderType}/presigned-url`, request);
+    const response = await apiClient.post<{
+      success: boolean;
+      data: PresignedUrlResponse;
+    }>(`/${imageFolderType}/presigned-url`, request);
 
-  console.log('Presigned URL Response:', response.data);
-  return response.data.data;
+    console.log('Presigned URL Response:', response.data);
+    
+    if (!response.data.success || !response.data.data) {
+      throw new Error(`Presigned URL 발급 실패: ${file.name}`);
+    }
+    
+    return response.data.data;
+  } catch (error) {
+    console.error(`Presigned URL 발급 실패 (${file.name}):`, error);
+    throw error;
+  }
 };
 
 // presigned URL 발급 (다중 이미지)
@@ -63,7 +73,14 @@ export const uploadImagesToS3 = async (
   presignedUrls: PresignedUrlResponse[],
 ): Promise<void> => {
   const uploadPromises = files.map(async (file, index) => {
-    const { presignedUrl } = presignedUrls[index];
+    const presignedData = presignedUrls[index];
+    
+    // presignedUrls[index]가 undefined인 경우 에러 처리
+    if (!presignedData || !presignedData.presignedUrl) {
+      throw new Error(`Presigned URL을 받지 못했습니다: ${file.name}`);
+    }
+
+    const { presignedUrl } = presignedData;
 
     const response = await fetch(presignedUrl, {
       method: 'PUT',
@@ -74,7 +91,7 @@ export const uploadImagesToS3 = async (
     });
 
     if (!response.ok) {
-      throw new Error(`이미지 업로드 실패: ${file.name}`);
+      throw new Error(`이미지 업로드 실패: ${file.name} (Status: ${response.status})`);
     }
   });
 
@@ -99,10 +116,15 @@ export const uploadImages = async (
     // 1. 파일 타입 검증
     files.forEach(validateFileType);
 
-    console.log(files, imageFolderType);
+    console.log('업로드할 파일들:', files, '폴더 타입:', imageFolderType);
 
     // 2. presigned URL 발급
     const presignedUrls = await getPresignedUrls(files, imageFolderType);
+    
+    // presignedUrls 검증
+    if (presignedUrls.length !== files.length) {
+      throw new Error(`Presigned URL 개수 불일치: 파일 ${files.length}개, URL ${presignedUrls.length}개`);
+    }
 
     // 3. S3에 이미지 업로드
     await uploadImagesToS3(files, presignedUrls);
@@ -110,7 +132,7 @@ export const uploadImages = async (
     // 4. 업로드 된 이미지 URL 반환
     return presignedUrls.map(item => item.imageUrl);
   } catch (error) {
-    console.error('이미지 업로드 실패', error);
+    console.error('이미지 업로드 실패:', error);
     throw error;
   }
 };
