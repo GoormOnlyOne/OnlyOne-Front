@@ -67,9 +67,10 @@ interface FeedItemProps {
 	onRefeedClick: (feedId: number) => void;
 	onEditClick: (feedId: number, clubId: number) => void;
 	onDeleteClick: (feedId: number) => void;
+	onOriginalFeedClick: (clubId: number, feedId: number) => void;
 }
 
-const FeedItem = ({ feed, onCommentClick, onLikeClick, onRefeedClick, onEditClick, onDeleteClick }: FeedItemProps) => {
+const FeedItem = ({ feed, onCommentClick, onLikeClick, onRefeedClick, onEditClick, onDeleteClick, onOriginalFeedClick }: FeedItemProps) => {
 	const [currentImageIndex, setCurrentImageIndex] = useState(0);
 	const [rootFeedImageIndex, setRootFeedImageIndex] = useState(0);
 
@@ -121,7 +122,16 @@ const FeedItem = ({ feed, onCommentClick, onLikeClick, onRefeedClick, onEditClic
 	};
 
 	return (
-		<div className="bg-white mb-4 shadow-sm">
+		<div 
+			className={`bg-white mb-4 shadow-sm ${!feed.isRepost ? 'cursor-pointer hover:shadow-md transition-shadow' : ''}`}
+			onClick={!feed.isRepost ? (e) => {
+				// 버튼 클릭이 아닌 경우에만 피드 상세로 이동
+				if (!(e.target as Element).closest('button')) {
+					e.stopPropagation();
+					onOriginalFeedClick(feed.clubId, feed.feedId);
+				}
+			} : undefined}
+		>
 			{/* 피드 작성자 정보 */}
 			<div className="flex items-center justify-between p-4 border-b border-gray-100">
 				<div className="flex items-center gap-3">
@@ -239,7 +249,13 @@ const FeedItem = ({ feed, onCommentClick, onLikeClick, onRefeedClick, onEditClic
 									</div>
 
 									{/* ROOT FEED (깔끔한 스타일) */}
-									<div className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm mx-3 mb-3">
+									<div 
+										className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm mx-3 mb-3 cursor-pointer hover:shadow-md transition-shadow"
+										onClick={(e) => {
+											e.stopPropagation();
+											onOriginalFeedClick(feed.rootFeed.clubId, feed.rootFeed.feedId);
+										}}
+									>
 										{/* rootFeed 작성자 정보 */}
 										<div className="flex items-center justify-between p-4 border-b border-gray-100">
 											<div className="flex items-center gap-3">
@@ -377,7 +393,13 @@ const FeedItem = ({ feed, onCommentClick, onLikeClick, onRefeedClick, onEditClic
 											<span>이 피드를 리피드함</span>
 										</div>
 
-										<div className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm">
+										<div 
+											className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm cursor-pointer hover:shadow-md transition-shadow"
+											onClick={(e) => {
+												e.stopPropagation();
+												onOriginalFeedClick(feed.parentFeed.clubId, feed.parentFeed.feedId);
+											}}
+										>
 											{/* 원본 피드 작성자 정보 */}
 											<div className="p-4 border-b border-gray-100">
 												<div className="flex items-center gap-3">
@@ -588,6 +610,8 @@ export const FeedList = () => {
 	const [selectedFeed, setSelectedFeed] = useState<FeedData | null>(null);
 	const [deleteModalOpen, setDeleteModalOpen] = useState(false);
 	const [selectedDeleteFeedId, setSelectedDeleteFeedId] = useState<number | null>(null);
+	const [moveToMeetingModalOpen, setMoveToMeetingModalOpen] = useState(false);
+	const [selectedMeetingInfo, setSelectedMeetingInfo] = useState<{clubId: number, feedId: number} | null>(null);
 	const likeSendingRef = useRef<Set<number>>(new Set());
 	const bottomSheetScrollRef = useRef<HTMLDivElement>(null);
 	type SortMode = 'latest' | 'popular';
@@ -649,7 +673,7 @@ export const FeedList = () => {
 			await fetchFeeds();
 		} catch (error) {
 			console.error('리피드 실패:', error);
-			showApiErrorToast(error);
+			showApiErrorToast(error); 
 		}
 	};
 
@@ -684,6 +708,21 @@ export const FeedList = () => {
 			console.error('피드 삭제 실패:', error);
 			showApiErrorToast(error);
 		}
+	};
+
+	// 원본 피드 클릭 핸들러
+	const handleOriginalFeedClick = (clubId: number, feedId: number) => {
+		setSelectedMeetingInfo({ clubId, feedId });
+		setMoveToMeetingModalOpen(true);
+	};
+
+	// 모임 이동 확인 핸들러
+	const handleMoveToMeetingConfirm = () => {
+		if (!selectedMeetingInfo) return;
+		
+		navigate(`/meeting/${selectedMeetingInfo.clubId}`);
+		setMoveToMeetingModalOpen(false);
+		setSelectedMeetingInfo(null);
 	};
 
 
@@ -806,6 +845,7 @@ export const FeedList = () => {
 						onRefeedClick={handleRefeedClick}
 						onEditClick={handleEditClick}
 						onDeleteClick={handleDeleteClick}
+						onOriginalFeedClick={handleOriginalFeedClick}
 					/>
 				))}
 			</div>
@@ -882,6 +922,17 @@ export const FeedList = () => {
 				}}
 				onConfirm={handleDeleteConfirm}
 				title="피드를 삭제하시겠습니까?"
+			/>
+
+			{/* 모임 이동 확인 모달 */}
+			<Modal
+				isOpen={moveToMeetingModalOpen}
+				onClose={() => {
+					setMoveToMeetingModalOpen(false);
+					setSelectedMeetingInfo(null);
+				}}
+				onConfirm={handleMoveToMeetingConfirm}
+				title="해당 모임으로 이동하시겠습니까?"
 			/>
 		</div>
 	);
