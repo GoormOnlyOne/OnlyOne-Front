@@ -70,50 +70,54 @@ export const Modal: React.FC<ModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
-      <div
-        ref={modalRef}
-        className="bg-gray-100 rounded-lg shadow-xl max-w-md w-full mx-4 p-8"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="modal-title"
-      >
-        <div className="text-center mb-8">
-          <h2
-            id="modal-title"
-            className="text-xl font-medium text-black leading-relaxed"
-          >
-            {title}
-          </h2>
-        </div>
-
-        <div className="flex gap-4 justify-center">
-          <button
-            ref={cancelBtnRef}
-            onClick={onClose}
-            className={clsx(
-              'px-8 py-3 rounded-lg font-medium text-base whitespace-nowrap min-w-[120px] h-12',
-              'bg-amber-900 text-white hover:bg-amber-800 focus:outline-none focus:ring-2 focus:ring-amber-900 focus:ring-offset-2',
-              'transition-colors duration-200',
-            )}
-          >
-            {cancelText}
-          </button>
-          <button
-            onClick={handleConfirm}
-            className={clsx(
-              'px-8 py-3 rounded-lg font-medium text-base whitespace-nowrap min-w-[120px] h-12',
-              'transition-colors duration-200',
-              variant === 'danger'
-                ? 'bg-red-500 text-white hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2'
-                : 'bg-yellow-400 text-amber-900 hover:bg-yellow-500 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-offset-2',
-            )}
-          >
-            {confirmText}
-          </button>
+      <div className="fixed inset-0 flex items-center justify-center z-50 p-4 pointer-events-none">
+        <div
+          ref={modalRef}
+          className="bg-white rounded-2xl shadow-2xl max-w-sm w-full mx-4 p-4 transform transition-all duration-300 ease-out pointer-events-auto"
+          role="dialog"
+          aria-alert="true"
+          aria-labelledby="alert-title"
+          style={{
+            boxShadow:
+              '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04), 0 0 0 1px rgba(245, 146, 31, 0.1)',
+          }}
+        >
+          <div className="text-center mb-4">
+            <h2
+              id="alert-title"
+              className="text-base font-medium text-gray-900 leading-relaxed"
+            >
+              {title}
+            </h2>
+          </div>
+  
+          <div className="flex gap-2 justify-center">
+            <button
+              ref={cancelBtnRef}
+              onClick={onClose}
+              className={clsx(
+                'px-4 py-2 rounded-lg font-medium text-xs whitespace-nowrap min-w-[80px]',
+                'bg-gray-100 text-gray-700 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-2',
+                'transition-all duration-200 transform hover:scale-105 active:scale-95',
+              )}
+            >
+              {cancelText}
+            </button>
+            <button
+              onClick={handleConfirm}
+              className={clsx(
+                'px-4 py-2 rounded-lg font-medium text-xs whitespace-nowrap min-w-[80px]',
+                'transition-all duration-200 transform hover:scale-105 active:scale-95',
+                variant === 'danger'
+                  ? 'bg-red-500 text-white hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2'
+                  : 'bg-[#F5921F] text-white hover:bg-[#EF7C30] focus:outline-none focus:ring-2 focus:ring-[#F5921F] focus:ring-offset-2',
+              )}
+            >
+              {confirmText}
+            </button>
+          </div>
         </div>
       </div>
-    </div>
   );
 };
 

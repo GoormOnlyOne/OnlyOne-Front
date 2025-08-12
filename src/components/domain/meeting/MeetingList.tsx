@@ -1,181 +1,287 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import apiClient from '../../../api/client';
+import MeetingCard, {type Meeting} from './MeetingCard';
+import EmptyState from '../search/EmptyState';
+import Loading from '../../common/Loading';
+import Modal from '../../../components/common/Modal';
 
-interface Meeting {
-  club_id: number;
-  name: string;
-  introduction: string;
-  interest: string;
-  district: string;
-  member_count: number;
-  image: string;
+
+interface MeetingListProps {
+  mode?: 'home' | 'full' | 'my';
+  apiEndpoint?: string;
+  showHomeSpecialSections?: boolean;
 }
 
-const meetingData: Meeting[] = [
-  {
-    club_id: 1,
-    name: '게이트볼',
-    introduction: '게이트볼 모임 입니다.',
-    interest: '운동',
-    district: '강남구',
-    member_count: 10,
-    image:
-      'https://readdy.ai/api/search-image?query=People%20running%20together%20in%20Han%20River%20park%20Seoul%2C%20morning%20exercise%2C%20beautiful%20sunrise%2C%20group%20activity%2C%20healthy%20lifestyle%2C%20outdoor%20sports%2C%20Korean%20cityscape%20in%20background%2C%20vibrant%20and%20energetic%20atmosphere&width=400&height=240&seq=1&orientation=landscape',
-  },
-  {
-    club_id: 2,
-    name: '한강 러닝 크루',
-    introduction: '매주 토요일 아침 한강에서 함께 달려요!',
-    interest: '운동',
-    district: '용산구',
-    member_count: 25,
-    image:
-      'https://readdy.ai/api/search-image?query=Italian%20cooking%20class%2C%20people%20making%20pasta%20together%2C%20modern%20kitchen%20studio%2C%20ingredients%20and%20cooking%20tools%2C%20warm%20lighting%2C%20collaborative%20cooking%20experience%2C%20professional%20chef%20instruction%2C%20cozy%20atmosphere&width=400&height=240&seq=2&orientation=landscape',
-  },
-  {
-    club_id: 3,
-    name: '북클럽 독서모임',
-    introduction: '한 달에 한 권, 함께 읽고 토론해요',
-    interest: '문화',
-    district: '마포구',
-    member_count: 15,
-    image:
-      'https://readdy.ai/api/search-image?query=Cozy%20book%20cafe%20reading%20group%2C%20people%20discussing%20books%2C%20warm%20lighting%2C%20comfortable%20seating%2C%20bookshelves%2C%20coffee%20cups%2C%20intellectual%20atmosphere%2C%20modern%20interior%20design%2C%20peaceful%20ambiance&width=400&height=240&seq=3&orientation=landscape',
-  },
-  {
-    club_id: 4,
-    name: '요가 필라테스',
-    introduction: '몸과 마음의 균형을 찾는 요가 모임',
-    interest: '운동',
-    district: '서초구',
-    member_count: 20,
-    image:
-      'https://readdy.ai/api/search-image?query=Jeju%20Island%20travel%20group%2C%20beautiful%20coastal%20scenery%2C%20travelers%20exploring%20together%2C%20clear%20blue%20sky%2C%20scenic%20landscape%2C%20adventure%20and%20friendship%2C%20Korean%20island%20paradise%2C%20outdoor%20exploration&width=400&height=240&seq=4&orientation=landscape',
-  },
-  {
-    club_id: 5,
-    name: '사진 출사 모임',
-    introduction: '주말마다 서울 곳곳을 누비며 사진 촬영해요',
-    interest: '문화',
-    district: '종로구',
-    member_count: 18,
-    image:
-      'https://readdy.ai/api/search-image?query=Guitar%20playing%20group%20session%2C%20musicians%20jamming%20together%2C%20music%20studio%20setting%2C%20acoustic%20and%20electric%20guitars%2C%20amplifiers%2C%20warm%20studio%20lighting%2C%20creative%20musical%20atmosphere%2C%20collaborative%20performance&width=400&height=240&seq=5&orientation=landscape',
-  },
-  {
-    club_id: 6,
-    name: '맛집 탐방대',
-    introduction: '서울의 숨은 맛집을 찾아다니는 미식 모임',
-    interest: '사교',
-    district: '강남구',
-    member_count: 30,
-    image:
-      'https://readdy.ai/api/search-image?query=Movie%20discussion%20group%2C%20people%20talking%20about%20films%2C%20cinema%20lobby%2C%20movie%20posters%2C%20comfortable%20seating%20area%2C%20enthusiastic%20film%20lovers%2C%20modern%20movie%20theater%20interior%2C%20engaging%20conversation&width=400&height=240&seq=6&orientation=landscape',
-  },
-];
-
-export default function MeetingList() {
-  const [meetings, setMeetings] = useState<Meeting[]>(meetingData);
+export default function MeetingList({
+  mode = 'home',
+  apiEndpoint,
+  showHomeSpecialSections = false,
+}: MeetingListProps) {
+  const [meetings, setMeetings] = useState<Meeting[]>([]);
+  const [partnerMeetings, setPartnerMeetings] = useState<Meeting[]>([]);
   const [loading, setLoading] = useState(false);
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const navigate = useNavigate();
 
-  const loadMoreMeetings = () => {
+  const [isAlertOpen, setIsAlertOpen] = useState(false);
+  const [alertMsg, setAlertMsg] = useState('');
+
+  // 모드별 엔드포인트/사이즈 선택
+  const getEndpointAndSize = () => {
+    switch (mode) {
+      case 'my':
+        return { endpoint: '/search/user', size: 20 };
+      case 'full':
+        return { endpoint: apiEndpoint ?? '/search/recommendations', size: 20 };
+      case 'home':
+        return { endpoint: apiEndpoint ?? '/search/recommendations', size: 20 };
+    }
+  };
+
+  // 데이터 로드 함수
+  const loadMeetings = async (pageNum: number, isNewLoad = false) => {
     if (loading) return;
 
     setLoading(true);
-    setTimeout(() => {
-      const newMeetings = meetingData.map(meeting => ({
-        ...meeting,
-        club_id: meeting.club_id + meetings.length,
-        member_count: Math.floor(Math.random() * 30) + 5,
-      }));
-      setMeetings(prev => [...prev, ...newMeetings]);
+    try {
+      const { endpoint, size } = getEndpointAndSize();
+
+      const response = await apiClient.get<Meeting[]>(endpoint, {
+        params: { page: pageNum, size },
+      });
+
+      if (response.success) {
+        const newMeetings = response.data;
+
+        if (isNewLoad) {
+          setMeetings(newMeetings);
+        } else {
+          setMeetings(prev => [...prev, ...newMeetings]);
+        }
+
+        if (newMeetings.length < size) {
+          setHasMore(false);
+        }
+      }
+    } catch (error) {
+      console.error('모임 목록 조회 실패:', error);
+    } finally {
       setLoading(false);
-    }, 1000);
+    }
   };
 
-  useEffect(() => {
-    const handleScroll = (e: Event) => {
-      const target = e.target as HTMLElement;
-      const scrollHeight = target.scrollHeight;
-      const scrollTop = target.scrollTop;
-      const clientHeight = target.clientHeight;
+  // 함께하는 사람들의 모임 (특별 섹션이 활성화된 경우에만)
+  const loadPartnerMeetings = async () => {
+    if (!showHomeSpecialSections) return;
 
-      // 스크롤이 바닥에서 100px 이내에 도달했을 때
-      if (scrollHeight - scrollTop - clientHeight < 100) {
-        if (!loading) {
-          loadMoreMeetings();
-        }
+    try {
+      const response = await apiClient.get<Meeting[]>(
+        '/search/teammates-clubs',
+        {
+          params: { page: 0, size: 5 },
+        },
+      );
+      if (response.success) {
+        setPartnerMeetings(response.data);
+      }
+    } catch (error) {
+      console.error('함께하는 사람들의 모임 조회 실패:', error);
+    }
+  };
+
+  // 초기 데이터 로드
+  useEffect(() => {
+    loadMeetings(0, true);
+    setPage(0);
+    setHasMore(true);
+    if (showHomeSpecialSections) {
+      loadPartnerMeetings();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mode, apiEndpoint, showHomeSpecialSections]);
+
+  // 무한 스크롤 (전체 모드에서만)
+  useEffect(() => {
+    if (mode !== 'full') return;
+
+    const handleScroll = () => {
+      const scrollHeight = document.documentElement.scrollHeight;
+      const scrollTop = document.documentElement.scrollTop;
+      const clientHeight = document.documentElement.clientHeight;
+
+      if (
+        scrollHeight - scrollTop - clientHeight < 100 &&
+        hasMore &&
+        !loading
+      ) {
+        const nextPage = page + 1;
+        setPage(nextPage);
+        loadMeetings(nextPage);
       }
     };
 
-    // main 요소 찾기
-    const mainElement = document.querySelector('main');
-    if (mainElement) {
-      mainElement.addEventListener('scroll', handleScroll);
-      return () => mainElement.removeEventListener('scroll', handleScroll);
-    }
-  }, [loading, meetings.length]);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page, hasMore, loading, mode]);
 
-  return (
-    <div className="px-4 pb-20">
-      <h2 className="text-base font-semibold text-gray-800 leading-snug mb-2">
-        내 주변에서 관심있는 모임을 확인 해보세요.
-      </h2>
-      <div className="space-y-4">
-        {meetings.map(meeting => (
-          <div
-            key={meeting.club_id}
-            className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow"
-          >
-            <div className="relative">
-              <img
-                src={meeting.image}
-                alt={meeting.name}
-                className="w-full h-48 object-cover"
-              />
-              <span className="absolute top-3 left-3 bg-blue-600 text-white px-3 py-1 rounded-full text-xs font-medium">
-                {meeting.interest}
-              </span>
-              <button className="absolute top-3 right-3 w-8 h-8 flex items-center justify-center bg-white/80 rounded-full hover:bg-white transition-colors">
-                <i className="ri-heart-line text-gray-600"></i>
-              </button>
-            </div>
+  const handleViewMorePartner = () => {
+    navigate('/partner-meetings');
+  };
 
-            <div className="p-4">
-              <h3 className="font-semibold text-gray-800 mb-2">
-                {meeting.name}
-              </h3>
-              <p className="text-sm text-gray-600 mb-3">
-                {meeting.introduction}
-              </p>
+  const handleViewMoreRecommended = () => {
+    navigate('/recommended-meetings');
+  };
 
-              <div className="flex items-center justify-between">
-                <div className="space-y-1">
-                  <div className="flex items-center text-sm text-gray-600">
-                    <i className="ri-map-pin-line mr-2"></i>
-                    <span>{meeting.district}</span>
-                  </div>
+  const handleJoinMeeting = (clubId: number) => {
+    console.log(`모임 ${clubId}에 가입`);
+    setAlertMsg('모임 가입이 완료되었습니다!');
+    setIsAlertOpen(true);
+  };
 
-                  <div className="flex items-center text-sm text-gray-600">
-                    <i className="ri-group-line mr-2"></i>
-                    <span>멤버 {meeting.member_count}명</span>
-                  </div>
-                </div>
+  // 홈 모드 렌더링
+  if (mode === 'home') {
+    return (
+      <div className="px-4 pb-20">
+		{loading && meetings.length === 0 && (
+          <div className="py-4">
+            <Loading text="로딩 중..." overlay={false} />
+          </div>
+        )}
 
-                <button className="bg-blue-600 text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-blue-700 transition-colors cursor-pointer hover:shadow-md transition-shadow">
-                  가입하기
+        {showHomeSpecialSections && (
+          <>
+            {/* 맞춤 추천 모임 섹션 */}
+            <div>
+              <h1 className="text-base font-semibold text-gray-800 leading-snug mb-1">
+                📍 내게 딱 맞는 모임을 찾아보세요!
+              </h1>
+              <h2 className="text-sm text-gray-400">
+                내 취향{' '}
+                <span className="text-[#EF7C30] font-semibold">맞춤 모임</span>
+                을 소개해드려요.
+              </h2>
+              <div className="space-y-4 mt-2">
+                {meetings.map(meeting => (
+                  <MeetingCard key={meeting.clubId} meeting={meeting} />
+                ))}
+              </div>
+
+              {/* 더보기 버튼 */}
+              <div className="flex justify-center mt-6 mb-8">
+                <button
+                  onClick={handleViewMoreRecommended}
+                  className="bg-gradient-to-br from-brand-primary to-brand-secondary text-white px-4 py-2 rounded-full text-sm font-medium hover:from-brand-secondary hover:to-brand-primary transition-all duration-200 hover:shadow-md"
+                >
+                  더보기 →
                 </button>
               </div>
             </div>
+
+            {/* 함께하는 사람들의 모임 섹션 */}
+            <div className="mb-8">
+              <h1 className="text-base font-semibold text-gray-800 leading-snug mb-1">
+                ⚽ 모임 친구들은 이런 활동도 해요!
+              </h1>
+              <h2 className="text-sm text-gray-400">
+                함께하는 멤버들의{' '}
+                <span className="text-[#EF7C30] font-semibold">다른 모임</span>
+                도 구경해 보세요.
+              </h2>
+
+			  {loading && partnerMeetings.length === 0 && (
+                <div className="py-3">
+                  <Loading text="불러오는 중..." overlay={false} />
+                </div>
+              )}
+
+              <div className="space-y-4 mt-2">
+                {partnerMeetings.map(meeting => (
+                  <MeetingCard key={meeting.clubId} meeting={meeting} />
+                ))}
+              </div>
+
+              {/* 더보기 버튼 */}
+              <div className="flex justify-center mt-6">
+                <button
+                  onClick={handleViewMorePartner}
+                  className="bg-gradient-to-br from-brand-primary to-brand-secondary text-white px-4 py-2 rounded-full text-sm font-medium hover:from-brand-secondary hover:to-brand-primary transition-all duration-200 hover:shadow-md"
+                >
+                  더보기 →
+                </button>
+              </div>
+            </div>
+          </>
+        )}
+
+        {!showHomeSpecialSections && (
+          <>
+            {loading && meetings.length === 0 && (
+              <div className="py-4">
+                <Loading text="로딩 중..." overlay={false} />
+              </div>
+            )}
+            <div className="space-y-4">
+              {meetings.map(meeting => (
+                <MeetingCard key={meeting.clubId} meeting={meeting} />
+              ))}
+            </div>
+          </>
+        )}
+      </div>
+    );
+  }
+
+  // 전체/내 모드 렌더링
+  return (
+    <div className="h-[calc(100vh-56px)] overflow-y-auto bg-gray-50 relative">
+      {loading && meetings.length === 0 && (
+        <Loading overlay text="로딩 중..." />
+      )}
+
+	  {/* 모임 목록 */}
+      <div>
+        <div className="space-y-4">
+          {meetings.map(meeting => (
+            <MeetingCard
+              key={meeting.clubId}
+              meeting={meeting}
+              onJoinSuccess={handleJoinMeeting}
+            />
+          ))}
+        </div>
+
+        {loading && meetings.length > 0 && (
+          <div className="py-6">
+            <Loading text="불러오는 중..." overlay={false} />
           </div>
-        ))}
+        )}
+
+        {/* 데이터가 없을 때 */}
+        {!loading && meetings.length === 0 && (
+          <EmptyState
+            title={mode === 'my' ? '가입한 모임이 없습니다' : '모임이 없습니다'}
+            description={
+              mode === 'my'
+                ? '관심 있는 모임에 가입해보세요!'
+                : '새로운 모임을 만들어보시거나 다른 조건으로 검색해보세요'
+            }
+            showCreateButton={mode !== 'my'}
+          />
+        )}
       </div>
 
-      {/* 로딩 스피너 */}
-      {loading && (
-        <div className="flex justify-center py-8">
-          <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-        </div>
-      )}
+      <Modal
+        isOpen={isAlertOpen}
+        onClose={() => setIsAlertOpen(false)}
+        onConfirm={() => setIsAlertOpen(false)}
+        title={alertMsg}
+        confirmText="확인"
+        cancelText="닫기"
+        variant="default"
+      />
     </div>
   );
 }

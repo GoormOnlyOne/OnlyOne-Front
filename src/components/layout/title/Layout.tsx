@@ -1,15 +1,43 @@
-import { useLocation, Outlet, useParams } from 'react-router-dom';
+import { useLocation, Outlet, useParams, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import Header from './Header';
 import Footer from './Footer';
+import apiClient from '../../../api/client';
+import Modal from '../../common/Modal';
+import { showToast as globalToast } from '../../common/Toast/ToastProvider';
+import { fetchChatMessages } from '../../../api/chat';
 
 export default function TitleLayout() {
   const location = useLocation();
   const pathname = location.pathname;
   const params = useParams();
+  const navigate = useNavigate();
+  const clubIdFromState = (location.state as { clubId?: number } | null)?.clubId ?? null;
+
   const [dynamicTitle, setDynamicTitle] = useState('');
+  const [leaving, setLeaving] = useState(false);
+  const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false); // 확인 모달
+  const [clubRole, setClubRole] = useState<'LEADER' | 'MEMBER' | 'GUEST' | null>(null);
+
+  const fetchChatRoomTitle = async (chatRoomId: string) => {
+    try {
+      const res = await fetchChatMessages(Number(chatRoomId));
+      const name = res?.data?.chatRoomName ?? null;
+      setDynamicTitle(name || `채팅방 #${chatRoomId}`);
+    } catch (error) {
+      console.error('채팅방 제목 불러오기 실패:', error);
+      setDynamicTitle(`채팅방`);
+    }
+  };
 
   useEffect(() => {
+    const chatRoomId = params.chatRoomId;
+    const meetingId = params.id;
+
+    if (chatRoomId && /^\/chat\/\d+\/messages\/?$/.test(pathname)) {
+      fetchChatRoomTitle(chatRoomId);
+    }
+
     if (
       params.id &&
       pathname.startsWith('/meeting/') &&
@@ -18,20 +46,43 @@ export default function TitleLayout() {
       // API 호출 예시
       fetchMeetingTitle(params.id);
     }
-  }, [params.id, pathname]);
+  }, [params.chatRoomId, params.id, pathname]);
 
   const fetchMeetingTitle = async (meetingId: string) => {
     try {
-      // TODO: 실제 API 호출 코드
-      // const response = await fetch(`/api/meetings/${meetingId}`);
-      // const data = await response.json();
-      // setDynamicTitle(data.title);
-
-      // 임시 예시
-      setDynamicTitle(`모임 ${meetingId}`);
+      const response = await apiClient.get(`/clubs/${meetingId}`);
+      if (response.success) {
+        setDynamicTitle(response.data.name);
+        setClubRole(response.data.clubRole);
+      } else {
+        setDynamicTitle(`모임 ${meetingId}`);
+      }
     } catch (error) {
       console.error('Failed to fetch meeting title:', error);
-      setDynamicTitle('모임 세');
+      setDynamicTitle('모임 상세');
+    }
+  };
+
+  // 컴포넌트 내부 어딘가(함수들 밑) 추가
+  const confirmLeave = async () => {
+    const meetingId = pathname.match(/\/meeting\/(\d+)/)?.[1];
+    if (!meetingId) return;
+
+    try {
+      setLeaving(true);
+      await apiClient.delete(`/clubs/${meetingId}/leave`);
+      globalToast('모임에서 탈퇴하였습니다.', 'success', 2000);
+      // 화면은 그대로 유지 (navigate 없음)
+    } catch (e) {
+      console.error('모임 탈퇴 실패:', e);
+      globalToast(
+        '모임에 가입하지 않은 상태입니다. 잠시 후 다시 시도해주세요.',
+        'error',
+        2000,
+      );
+    } finally {
+      setLeaving(false);
+      setIsLeaveModalOpen(false);
     }
   };
 
@@ -79,7 +130,7 @@ export default function TitleLayout() {
       };
       break;
 
-    case pathname === '/mypage/settlement':
+    case pathname === '/mypage/wallet':
       headerProps = {
         isBack: true,
         isTitle: true,
@@ -145,9 +196,12 @@ export default function TitleLayout() {
       headerProps = {
         isBack: true,
         isTitle: true,
-        titleText: meetingId || '모임 상세',
+        titleText: dynamicTitle || '모임 상세',
         isLike: true,
-        isOut: true,
+        isOut: clubRole !== 'GUEST',
+        // ✅ 헤더에 콜백/디세이블 전달
+        onOut: () => setIsLeaveModalOpen(true),
+        outDisabled: leaving,
       };
       break;
 
@@ -187,6 +241,52 @@ export default function TitleLayout() {
       };
       break;
 
+    case pathname === '/recommended-meetings':
+      headerProps = {
+        isBack: true,
+        isTitle: true,
+        titleText: '맞춤 모임',
+        isLike: false,
+        isOut: false,
+      };
+      break;
+
+    case pathname === '/partner-meetings':
+      headerProps = {
+        isBack: true,
+        isTitle: true,
+        titleText: '동료들의 모임',
+        isLike: false,
+        isOut: false,
+      };
+      break;
+
+    case /^\/chat\/\d+\/messages\/?$/.test(pathname):
+      headerProps = {
+        isBack: true,
+        isTitle: true,
+        titleText: dynamicTitle || '채팅방',
+        isLike: false,
+        isOut: false,
+        onBack: () => {
+          if (clubIdFromState) {
+            navigate(`/meeting/${clubIdFromState}?tab=chat`, { replace: true });
+          } else {
+            navigate(-1);
+          }
+        },
+      };
+      break;
+
+    case pathname === '/feed':
+      headerProps = {
+        isBack: false,
+        isTitle: true,
+        titleText: '피드 목록',
+        isLike: false,
+        isOut: false,
+      };
+      break;
     default:
       headerProps = null; // 헤더 표시 안 함
   }
@@ -202,16 +302,24 @@ export default function TitleLayout() {
       )}
 
       {/* 스크롤 가능한 메인 영역 */}
-      <main className="flex-1 overflow-y-auto bg-gray-50">
+      <main className="flex-1 overflow-y-auto bg-neutral-50">
         <Outlet />
       </main>
 
       {/* 고정 푸터 - 높이를 명시적으로 설정 */}
-      {pathname === '/mypage' && (
+      {(pathname === '/mypage' || pathname === '/feed') && (
         <div className="h-16 flex-shrink-0">
           <Footer />
         </div>
       )}
+
+      {/* 탈퇴 확인 모달 */}
+      <Modal
+        isOpen={isLeaveModalOpen}
+        onClose={() => setIsLeaveModalOpen(false)}
+        onConfirm={confirmLeave}
+        title="모임에서 탈퇴하시겠습니까?"
+      />
     </div>
   );
 }

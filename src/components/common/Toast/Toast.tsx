@@ -36,7 +36,7 @@ export const Toast: React.FC<ToastProps> = ({
 
   const getToastStyles = () => {
     const baseStyles =
-      'fixed left-1/2 transform -translate-x-1/2 z-50 max-w-sm w-full mx-4 p-4 rounded-lg shadow-lg transition-all duration-300';
+      'fixed left-1/2 transform -translate-x-1/2 z-50 max-w-sm w-full mx-auto p-4 rounded-lg shadow-lg transition-all duration-300';
 
     const positionStyles = {
       top: 'top-4',
@@ -45,10 +45,10 @@ export const Toast: React.FC<ToastProps> = ({
     };
 
     const typeStyles = {
-      success: 'bg-green-500 text-white',
-      error: 'bg-red-500 text-white',
-      warning: 'bg-yellow-500 text-amber-900',
-      info: 'bg-blue-500 text-white',
+      success: 'bg-[var(--color-complement-teal)] text-white',
+      error: 'bg-[var(--color-brand-deepest)] text-white',
+      warning: 'bg-[var(--color-brand-warm)] text-[var(--color-brand-deepest)]',
+      info: 'bg-[var(--color-complement-blue)] text-white',
     };
 
     return clsx(

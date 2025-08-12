@@ -1,2 +1,55 @@
 @import url('https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.5.0/remixicon.min.css');
 @import "tailwindcss";
+
+@theme {
+  /* Brand Colors */
+  --color-brand-primary: #F5921F;
+  --color-brand-secondary: #EF7C30;
+  --color-brand-accent: #F5921F;
+  
+  /* Harmonious Color Palette */
+  --color-brand-light: #FFF4E8;
+  --color-brand-soft: #FFEBD1;
+  --color-brand-warm: #FFD4A3;
+  --color-brand-darker: #D47619;
+  --color-brand-deepest: #B8620E;
+  
+  /* Complementary Colors */
+  --color-complement-blue: #1F7DF5;
+  --color-complement-teal: #1DB584;
+  --color-complement-purple: #8B5CF6;
+  
+  /* Neutral Warm */
+  --color-neutral-50: #FEFDFB;
+  --color-neutral-100: #FDF9F3;
+  --color-neutral-200: #F9F1E8;
+  --color-neutral-300: #F0E4D7;
+  --color-neutral-400: #D4C0A9;
+  --color-neutral-500: #A68B6B;
+  --color-neutral-600: #8B7355;
+  --color-neutral-700: #6B5A47;
+  --color-neutral-800: #4A3F35;
+  --color-neutral-900: #2D241C;
+}
+
+/* 모든 버튼에 포인터 커서 적용 */
+button {
+  cursor: pointer;
+}
+button:disabled {
+  cursor: not-allowed;
+}
+
+/* Input과 textarea 포커스 시 주황색 아웃라인 */
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  border-color: var(--color-brand-primary);
+  box-shadow: 0 0 0 3px rgba(245, 146, 31, 0.1);
+}
+
+/* 알림 아이템 hover 시 연한 주황색 배경 */
+.hover\:bg-orange-50:hover {
+  background-color: var(--color-brand-light);
+}

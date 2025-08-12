@@ -20,11 +20,11 @@ export default function Navigation() {
       href: '/category',
     },
     {
-      id: 'meeting',
-      label: '모임',
-      icon: 'ri-group-line',
-      activeIcon: 'ri-group-fill',
-      href: '/meeting',
+      id: 'feed',
+      label: '피드',
+      icon: 'ri-gallery-line',
+      activeIcon: 'ri-gallery-fill',
+      href: '/feed',
     },
     {
       id: 'mypage',
@@ -49,14 +49,14 @@ export default function Navigation() {
                 transition-all duration-300 ease-in-out
                 ${
                   isActive
-                    ? 'text-blue-600'
+                    ? 'text-brand-primary'
                     : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
                 }
               `}
             >
               {/* 활성 탭 배경 애니메이션 */}
               {isActive && (
-                <div className="absolute inset-0 bg-blue-50 opacity-50 scale-90 rounded-lg transition-all duration-300" />
+                <div className="absolute inset-0 bg-brand-primary/10 opacity-50 scale-90 rounded-lg transition-all duration-300" />
               )}
 
               {/* 아이콘 */}
@@ -81,7 +81,7 @@ export default function Navigation() {
 
               {/* 하단 인디케이터 */}
               {isActive && (
-                <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-12 h-0.5 bg-blue-600 rounded-full animate-slide-in" />
+                <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-12 h-0.5 bg-brand-primary rounded-full animate-slide-in" />
               )}
             </Link>
           );

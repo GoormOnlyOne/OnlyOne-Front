@@ -1,0 +1,215 @@
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import apiClient from '../../../api/client';
+import { Link } from 'react-router-dom';
+import EmptyState from '../search/EmptyState';
+import Loading from '../../common/Loading';
+import { showToast } from '../../common/Toast/ToastProvider';
+import Modal from '../../common/Modal';
+
+interface FeedItem {
+  id: number;
+  imageUrl: string;
+  likeCount: number;
+  commentCount: number;
+}
+
+interface FeedSummaryDto {
+  feedId: number;
+  thumbnailUrl: string;
+  likeCount: number;
+  commentCount: number;
+}
+
+interface PageResponse<T> {
+  content: T[];
+}
+
+interface CommonResponse<T> {
+  success: boolean;
+  data: T;
+}
+
+interface MeetingFeedGridProps {
+  clubId: string;
+  readOnly?: boolean;
+}
+
+// 숫자 포맷: 1.2K처럼 compact
+const formatCount = (n: number) =>
+  Intl.NumberFormat('en', {
+    notation: 'compact',
+    maximumFractionDigits: 1,
+  }).format(n);
+
+const MeetingFeedGrid: React.FC<MeetingFeedGridProps> = ({ clubId, readOnly = false }) => {
+  const [items, setItems] = useState<FeedItem[]>([]);
+  const [page, setPage] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+
+  const [firstLoaded, setFirstLoaded] = useState(false);
+  const [firstPageEmpty, setFirstPageEmpty] = useState(false);
+
+  const loadingRef = useRef(false);
+
+  const [isAlertOpen, setIsAlertOpen] = useState(false);
+  const alertMsg = '모임에 가입해야 자세히 볼 수 있어요.';
+
+  const loadMore = useCallback(() => {
+    if (loadingRef.current || !hasMore) return;
+    loadingRef.current = true;
+    setLoading(true);
+
+    apiClient
+      .get<CommonResponse<PageResponse<FeedSummaryDto>>>(
+        `/clubs/${clubId}/feeds?page=${page}&limit=20`,
+      )
+      .then(response => {
+        const content = response?.data?.content ?? [];
+        if (page === 0) {
+          setFirstLoaded(true);
+          setFirstPageEmpty(content.length === 0);
+        }
+
+        if (content.length < 20) {
+          setHasMore(false);
+        }
+
+        setItems(prev => {
+          const existingIds = new Set(prev.map(i => i.id));
+          const newOnes = content
+            .filter(dto => !existingIds.has(dto.feedId))
+            .map(dto => ({
+              id: dto.feedId,
+              imageUrl: dto.thumbnailUrl,
+              likeCount: dto.likeCount,
+              commentCount: dto.commentCount,
+            }));
+          return [...prev, ...newOnes];
+        });
+
+        setPage(prev => prev + 1);
+      })
+      .catch(err => console.error('피드 로드 실패:', err))
+      .finally(() => {
+        loadingRef.current = false;
+        setLoading(false);
+      });
+  }, [clubId, page, hasMore]);
+
+  useEffect(() => {
+    loadMore();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    const handleScroll = (e: Event) => {
+      const target = e.target as HTMLElement;
+      const { scrollTop, scrollHeight, clientHeight } = target;
+      if (scrollTop + clientHeight >= scrollHeight && !loading && hasMore) {
+        loadMore();
+      }
+    };
+    const mainEl = document.querySelector('main');
+    if (mainEl) {
+      mainEl.addEventListener('scroll', handleScroll);
+      return () => mainEl.removeEventListener('scroll', handleScroll);
+    }
+  }, [loadMore, loading, hasMore]);
+
+  return (
+    <>
+      {!loading && firstLoaded && firstPageEmpty && (
+        <EmptyState
+          title="이 모임에는 아직 피드가 게시되지 않았습니다."
+          description="첫 사진과 후기를 남겨보세요."
+          showCreateButton={false}
+        />
+      )}
+
+      <div className="grid grid-cols-3 gap-2 p-4 relative min-h-[200px]">
+        {loading && items.length === 0 && (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <Loading text="로딩 중..." />
+          </div>
+        )}
+        {items.map(item => (
+          <Link
+            key={item.id}
+            to={`/meeting/${clubId}/feed/${item.id}`}
+            aria-label={readOnly ? '모임 가입 필요' : '피드 상세 보기'}
+            onClick={e => {
+              if (readOnly) {
+                e.preventDefault();
+                e.stopPropagation();
+                showToast('모임에 가입해서 콘텐츠를 상세하게 즐기세요', 'warning', 2000)
+              }
+            }}
+            tabIndex={readOnly ? -1 : 0}
+            aria-disabled={readOnly}
+            className={readOnly ? 'cursor-not-allowed' : undefined}
+          >
+            <div className="relative aspect-square bg-gray-200 rounded overflow-hidden group">
+              <img
+                src={item.imageUrl}
+                alt="피드 이미지"
+                className="object-cover w-full h-full transition-transform duration-300 group-hover:scale-105"
+                loading="lazy"
+              />
+
+              {/* 하단 가독성 보정 그라데이션 */}
+              <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/40 to-transparent" />
+
+              {/* 좋아요/댓글 배지 */}
+              <div className="absolute bottom-2 left-2 flex gap-1">
+                {/* 좋아요 */}
+                <div
+                  className="inline-flex items-center gap-1 rounded-full bg-black/45 backdrop-blur-[2px]
+                             px-2 py-1 text-white shadow-sm ring-1 ring-white/10
+                             group-hover:bg-black/55 group-hover:ring-white/20 transition-colors"
+                  aria-label={`좋아요 ${item.likeCount}개`}
+                >
+                  <i className="ri-heart-line text-sm leading-none" />
+                  <span className="text-[11px] leading-none">
+                    {formatCount(item.likeCount)}
+                  </span>
+                </div>
+
+                {/* 댓글 */}
+                <div
+                  className="inline-flex items-center gap-1 rounded-full bg-black/45 backdrop-blur-[2px]
+                             px-2 py-1 text-white shadow-sm ring-1 ring-white/10
+                             group-hover:bg-black/55 group-hover:ring-white/20 transition-colors"
+                  aria-label={`댓글 ${item.commentCount}개`}
+                >
+                  <i className="ri-chat-3-line text-sm leading-none" />
+                  <span className="text-[11px] leading-none">
+                    {formatCount(item.commentCount)}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </Link>
+        ))}
+      </div>
+
+      {loading && items.length > 0 && (
+        <div className="py-2">
+          <Loading text="불러오는 중..." overlay={false} />
+        </div>
+      )}
+
+      <Modal
+        isOpen={isAlertOpen}
+        onClose={() => setIsAlertOpen(false)}
+        onConfirm={() => setIsAlertOpen(false)}
+        title={alertMsg}
+        confirmText="확인"
+        cancelText="닫기"
+        variant="default"
+      />
+    </>
+  );
+};
+
+export default MeetingFeedGrid;

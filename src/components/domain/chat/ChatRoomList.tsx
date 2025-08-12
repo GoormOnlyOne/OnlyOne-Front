@@ -6,10 +6,10 @@ export interface ChatRoom {
   id: number;
   type: ChatRoomType;
   name: string;
-  lastMessage: string;
-  lastMessageTime: Date;
-  memberCount: number;
-  unreadCount: number;
+  lastMessage?: string;
+  lastMessageTime?: Date;
+  memberCount?: number;
+  unreadCount?: number;
 }
 
 interface ChatRoomListProps {
@@ -67,10 +67,15 @@ const ChatRoomList: React.FC<ChatRoomListProps> = ({
               </div>
               <div className="flex-shrink-0 ml-2">
                 <span className="text-xs text-gray-400">
-                  {chatRoom.lastMessageTime.toLocaleTimeString('ko-KR', {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                  })}
+                  {chatRoom.lastMessageTime
+                    ? new Date(chatRoom.lastMessageTime).toLocaleTimeString(
+                        'ko-KR',
+                        {
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        },
+                      )
+                    : ''}
                 </span>
               </div>
             </div>
@@ -81,23 +86,6 @@ const ChatRoomList: React.FC<ChatRoomListProps> = ({
                 <p className="text-sm text-gray-600 truncate">
                   {chatRoom.lastMessage}
                 </p>
-              </div>
-
-              <div className="flex items-center space-x-2 flex-shrink-0 ml-2">
-                {/* 멤버 수 */}
-                <div className="flex items-center text-xs text-gray-400">
-                  <i className="ri-group-line mr-1"></i>
-                  <span>{chatRoom.memberCount}</span>
-                </div>
-
-                {/* 안읽은 메시지 수 */}
-                {chatRoom.unreadCount > 0 && (
-                  <div className="bg-red-500 text-white text-xs rounded-full min-w-[20px] h-5 flex items-center justify-center px-1.5">
-                    <span className="font-medium">
-                      {chatRoom.unreadCount > 99 ? '99+' : chatRoom.unreadCount}
-                    </span>
-                  </div>
-                )}
               </div>
             </div>
           </div>

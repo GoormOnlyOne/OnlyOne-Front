@@ -20,6 +20,7 @@ import ScheduleList from '../../components/domain/meeting/ScheduleList';
 import ParticipantInfo from '../../components/domain/meeting/ParticipantInfo';
 
 export const ComponentGallery = () => {
+  
   // 모달
   const [isDefaultModalOpen, setIsDefaultModalOpen] = useState(true);
 

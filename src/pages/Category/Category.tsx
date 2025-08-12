@@ -1,26 +1,122 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 
 import CategorySection from '../../components/domain/category/CategorySection';
 import MeetingList from '../../components/domain/meeting/MeetingList';
+import MeetingCard from '../../components/domain/meeting/MeetingCard';
+import EmptyState from '../../components/domain/search/EmptyState';
+import apiClient from '../../api/client';
 import ScrollToTopButton from '../../components/common/ScrollToTopButton';
 import AddressSelector, {
   type AddressData,
 } from '../../components/common/AddressSelector';
 import TabBar from '../../components/common/TabBar';
 import type { TabItem } from '../../components/common/TabBar';
+import Loading from '../../components/common/Loading';
 
 export const Category = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const selectedCategoryFromUrl = searchParams.get('select'); // URL에서 'select' 파라미터 읽기
   const [activeTab, setActiveTab] = useState<string>('interest');
+  // URL에서 카테고리가 전달되면 사용, 없으면 기본값 'CULTURE'
+  const [selectedInterest, setSelectedInterest] = useState<string | null>(
+    selectedCategoryFromUrl || 'CULTURE',
+  );
+  const [meetings, setMeetings] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [locationMeetings, setLocationMeetings] = useState<any[]>([]);
+  const [locationLoading, setLocationLoading] = useState(false);
   const [address, setAddress] = useState<AddressData>({
-    city: '',
-    district: '',
-    isComplete: false,
+    city: '서울',
+    district: '종로구',
+    isComplete: true,
   });
 
   const handleAddressChange = (address: AddressData) => {
     setAddress(address);
-    console.log(address);
+    console.log('주소 변경:', address);
+    if (address.isComplete) {
+      loadMeetingsByLocation(address.city, address.district);
+    }
   };
+
+  const handleInterestChange = (categoryId: string | string[]) => {
+    const selectedId =
+      typeof categoryId === 'string' ? categoryId : categoryId[0];
+    setSelectedInterest(selectedId);
+    console.log('선택된 관심사:', selectedId);
+
+    // URL에 선택된 카테고리 반영
+    const newSearchParams = new URLSearchParams(searchParams);
+    newSearchParams.set('select', selectedId);
+    setSearchParams(newSearchParams);
+
+    loadMeetingsByCategory(selectedId);
+  };
+
+  // 카테고리 ID를 숫자로 변환하는 함수 (새로운 Category enum 대응)
+  const getCategoryNumericId = (categoryId: string): number => {
+    const categoryMap: { [key: string]: number } = {
+      CULTURE: 1,
+      EXERCISE: 2,
+      TRAVEL: 3,
+      MUSIC: 4,
+      CRAFT: 5,
+      SOCIAL: 6,
+      LANGUAGE: 7,
+      FINANCE: 8,
+    };
+    return categoryMap[categoryId] || 1;
+  };
+
+  const loadMeetingsByCategory = async (categoryId: string) => {
+    setLoading(true);
+    try {
+      const interestId = getCategoryNumericId(categoryId);
+      const response = await apiClient.get(`/search/interests?${interestId}`, {
+        params: { interestId, page: 0, size: 20 },
+      });
+      if (response.success) {
+        setMeetings(response.data);
+      }
+    } catch (error) {
+      console.error('관심사별 모임 조회 실패:', error);
+      setMeetings([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadMeetingsByLocation = async (city: string, district: string) => {
+    setLocationLoading(true);
+    try {
+      const response = await apiClient.get(`/search/locations`, {
+        params: { city, district, page: 0, size: 20 },
+      });
+      console.log('지역별 모임 조회 응답:', response);
+      if (response.success) {
+        setLocationMeetings(response.data);
+      } else {
+        setLocationMeetings([]);
+      }
+    } catch (error) {
+      console.error('지역별 모임 조회 실패:', error);
+      setLocationMeetings([]);
+    } finally {
+      setLocationLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (selectedInterest) {
+      loadMeetingsByCategory(selectedInterest);
+    }
+    // 초기 지역별 모임 로드
+    if (address.isComplete) {
+      loadMeetingsByLocation(address.city, address.district);
+    }
+  }, []);
 
   const handleTabChange = (tabId: string) => {
     setActiveTab(tabId);
@@ -42,13 +138,29 @@ export const Category = () => {
           <div className="px-4 py-6">
             <CategorySection
               mode="single-select"
-              onCategoryChange={categoryId => {
-                console.log('선택된 카테고리:', categoryId);
-              }}
-              defaultSelected="culture"
+              onCategoryChange={handleInterestChange}
+              initialValue={(selectedCategoryFromUrl as any) || 'CULTURE'}
             />
           </div>
-          <MeetingList />
+
+          {/* 모임 리스트 */}
+          <div className="px-4 py-6">
+            {loading ? (
+              <Loading overlay text="로딩 중..." />
+            ) : meetings.length > 0 ? (
+              <div className="space-y-4">
+                {meetings.map(meeting => (
+                  <MeetingCard key={meeting.clubId} meeting={meeting} />
+                ))}
+              </div>
+            ) : (
+              <EmptyState
+                title="해당 관심사의 모임이 없습니다"
+                description="다른 관심사를 선택해보시거나 새로운 모임을 만들어보세요"
+                showCreateButton={true}
+              />
+            )}
+          </div>
         </>
       ),
     },
@@ -65,7 +177,25 @@ export const Category = () => {
               className="mb-4"
             />
           </div>
-          <MeetingList />
+
+          {/* 지역별 모임 리스트 */}
+          <div className="px-4 py-6">
+            {locationLoading ? (
+              <Loading overlay text="로딩 중..." />
+            ) : locationMeetings.length > 0 ? (
+              <div className="space-y-4">
+                {locationMeetings.map(meeting => (
+                  <MeetingCard key={meeting.clubId} meeting={meeting} />
+                ))}
+              </div>
+            ) : (
+              <EmptyState
+                title={`${address.city} ${address.district}에 해당하는 모임이 없습니다`}
+                description="다른 지역을 선택해보시거나 새로운 모임을 만들어보세요"
+                showCreateButton={true}
+              />
+            )}
+          </div>
         </>
       ),
     },

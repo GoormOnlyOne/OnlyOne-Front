@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { kakaoLogin } from '../utils/kakaoAuth';
+import logo from '../assets/logo.png';
+import Loading from '../components/common/Loading';
 
 export const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -13,7 +15,6 @@ export const Login = () => {
   const handleKakaoLogin = () => {
     setIsLoading(true);
     try {
-      // 카카오 OAuth 로그인 시작
       kakaoLogin();
     } catch (error) {
       console.error('카카오 로그인 실행 중 오류:', error);
@@ -22,39 +23,41 @@ export const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-blue-50 to-white px-4 overflow-hidden">
-      {/* 로고 영역 */}
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b bg-neutral-50 px-4 overflow-hidden">
+      {isLoading && <Loading overlay text="카카오로 이동 중..." />}
+      {/* 로고 + 문구 */}
       <div
-        className={`flex-1 flex items-center justify-center transition-all duration-700 ${
-          isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+        className={`w-full max-w-sm text-center transition-all duration-700 ${
+          isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'
         }`}
       >
-        <div className="text-center">
-          {/* 아이콘 + 텍스트 조합 */}
-          <div className="mb-4">
-            <div className="w-24 h-24 bg-blue-600 rounded-3xl flex items-center justify-center mx-auto shadow-lg">
-              <i className="ri-group-fill text-white text-5xl"></i>
-            </div>
-          </div>
-
-          <h1 className="text-4xl font-bold text-gray-800 mb-2">벗킷</h1>
-          <p className="text-gray-600 text-sm">함께하는 즐거움, 새로운 만남</p>
-        </div>
+        <img
+          src={logo}
+          alt="서비스 로고"
+          className="w-36 h-36 sm:w-40 sm:h-40 object-contain mx-auto block drop-shadow-md select-none"
+          decoding="async"
+          loading="eager"
+          draggable={false}
+        />
+        {/* 이미지-텍스트 간격 ↑ 여기서 조절 */}
+        <p className="mt-6 text-gray-600 text-lg">
+          함께하는 즐거움, 새로운 만남
+        </p>
       </div>
 
       {/* 로그인 버튼 영역 */}
       <div
-        className={`w-full max-w-sm pb-16 transition-all duration-700 delay-300 ${
-          isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+        className={`w-full max-w-sm pb-16 mt-70 transition-all duration-700 delay-300 ${
+          isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-3'
         }`}
       >
         <button
           onClick={handleKakaoLogin}
           disabled={isLoading}
-          className="w-full bg-[#FEE500] hover:bg-[#FDD835] active:bg-[#F9D71C] text-black font-medium py-4 px-6 rounded-xl flex items-center justify-center space-x-3 transition-all shadow-md hover:shadow-lg disabled:opacity-70"
+          className="w-full bg-[#FEE500] hover:bg-[#FDD835] active:bg-[#F9D71C] text-black font-medium py-4 px-6 rounded-xl flex items-center justify-center space-x-3 transition-all shadow-md hover:shadow-lg disabled:opacity-70 cursor-pointer disabled:cursor-not-allowed"
         >
           {isLoading ? (
-            <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin" />
+            <Loading size="sm" className="!text-black" />
           ) : (
             <>
               <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">

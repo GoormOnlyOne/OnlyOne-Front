@@ -7,7 +7,7 @@ export interface ScheduleFormData {
   meetingTime: string;
   location: string;
   costPerPerson: number;
-  capacity: number;
+  userLimit: number;
 }
 
 export interface InitialData {
@@ -16,7 +16,7 @@ export interface InitialData {
   meetingTime?: string;
   location?: string;
   costPerPerson?: number;
-  capacity?: number;
+  userLimit?: number;
 }
 
 interface ScheduleFormProps {
@@ -38,7 +38,7 @@ export const ScheduleForm = ({
     meetingTime: '',
     location: '',
     costPerPerson: 0,
-    capacity: 1,
+    userLimit: 1,
   });
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -85,9 +85,9 @@ export const ScheduleForm = ({
     onFormChange('costPerPerson', Math.min(value, 1000000));
   };
 
-  const handleCapacityChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleUserLimitChange = (e: ChangeEvent<HTMLInputElement>) => {
     const value = parseInt(e.target.value.replace(/[^0-9]/g, '')) || 1;
-    onFormChange('capacity', Math.max(1, Math.min(value, 100)));
+    onFormChange('userLimit', Math.max(1, Math.min(value, 100)));
   };
 
   const handleDateChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -127,8 +127,8 @@ export const ScheduleForm = ({
     formData.meetingTime !== '' &&
     formData.location.trim().length >= 1 &&
     formData.costPerPerson >= 0 &&
-    formData.capacity >= 1 &&
-    formData.capacity <= 100;
+    formData.userLimit >= 1 &&
+    formData.userLimit <= 100;
 
   const formatNumber = (num: number) => {
     return num.toLocaleString('ko-KR');
@@ -273,8 +273,8 @@ export const ScheduleForm = ({
               <div className="relative">
                 <input
                   type="text"
-                  value={formData.capacity}
-                  onChange={handleCapacityChange}
+                  value={formData.userLimit}
+                  onChange={handleUserLimitChange}
                   placeholder="정모 인원을 설정해주세요."
                   className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   required
@@ -297,7 +297,7 @@ export const ScheduleForm = ({
                 className={`w-full py-3 px-4 rounded-lg font-medium transition-colors focus:ring-2 focus:ring-offset-2 
                   ${
                     isFormValid
-                      ? 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500'
+                      ? 'bg-brand-primary text-white hover:bg-brand-secondary focus:ring-brand-secondary'
                       : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                   }`}
               >
