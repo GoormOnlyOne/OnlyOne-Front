@@ -2,7 +2,9 @@ import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import MeetingFeedGrid from '../../components/domain/meeting/MeetingFeedGrid';
 
-export const MeetingFeed: React.FC = () => {
+type Props = { readOnly?: boolean };
+
+export const MeetingFeed: React.FC<Props> = ({ readOnly = false}) => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   if (!id) return null;
@@ -10,7 +12,7 @@ export const MeetingFeed: React.FC = () => {
   return (
     <div className="relative">
       {/* 그리드 + 무한 스크롤; clubId prop 전달 */}
-      <MeetingFeedGrid clubId={id} />
+      <MeetingFeedGrid clubId={id} readOnly={readOnly} />
 
       {/* 등록 버튼: 항상 고정, 피드 위에 */}
       <button

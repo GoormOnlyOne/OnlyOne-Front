@@ -28,7 +28,7 @@ export const MeetingDetail = () => {
   }, [meetingId]);
 
   const handleTabChange = (tabId: string) => {
-    if (clubRole === 'GUEST' && (tabId === 'feed' || tabId === 'chat')) {
+    if (clubRole === 'GUEST' && tabId === 'chat') {
       alert('모임에 가입해야 볼 수 있습니다.');
       return false; // 탭 변경 방지
     }
@@ -45,7 +45,7 @@ export const MeetingDetail = () => {
     {
       id: 'feed',
       label: '게시판',
-      content: <MeetingFeed />,
+      content: <MeetingFeed readOnly={clubRole ==='GUEST'}/>
     },
     {
       id: 'chat',
