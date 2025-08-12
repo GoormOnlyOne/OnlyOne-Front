@@ -252,7 +252,7 @@ export const Signup = () => {
               flex-1 px-6 py-3 rounded-lg font-medium transition-colors
               ${
                 currentStep === totalSteps
-                  ? 'bg-blue-600 text-white hover:bg-blue-700'
+                  ? 'bg-[var(--color-brand-primary)] text-white hover:bg-[color-mix(in srgb, var(--color-brand-primary) 90%, black)]'
                   : 'bg-brand-primary text-white hover:brand-secondary'
               }
               disabled:opacity-50 disabled:cursor-not-allowed

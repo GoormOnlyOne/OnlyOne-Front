@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
-import clsx from 'clsx';
 import ScrollToTopButton from '../../components/common/ScrollToTopButton';
 import { useNavigate } from 'react-router-dom';
 import { showApiErrorToast } from '../../components/common/Toast/ToastProvider';
 import apiClient from '../../api/client';
-import Loading from '../../components/common/Loading';
+import ListCard from '../../components/common/ListCard';
+import { Wallet } from 'lucide-react'; // 충전 아이콘
 
 interface WalletTransactionResponse {
   type: 'INCOMING' | 'OUTGOING' | 'CHARGE';
@@ -20,7 +20,7 @@ interface WalletTransaction {
   title: string;
   amount: number;
   status: 'COMPLETED' | 'FAILED';
-  main_image: string;
+  main_image: string | React.ReactNode; // 아이콘도 받을 수 있도록 타입 확장
   created_at: Date;
 }
 
@@ -35,8 +35,10 @@ const WalletHistory = ({ type }: WalletHistoryProps) => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const getFilterParam = (type: string): 'ALL' | 'CHARGE' | 'TRANSACTION' => {
-    switch (type) {
+  const getFilterParam = (
+    t: WalletHistoryProps['type'],
+  ): 'ALL' | 'CHARGE' | 'TRANSACTION' => {
+    switch (t) {
       case 'all':
         return 'ALL';
       case 'charge':
@@ -48,30 +50,58 @@ const WalletHistory = ({ type }: WalletHistoryProps) => {
     }
   };
 
-  const fetchWalletTransactions = async (filter: string) => {
+  const withBase = (url?: string) => {
+    if (!url) return '';
+    if (/^https?:\/\//i.test(url)) return url;
+    const BASE = import.meta?.env?.VITE_IMAGE_BASE_URL || '';
+    return BASE ? `${BASE}${url}` : url;
+  };
+
+  const ChargeIcon = () => (
+    <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
+      <Wallet className="w-6 h-6 text-[var(--color-brand-primary)]" />
+    </div>
+  );
+
+  const getTransactionImage = (
+    transactionType: 'INCOMING' | 'OUTGOING' | 'CHARGE',
+    mainImage: string,
+  ) => {
+    if (transactionType === 'CHARGE') {
+      return <ChargeIcon />;
+    }
+    return withBase(mainImage);
+  };
+
+  const fetchWalletTransactions = async (
+    filter: 'ALL' | 'CHARGE' | 'TRANSACTION',
+  ) => {
     try {
       setLoading(true);
 
       const response = await apiClient.get<{
         success: boolean;
-        data: { userWalletTransactionList?: WalletTransactionResponse[] };
+        data?: { userWalletTransactionList?: WalletTransactionResponse[] };
       }>('/users/wallet', { params: { filter } });
 
-      const list = response.data.userWalletTransactionList ?? [];
+      const list =
+        response.data?.data?.userWalletTransactionList ??
+        (response as any).data?.userWalletTransactionList ??
+        [];
 
-      // API 응답을 컴포넌트에서 사용하는 형태로 변환
       const transformed: WalletTransaction[] = list.map(
         ({ type, title, amount, status, mainImage, createdAt }) => ({
           type,
           title,
           amount,
           status,
-          main_image: mainImage,
+          // CHARGE는 커스텀 아이콘, 나머지는 API 응답 이미지 사용
+          main_image: getTransactionImage(type, mainImage),
           created_at: new Date(createdAt),
         }),
       );
+      console.log(transformed);
 
-      // ③ 상태 업데이트
       setWalletTransactions(transformed);
     } catch (err: any) {
       showApiErrorToast(err);
@@ -85,10 +115,11 @@ const WalletHistory = ({ type }: WalletHistoryProps) => {
   useEffect(() => {
     const filter = getFilterParam(type);
     fetchWalletTransactions(filter);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [type]);
 
-  const getTransactionTypeText = (type: string) => {
-    switch (type) {
+  const getTransactionTypeText = (t: WalletTransaction['type']) => {
+    switch (t) {
       case 'INCOMING':
         return '정산';
       case 'OUTGOING':
@@ -100,14 +131,16 @@ const WalletHistory = ({ type }: WalletHistoryProps) => {
     }
   };
 
-  const getTransactionTypeColor = (type: string) => {
-    switch (type) {
+  const getTransactionTypeColor = (t: WalletTransaction['type']) => {
+    const baseStyle =
+      'inline-flex items-center px-2.5 py-0.5 rounded-full text-medium font-medium';
+    switch (t) {
       case 'INCOMING':
-        return 'text-green-600 bg-green-50';
+        return `${baseStyle} bg-[var(--color-complement-blue)]/10 text-[var(--color-complement-blue)] ring-1 ring-[var(--color-complement-blue)]/20`;
       case 'OUTGOING':
-        return 'text-red-600 bg-red-50';
+        return `${baseStyle} bg-red-500/10 text-red-600 ring-1 ring-red-500/20`;
       case 'CHARGE':
-        return 'text-blue-600 bg-blue-50';
+        return `${baseStyle} bg-[var(--color-brand-primary)]/10 text-[var(--color-brand-primary)] ring-1 ring-[var(--color-brand-primary)]/20`;
       default:
         return 'text-gray-600 bg-gray-50';
     }
@@ -122,78 +155,46 @@ const WalletHistory = ({ type }: WalletHistoryProps) => {
       minute: '2-digit',
     }).format(date);
 
+  const listItems = walletTransactions.map(tx => ({
+    id: tx.created_at.getTime(),
+    title: tx.title,
+    subtitle: formatDate(tx.created_at),
+    image: tx.main_image, // 문자열 URL 또는 React 컴포넌트
+    badge: {
+      text: getTransactionTypeText(tx.type),
+      color: getTransactionTypeColor(tx.type),
+    },
+    rightContent: (
+      <div className="font-semibold text-medium text-gray-900">
+        {tx.type === 'OUTGOING' ? '-' : '+'}
+        {tx.amount.toLocaleString()} P
+      </div>
+    ),
+  }));
+
+  const getTitle = () => {
+    switch (type) {
+      case 'all':
+        return '전체 내역';
+      case 'charge':
+        return '충전 내역';
+      case 'settlement':
+        return '정산 내역';
+      default:
+        return '';
+    }
+  };
+
   return (
-    <div className="px-4 pb-20 relative">
-      {loading && <Loading overlay text="불러오는 중..." />}
-
-      <h2 className="text-base font-semibold text-gray-800 leading-snug mb-2">
-        {type === 'all' && '전체 내역'}
-        {type === 'charge' && '충전 내역'}
-        {type === 'settlement' && '정산 내역'}
-      </h2>
-
-      {walletTransactions.length === 0 && !loading ? (
-        <div className="text-center py-8">
-          <p className="text-gray-500">거래 내역이 없습니다.</p>
-        </div>
-      ) : (
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-          {walletTransactions.map((tx, idx) => (
-            <div
-              key={idx}
-              className={clsx(
-                'flex items-center justify-between px-4 py-3 border-b border-gray-100 last:border-b-0',
-              )}
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden flex-shrink-0">
-                  {tx.main_image ? (
-                    <img
-                      src={tx.main_image}
-                      alt="거래 이미지"
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <i className="ri-wallet-3-fill text-gray-400" />
-                  )}
-                </div>
-                <div className="flex flex-col">
-                  <div className="text-base font-medium text-gray-900">
-                    {tx.title}
-                  </div>
-                  <div className="text-sm text-gray-500">
-                    {formatDate(tx.created_at)}
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex flex-col items-end gap-1">
-                <div
-                  className={clsx(
-                    'px-2 py-1 rounded-full font-medium text-sm',
-                    getTransactionTypeColor(tx.type),
-                  )}
-                >
-                  {getTransactionTypeText(tx.type)}
-                </div>
-                <div className="font-semibold text-lg text-gray-900">
-                  {tx.type === 'OUTGOING' ? '-' : '+'}
-                  {tx.amount} P
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {loading && !walletTransactions.length && (
-        <div className="flex justify-center py-8">
-          <Loading text="불러오는 중..." />
-        </div>
-      )}
-
+    <>
+      <ListCard
+        title={getTitle()}
+        items={listItems}
+        emptyMessage="거래 내역이 없습니다."
+        loading={loading}
+      />
       <ScrollToTopButton />
-    </div>
+    </>
   );
 };
 

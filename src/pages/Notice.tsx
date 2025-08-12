@@ -1,7 +1,17 @@
 import { useEffect, useState } from 'react';
 import { getNotifications, deleteNotification } from '../api/notification';
 import type { Notification as NotificationApi } from '../types/notification';
+import ListCard from '../components/common/ListCard';
 import Loading from '../components/common/Loading';
+import {
+  MessageCircle,
+  DollarSign,
+  Heart,
+  MessageSquare,
+  Bell,
+  Trash2,
+  Repeat2, // 리피드 아이콘 추가
+} from 'lucide-react';
 
 export const Notice = () => {
   const [notifications, setNotifications] = useState<NotificationApi[]>([]);
@@ -13,8 +23,9 @@ export const Notice = () => {
     const fetchNotifications = async () => {
       try {
         setLoading(true);
-        // 임시로 userId=1로 설정 (실제로는 로그인한 사용자 ID 사용)
-        const response = await getNotifications({ userId: 1 });
+
+        const response = await getNotifications();
+        console.log(response);
 
         // 첫 페이지 조회 시 모든 알림을 읽음 처리로 UI 업데이트
         const readNotifications = response.notifications.map(notification => ({
@@ -24,7 +35,6 @@ export const Notice = () => {
 
         setNotifications(readNotifications);
         setUnreadCount(0); // 모든 알림이 읽음 처리되었으므로 0으로 설정
-        
       } catch {
         setError('알림을 불러오는데 실패했습니다.');
       } finally {
@@ -65,12 +75,146 @@ export const Notice = () => {
     }
   };
 
+  // 알림 타입별 아이콘 컴포넌트 생성
+  const getNotificationIcon = (type: string) => {
+    const iconSize = 'w-6 h-6';
+    const containerBase =
+      'w-12 h-12 rounded-full flex items-center justify-center';
+
+    switch (type) {
+      case 'CHAT':
+        return (
+          <div
+            className={`${containerBase} bg-[var(--color-brand-primary)]/20`}
+          >
+            <MessageCircle
+              className={`${iconSize} text-[var(--color-brand-primary)]`}
+            />
+          </div>
+        );
+      case 'SETTLEMENT':
+        return (
+          <div
+            className={`${containerBase} bg-[var(--color-brand-primary)]/20`}
+          >
+            <DollarSign
+              className={`${iconSize} text-[var(--color-brand-primary)]`}
+            />
+          </div>
+        );
+      case 'LIKE':
+        return (
+          <div
+            className={`${containerBase} bg-[var(--color-brand-primary)]/20`}
+          >
+            <Heart
+              className={`${iconSize} text-[var(--color-brand-primary)]`}
+            />
+          </div>
+        );
+      case 'COMMENT':
+        return (
+          <div
+            className={`${containerBase} bg-[var(--color-brand-primary)]/20`}
+          >
+            <MessageSquare
+              className={`${iconSize} text-[var(--color-brand-primary)]`}
+            />
+          </div>
+        );
+      case 'REFEED':
+        return (
+          <div
+            className={`${containerBase} bg-[var(--color-brand-primary)]/20`}
+          >
+            <Repeat2
+              className={`${iconSize} text-[var(--color-brand-primary)]`}
+            />
+          </div>
+        );
+      default:
+        return (
+          <div
+            className={`${containerBase} bg-[var(--color-brand-primary)]/20`}
+          >
+            <Bell className={`${iconSize} text-[var(--color-brand-primary)]`} />
+          </div>
+        );
+    }
+  };
+
+  // 알림 타입별 한국어 텍스트 반환
+  const getNotificationTypeText = (type: string) => {
+    switch (type) {
+      case 'CHAT':
+        return '채팅';
+      case 'SETTLEMENT':
+        return '정산';
+      case 'LIKE':
+        return '좋아요';
+      case 'COMMENT':
+        return '댓글';
+      case 'REFEED': // 리피드 텍스트 추가
+        return '리피드';
+      default:
+        return '알림';
+    }
+  };
+
+  const getNotificationTypeColor = (type: string) => {
+    const baseStyle =
+      'inline-flex items-center px-2.5 py-0.5 rounded-full text-medium font-medium';
+    switch (type) {
+      case 'CHAT':
+        return `${baseStyle} bg-[var(--color-brand-primary)]/10 text-[var(--color-brand-primary)] ring-1 ring-[var(--color-brand-primary)]/20`;
+      case 'SETTLEMENT':
+        return `${baseStyle} bg-red-500/10 text-red-600 ring-1 ring-red-500/20`;
+      case 'LIKE':
+        return `${baseStyle} bg-[var(--color-complement-blue)]/10 text-[var(--color-complement-blue)] ring-1 ring-[var(--color-complement-blue)]/20`;
+      case 'COMMENT':
+        return `${baseStyle} bg-[var(--color-complement-teal)]/10 text-[var(--color-complement-teal)] ring-1 ring-[var(--color-complement-teal)]/20`;
+      case 'REFEED':
+        return `${baseStyle} bg-[var(--color-brand-secondary)]/10 text-[var(--color-brand-secondary)] ring-1 ring-[var(--color-brand-secondary)]/20`;
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const formatDate = (date: string) => {
+    return new Date(date).toLocaleString('ko-KR');
+  };
+
+  const listItems = notifications.map(notification => ({
+    id: notification.notificationId,
+    title: notification.content,
+    subtitle: formatDate(notification.createdAt),
+    image: getNotificationIcon(notification.type),
+    badge: {
+      text: getNotificationTypeText(notification.type), // 한국어 텍스트 사용
+      color: getNotificationTypeColor(notification.type),
+    },
+    rightContent: (
+      <div className="flex items-center gap-2">
+        {/* 휴지통 아이콘 버전 */}
+        <button
+          onClick={e => handleDelete(notification, e)}
+          className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors duration-200"
+          aria-label="알림 삭제"
+        >
+          <Trash2 className="w-4 h-4" />
+        </button>
+
+        {!notification.isRead && (
+          <div className="w-2 h-2 bg-blue-500 rounded-full" />
+        )}
+      </div>
+    ),
+    onClick: () => handleClick(notification),
+  }));
+
   return (
     <div className="relative min-h-[160px]" aria-busy={loading}>
-      {' '}
-      {/* ★ 변경 */}
-      {loading && <Loading overlay text="알림을 불러오는 중..." />}{' '}
-      {/* ★ 변경 */}
+      {loading && <Loading overlay text="알림을 불러오는 중..." />}
       {/* 에러 배너 */}
       {error && (
         <div className="mb-3 text-red-700 bg-red-50 border border-red-200 rounded-md px-3 py-2">
@@ -85,57 +229,12 @@ export const Notice = () => {
           </p>
         </div>
       )}
-      {/* 빈 상태 */}
-      {notifications.length === 0 && !loading && !error ? (
-        <div className="flex justify-center items-center py-8">
-          <div className="text-gray-500">알림이 없습니다.</div>
-        </div>
-      ) : (
-        <div className="space-y-2">
-          {notifications.map(notification => (
-            <div
-              key={notification.notificationId}
-              onClick={() => handleClick(notification)}
-              className={`p-4 mb-0 border-b border-gray-200 cursor-pointer hover:bg-neutral-100 ${
-                notification.isRead ? 'bg-neutral-50 border-blue-200' : ''
-              }`}
-            >
-              <div className="flex justify-between items-start mb-2">
-                <span
-                  className={`px-2 py-1 rounded text-xs font-medium ${
-                    notification.type === 'CHAT'
-                      ? 'bg-blue-100 text-blue-800'
-                      : notification.type === 'SETTLEMENT'
-                        ? 'bg-green-100 text-green-800'
-                        : notification.type === 'LIKE'
-                          ? 'bg-red-100 text-red-800'
-                          : notification.type === 'COMMENT'
-                            ? 'bg-purple-100 text-purple-800'
-                            : 'bg-gray-100 text-gray-800'
-                  }`}
-                >
-                  {notification.type}
-                </span>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-gray-500">
-                    {new Date(notification.createdAt).toLocaleString('ko-KR')}
-                  </span>
-                  <button
-                    onClick={e => handleDelete(notification, e)}
-                    className="text-red-500 hover:text-red-700 text-sm font-medium"
-                  >
-                    삭제
-                  </button>
-                </div>
-              </div>
-              <p className="text-sm text-gray-700">{notification.content}</p>
-              {!notification.isRead && (
-                <div className="w-2 h-2 bg-neutral-50 rounded-full mt-2" />
-              )}
-            </div>
-          ))}
-        </div>
-      )}
+      <ListCard
+        className="mt-2"
+        items={listItems}
+        emptyMessage="알림이 없습니다."
+        loading={loading}
+      />
     </div>
   );
 };
