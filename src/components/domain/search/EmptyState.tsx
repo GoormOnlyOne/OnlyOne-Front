@@ -19,7 +19,9 @@ export default function EmptyState({
         {description}
       </p>
 
-      {showCreateButton && <CreateMeetingCard />}
+      <div className="w-full">
+        {showCreateButton && <CreateMeetingCard />}
+      </div>
     </div>
   );
 }

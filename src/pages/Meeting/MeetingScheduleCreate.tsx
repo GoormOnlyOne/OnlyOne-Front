@@ -43,7 +43,7 @@ export const MeetingScheduleCreate = () => {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <div className="max-w-2xl mx-auto">
+      <div className="w-full">
         <ScheduleForm mode="create" onSubmit={handleSubmit} />
       </div>
     </div>

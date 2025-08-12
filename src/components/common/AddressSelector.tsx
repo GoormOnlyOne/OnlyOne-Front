@@ -109,9 +109,15 @@ const AddressSelector: React.FC<AddressSelectorProps> = ({
       );
 
       if (targetButton) {
-        targetButton.scrollIntoView({
+        const buttonRect = targetButton.getBoundingClientRect();
+        const containerRect = container.getBoundingClientRect();
+        const scrollTop = container.scrollTop;
+        
+        const targetScrollTop = scrollTop + buttonRect.top - containerRect.top;
+        
+        container.scrollTo({
+          top: targetScrollTop,
           behavior: 'smooth',
-          block: 'start',
         });
       }
     },
