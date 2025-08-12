@@ -21,9 +21,9 @@ const MeetingFeedCreate = () => {
         feedUrls: data.feedUrls || [],
         content: data.content,
       });
-      // 성공 시 모임 상세 페이지로 이동
+      // 성공 시 모임 상세 페이지로 이동 (새로고침 강제를 위해 timestamp 추가)
       globalToast('피드를 생성했습니다.', 'success', 2000);
-      navigate(`/meeting/${meetingId}`);
+      navigate(`/meeting/${meetingId}?refresh=${Date.now()}`, { replace: true });
     } catch (error) {
       console.error('피드 생성실패:', error);
       showApiErrorToast(error);

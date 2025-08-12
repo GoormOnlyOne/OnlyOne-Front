@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import apiClient from '../../../api/client';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import EmptyState from '../search/EmptyState';
 import Loading from '../../common/Loading';
 import { showToast } from '../../common/Toast/ToastProvider';
@@ -42,6 +42,7 @@ const formatCount = (n: number) =>
   }).format(n);
 
 const MeetingFeedGrid: React.FC<MeetingFeedGridProps> = ({ clubId, readOnly = false }) => {
+  const [searchParams] = useSearchParams();
   const [items, setItems] = useState<FeedItem[]>([]);
   const [page, setPage] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -65,9 +66,13 @@ const MeetingFeedGrid: React.FC<MeetingFeedGridProps> = ({ clubId, readOnly = fa
         `/clubs/${clubId}/feeds?page=${page}&limit=20`,
       )
       .then(response => {
-        const content = response?.data?.data?.content ?? [];
-
-        console.log('content: ', content);
+        console.log('Full API response:', response);
+        console.log('response.data:', response?.data);
+        
+        // 실제 API 구조에 맞게 수정
+        const content = response?.data?.content ?? [];
+        
+        console.log('Extracted content:', content);
         
         if (page === 0) {
           setFirstLoaded(true);
@@ -100,10 +105,34 @@ const MeetingFeedGrid: React.FC<MeetingFeedGridProps> = ({ clubId, readOnly = fa
       });
   }, [clubId, page, hasMore]);
 
+  // 데이터 초기화 함수
+  const resetFeedData = useCallback(() => {
+    setItems([]);
+    setPage(0);
+    setHasMore(true);
+    setFirstLoaded(false);
+    setFirstPageEmpty(false);
+    loadingRef.current = false;
+  }, []);
+
   useEffect(() => {
     loadMore();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // refresh 파라미터가 변경되면 데이터를 새로고침
+  useEffect(() => {
+    const refreshParam = searchParams.get('refresh');
+    if (refreshParam) {
+      console.log('Refreshing feed data due to refresh param:', refreshParam);
+      resetFeedData();
+      // 약간의 딜레이 후 로드 (상태 초기화 완료 보장)
+      setTimeout(() => {
+        loadMore();
+      }, 100);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams.get('refresh')]);
 
   useEffect(() => {
     const handleScroll = (e: Event) => {
