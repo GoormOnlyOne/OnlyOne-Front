@@ -7,6 +7,7 @@ import apiClient from '../../api/client';
 import Modal from '../../components/common/Modal';
 import { Settings, Plus, MapPin, Users, Tag } from 'lucide-react';
 import Loading from '../../components/common/Loading';
+import { translateInterest } from '../../utils/interest';
 
 // API 응답 타입
 interface ClubDetailResponse {
@@ -173,7 +174,7 @@ const MeetingHome: React.FC = () => {
             </div>
             <div className="flex items-center gap-2 text-sm text-gray-600">
               <Tag className="w-4 h-4 text-brand-primary" />
-              <span>{meeting.category}</span>
+              <span>{translateInterest(meeting.category)}</span>
             </div>
             <div className="flex items-center gap-2 text-sm text-gray-600">
               <Users className="w-4 h-4 text-brand-primary" />
