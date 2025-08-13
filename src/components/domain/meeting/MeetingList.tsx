@@ -236,7 +236,7 @@ export default function MeetingList({
 
   // 전체/내 모드 렌더링
   return (
-    <div className="h-[calc(100vh-56px)] overflow-y-auto bg-gray-50 relative">
+    <div className="bg-gray-50 relative">
       {loading && meetings.length === 0 && (
         <Loading overlay text="로딩 중..." />
       )}
