@@ -34,7 +34,8 @@ interface Settlement {
 type ParticipatorsApi = { success: boolean; data: ParticipatorResponse[] };
 type SettlementsApi = {
   success: boolean;
-  data: { userSettlementList: SettlementResponse[] };
+  data: SettlementResponse[] | { userSettlementList: SettlementResponse[] };
+  userSettlementList?: SettlementResponse[];
 };
 
 export const ParticipationStatus: React.FC = () => {
@@ -64,8 +65,26 @@ export const ParticipationStatus: React.FC = () => {
           const res = await apiClient.get<SettlementsApi>(
             `/clubs/${meetingId}/schedules/${scheduleId}/settlements`,
           );
+          console.log('settlement API response: ', res);
+          
           if (!res.success) throw new Error('정산 목록 조회 실패');
-          const data = res.data?.data?.userSettlementList || [];
+          
+          // API 응답 구조에 따라 다양한 경로 시도
+          let data: SettlementResponse[] = [];
+          if (Array.isArray(res.data)) {
+            data = res.data;
+          } else if (res.data && typeof res.data === 'object' && 'userSettlementList' in res.data) {
+            const dataObj = res.data as { userSettlementList: SettlementResponse[] };
+            data = dataObj.userSettlementList || [];
+          } else if ('userSettlementList' in res) {
+            const resObj = res as any;
+            data = resObj.userSettlementList || [];
+          } else {
+            console.error('Unexpected settlement data structure:', res.data);
+          }
+          
+          console.log('extracted settlement data: ', data);
+          
           const transformed: Settlement[] = (data ?? []).map(
             ({ userId, nickname, profileImage, settlementStatus }: SettlementResponse) => ({
               userId,
@@ -74,7 +93,10 @@ export const ParticipationStatus: React.FC = () => {
               settlementStatus,
             }),
           );
+          
+          console.log('transformed settlements: ', transformed);
           setSettlements(transformed);
+          
         } else {
           // 참여자 리스트 조회
           const res = await apiClient.get<ParticipatorResponse[]>(
