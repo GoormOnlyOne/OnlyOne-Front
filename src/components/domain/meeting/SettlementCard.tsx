@@ -8,7 +8,7 @@ export default function SettlementCard() {
   };
 
   return (
-    <div className="bg-gradient-to-br from-[#FF6B6B] via-[#FF8E53] to-[#FF6B9D] rounded-2xl p-4 text-center shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.015] relative overflow-hidden">
+    <div className="bg-gradient-to-br from-brand-light via-brand-soft to-brand-warm rounded-2xl p-4 text-center shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.015] relative overflow-hidden border border-brand-warm/30">
       {/* 배경 장식 애니메이션 */}
       {/* <div className="absolute -top-2 -right-2 w-8 h-8 bg-white/30 rounded-full animate-ping"></div>
       <div
@@ -20,7 +20,7 @@ export default function SettlementCard() {
         style={{ animationDelay: '1s' }}
       ></div> */}
 
-      <div className="text-white relative z-10">
+      <div className="text-brand-deepest relative z-10">
         <div
           className="text-3xl mb-2 animate-bounce"
           style={{ animationDelay: '0.2s' }}
@@ -36,7 +36,7 @@ export default function SettlementCard() {
           아직 정산하지 않은 정기 모임을 확인해보세요
         </p>
         <button
-          className="bg-white text-[#FF6B6B] text-sm font-bold px-4 py-2 rounded-xl hover:bg-gray-100 transform hover:scale-[1.015] transition-all duration-200 shadow-md relative overflow-hidden"
+          className="bg-brand-primary text-white text-sm font-bold px-4 py-2 rounded-xl hover:bg-brand-secondary transform hover:scale-[1.015] transition-all duration-200 shadow-md relative overflow-hidden"
           onClick={onNavigateToSettlement}
         >
           <span className="relative z-10">⚡ 정산하러 가기</span>
