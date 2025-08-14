@@ -930,7 +930,7 @@ export const FeedList = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="z-10 bg-white px-4 pt-3 pb-2">
+      <div className="z-10 bg-white px-4 py-3">
         <SortChips value={sortMode} onChange={setSortMode} />
       </div>
       {/* 피드 리스트 */}
