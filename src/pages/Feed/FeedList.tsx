@@ -76,6 +76,8 @@ interface FeedItemProps {
 const FeedItem = ({ feed, onCommentClick, onLikeClick, onRefeedClick, onEditClick, onDeleteClick, onOriginalFeedClick }: FeedItemProps) => {
 	const [currentImageIndex, setCurrentImageIndex] = useState(0);
 	const [rootFeedImageIndex, setRootFeedImageIndex] = useState(0);
+  const hasParent = !!feed.parentFeed;
+  const hasRootImages = (feed.rootFeed?.imageUrls?.length ?? 0) > 0;
 
 	// 날짜 포맷팅 함수
 	const formatDate = (dateString: string) => {
@@ -150,9 +152,9 @@ const FeedItem = ({ feed, onCommentClick, onLikeClick, onRefeedClick, onEditClic
 						<div className="text-xs text-gray-500">
 							{formatDate(feed.created)}
 						</div>
-					</div>
+					</div>    
 				</div>
-				{(feed.feedMine && !feed.isRepost) && (
+				{(feed.feedMine) && (
 					<div className="flex gap-2">
 						<button
 							onClick={() => onEditClick(feed.feedId, feed.clubId)}
@@ -204,7 +206,7 @@ const FeedItem = ({ feed, onCommentClick, onLikeClick, onRefeedClick, onEditClic
 								}}
 							/>
 						) : (
-							<span className="text-gray-500">사진이 들어갑니다.</span>
+							<span className="text-gray-500">원본 피드가 삭제됐습니다.</span>
 						)}
 					</div>
 				)}
@@ -308,9 +310,9 @@ const FeedItem = ({ feed, onCommentClick, onLikeClick, onRefeedClick, onEditClic
 													}
 												}}
 											>
-												{feed.rootFeed.imageUrls.length > 0 ? (
+												{(hasParent && hasRootImages) ?   (
 													<img
-														src={feed.rootFeed.imageUrls[rootFeedImageIndex]}
+														src={feed.rootFeed!.imageUrls[rootFeedImageIndex]}
 														alt={`rootFeed 이미지 ${rootFeedImageIndex + 1}`}
 														className="w-full h-full object-cover"
 														onError={e => {
@@ -319,7 +321,7 @@ const FeedItem = ({ feed, onCommentClick, onLikeClick, onRefeedClick, onEditClic
 													/>
 												) : (
 													<span className="text-gray-500">
-														사진이 들어갑니다.
+														원본 피드가 삭제됐습니다.
 													</span>
 												)}
 											</div>
@@ -479,7 +481,7 @@ const FeedItem = ({ feed, onCommentClick, onLikeClick, onRefeedClick, onEditClic
 														/>
 													) : (
 														<span className="text-gray-500">
-															사진이 들어갑니다.
+															원본 피드가 삭제됐습니다.
 														</span>
 													)}
 												</div>
