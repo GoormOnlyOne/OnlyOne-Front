@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { clsx } from 'clsx';
 
 export interface TabItem {
@@ -17,6 +17,13 @@ const TabBar: React.FC<TabBarProps> = ({ tabs, defaultTab, onTabChange }) => {
   const [activeTab, setActiveTab] = useState<string>(
     defaultTab || tabs[0]?.id || '',
   );
+
+  // defaultTab prop이 변경될 때 activeTab 상태 업데이트
+  useEffect(() => {
+    if (defaultTab && defaultTab !== activeTab) {
+      setActiveTab(defaultTab);
+    }
+  }, [defaultTab]);
 
   const handleTabClick = useCallback(
     (tabId: string) => {
