@@ -17,7 +17,7 @@ interface MeetingListProps {
 // 백엔드의 "내 모임" 응답 타입 (mode === 'my')
 interface MyClubsResponse {
   clubResponseDtoList: Meeting[];
-  unsettledScheduleExist: boolean;
+  isUnsettledScheduleExist: boolean;
 }
 
 export default function MeetingList({
@@ -65,7 +65,8 @@ export default function MeetingList({
         });
 
         if (response.success) {
-          const { clubResponseDtoList, unsettledScheduleExist } = response.data;
+          const { clubResponseDtoList, isUnsettledScheduleExist } =
+            response.data;
           // 리스트 갱신
           if (isNewLoad) {
             setMeetings(clubResponseDtoList);
@@ -73,7 +74,7 @@ export default function MeetingList({
             setMeetings(prev => [...prev, ...clubResponseDtoList]);
           }
           // 정산 미완료 여부 세팅
-          setHasUnsettledPayments(!!unsettledScheduleExist);
+          setHasUnsettledPayments(!!isUnsettledScheduleExist);
 
           // 페이지네이션 판단 (백엔드가 사이즈 미만이면 끝으로 간주)
           if (clubResponseDtoList.length < size) {

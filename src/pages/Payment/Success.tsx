@@ -27,54 +27,84 @@ export function Success() {
 
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const paymentKey = searchParams.get('paymentKey');
-  const orderId = searchParams.get('orderId');
+  const paymentKey = searchParams.get('paymentKey') ?? '';
+  const orderId = searchParams.get('orderId') ?? '';
   const amount = Number(searchParams.get('amount') ?? 0);
 
+  // 결제 처리 + 재시도
   useEffect(() => {
     if (!paymentKey || !orderId || !amount) return;
 
-    async function processPaymentWithRetry() {
-      await apiClient.post<SavePaymentRequestDto>('/payments/success', {
-        orderId,
-        amount,
-      });
+    (async function processPaymentWithRetry() {
+      try {
+        // 1) 성공 콜백(사전 저장)
+        await apiClient.post<SavePaymentRequestDto>('/payments/success', {
+          orderId,
+          amount,
+        });
 
-      const maxRetries = 6;
-      let lastError: ApiError | null = null;
+        // 2) 승인 재시도 루프
+        const maxRetries = 6;
+        let lastError: ApiError | null = null;
 
-      for (let attempt = 1; attempt <= maxRetries; attempt++) {
-        try {
-          const res = await apiClient.post<ConfirmPaymentRequestDto>(
-            '/payments/confirm',
-            {
-              paymentKey,
-              orderId,
-              amount,
-            },
-          );
-          if (res.success) {
-            setIsConfirmed(true);
-            return;
+        for (let attempt = 1; attempt <= maxRetries; attempt++) {
+          try {
+            const res = await apiClient.post<ConfirmPaymentRequestDto>(
+              '/payments/confirm',
+              { paymentKey, orderId, amount },
+            );
+            if (res.success) {
+              setIsConfirmed(true);
+              setIsProcessing(false);
+              return;
+            }
+          } catch (err) {
+            lastError = err as ApiError;
+            console.warn(`Confirm attempt ${attempt} failed`, err);
+            if (attempt < maxRetries) await delay(5000);
           }
-        } catch (err) {
-          lastError = err as ApiError;
-          console.warn(`Confirm attempt ${attempt} failed`, err);
-          if (attempt < maxRetries) await delay(5000);
+        }
+
+        // 3) 최종 실패 처리: 에러 상태 세팅 + 실패 보고 API 호출
+        setErrorOccurred(lastError);
+        try {
+          await apiClient.post<ConfirmPaymentRequestDto>('/payments/fail', {
+            paymentKey,
+            orderId,
+            amount,
+          });
+        } catch (failErr) {
+          console.error('결제 실패 보고 API 호출 실패:', failErr);
+          // 실패 보고가 실패해도 UI 흐름은 계속
+        } finally {
+          setIsProcessing(false);
+        }
+      } catch (outerErr) {
+        // /payments/success 호출 자체가 실패한 경우도 최종 실패로 처리
+        console.error('사전 저장 처리 실패:', outerErr);
+        setErrorOccurred(outerErr as ApiError);
+        try {
+          await apiClient.post<ConfirmPaymentRequestDto>('/payments/fail', {
+            paymentKey,
+            orderId,
+            amount,
+          });
+        } catch (failErr) {
+          console.error('결제 실패 보고 API 호출 실패:', failErr);
+        } finally {
+          setIsProcessing(false);
         }
       }
-      setErrorOccurred(lastError);
-    }
-
-    processPaymentWithRetry();
+    })();
   }, [paymentKey, orderId, amount]);
 
-  // 결제 에러 처리
+  // 결제 에러 토스트 + 리다이렉트
   useEffect(() => {
     if (!errorOccurred) return;
     showApiErrorToast(errorOccurred);
     console.error('결제 최종 실패:', errorOccurred);
-    setTimeout(() => navigate('/mypage'), 1000);
+    const timer = setTimeout(() => navigate('/mypage'), 1000);
+    return () => clearTimeout(timer);
   }, [errorOccurred, navigate]);
 
   // 결제 성공 처리

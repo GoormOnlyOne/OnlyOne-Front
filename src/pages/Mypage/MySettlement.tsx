@@ -14,7 +14,7 @@ interface MySettlementResponse {
   scheduleId: number;
   amount: number;
   mainImage: string;
-  settlementStatus: 'REQUESTED' | 'COMPLETED';
+  settlementStatus: 'REQUESTED' | 'COMPLETED' | 'FAILED';
   title: string; // "모임이름: 정기모임이름" 형태
   createdAt: string;
 }
@@ -24,7 +24,7 @@ interface MySettlement {
   scheduleId: number;
   amount: number;
   mainImage: string;
-  settlementStatus: 'REQUESTED' | 'COMPLETED';
+  settlementStatus: 'REQUESTED' | 'COMPLETED' | 'FAILED';
   title: string;
   createdAt: Date;
 }
@@ -237,6 +237,19 @@ const MySettlement = () => {
                 }}
               >
                 정산하기
+              </button>
+            )}
+            {settlement.settlementStatus === 'FAILED' && (
+              <button
+                type="button"
+                className="flex-1 inline-flex items-center justify-center rounded-lg bg-brand-primary text-white text-sm font-semibold px-3 py-2 shadow-sm hover:brightness-110 active:brightness-95 mt-3"
+                onClick={e => {
+                  e.stopPropagation();
+                  setSelectedSettlement(settlement);
+                  setIsModalOpen(true);
+                }}
+              >
+                다시 정산하기
               </button>
             )}
             <button
