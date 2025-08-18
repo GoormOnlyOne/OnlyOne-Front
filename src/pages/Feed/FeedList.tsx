@@ -84,6 +84,8 @@ const FeedItem = ({
 }: FeedItemProps) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [rootFeedImageIndex, setRootFeedImageIndex] = useState(0);
+  const hasParent = !!feed.parentFeed;
+  const hasRootImages = (feed.rootFeed?.imageUrls?.length ?? 0) > 0;
 
   // 날짜 포맷팅 함수
   const formatDate = (dateString: string) => {
@@ -103,7 +105,7 @@ const FeedItem = ({
       hour12: false,
     });
 
-    return `$${dateStr} $${timeStr}`;
+    return `${dateStr} ${timeStr}`;
   };
 
   const handlePrevImage = () => {
@@ -133,122 +135,325 @@ const FeedItem = ({
   };
 
   return (
-    <div className="bg-gray-50 relative p-4">
-      <div className="mb-4">
-        <div
-          className={`rounded-2xl bg-white shadow-sm ${!feed.isRepost ? 'cursor-pointer hover:shadow-md transition-shadow' : ''}`}
-          onClick={
-            !feed.isRepost
-              ? e => {
-                  // 버튼 클릭이 아닌 경우에만 피드 상세로 이동
-                  if (!(e.target as Element).closest('button')) {
-                    e.stopPropagation();
-                    onOriginalFeedClick(feed.clubId, feed.feedId);
-                  }
+    <div className="px-4 pb-4">
+      <div
+        className={`rounded-2xl bg-white mb-4 shadow-sm ${!feed.isRepost ? 'cursor-pointer hover:shadow-md transition-shadow' : ''}`}
+        onClick={
+          !feed.isRepost
+            ? e => {
+                // 버튼 클릭이 아닌 경우에만 피드 상세로 이동
+                if (!(e.target as Element).closest('button')) {
+                  e.stopPropagation();
+                  onOriginalFeedClick(feed.clubId, feed.feedId);
                 }
-              : undefined
-          }
-        >
-          {/* 피드 작성자 정보 */}
-          <div className="flex items-center justify-between p-4 border-b border-gray-100">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
-                <img
-                  src={feed.profileImage || userProfile}
-                  className="w-10 h-10 rounded-full"
-                  alt="프로필"
-                />
-              </div>
-              <div>
-                <div className="text-sm font-medium">{feed.nickname}</div>
-                <div className="text-xs text-gray-500">
-                  {formatDate(feed.created)}
-                </div>
+              }
+            : undefined
+        }
+      >
+        {/* 피드 작성자 정보 */}
+        <div className="flex items-center justify-between p-4 border-b border-gray-100">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
+              <img
+                src={feed.profileImage || userProfile}
+                className="w-10 h-10 rounded-full"
+                alt="프로필"
+              />
+            </div>
+            <div>
+              <div className="text-sm font-medium">{feed.nickname}</div>
+              <div className="text-xs text-gray-500">
+                {formatDate(feed.created)}
               </div>
             </div>
-            {feed.feedMine && !feed.isRepost && (
-              <div className="flex gap-2">
-                <button
-                  onClick={() => onEditClick(feed.feedId, feed.clubId)}
-                  className="px-3 py-1 text-sm bg-gray-200 rounded hover:bg-gray-300 transition-colors"
-                >
-                  수정
-                </button>
-                <button
-                  onClick={() => onDeleteClick(feed.feedId)}
-                  className="px-3 py-1 text-sm bg-red-100 text-red-600 rounded hover:bg-red-200 transition-colors"
-                >
-                  삭제
-                </button>
-              </div>
-            )}
           </div>
-
-          {/* 이미지 캐러셀 또는 리피드 카드 */}
-          <div className="relative">
-            {/* 일반 피드: 이미지 캐러셀 */}
-            {!feed.isRepost && (
-              <div
-                className="rounded-2xl aspect-square bg-gray-200 flex items-center justify-center overflow-hidden"
-                onTouchStart={e => {
-                  const touch = e.touches[0];
-                  e.currentTarget.dataset.startX = touch.clientX.toString();
-                }}
-                onTouchEnd={e => {
-                  const startX = parseFloat(
-                    e.currentTarget.dataset.startX || '0',
-                  );
-                  const endX = e.changedTouches[0].clientX;
-                  const diff = startX - endX;
-
-                  if (Math.abs(diff) > 50) {
-                    if (diff > 0) {
-                      handleNextImage();
-                    } else {
-                      handlePrevImage();
-                    }
-                  }
-                }}
+          {feed.feedMine && (
+            <div className="flex gap-2">
+              <button
+                onClick={() => onEditClick(feed.feedId, feed.clubId)}
+                className="px-3 py-1 text-sm bg-gray-200 rounded hover:bg-gray-300 transition-colors"
               >
-                {feed.imageUrls.length > 0 ? (
-                  <img
-                    src={feed.imageUrls[currentImageIndex]}
-                    alt={`피드 이미지 ${currentImageIndex + 1}`}
-                    className="w-full h-full object-cover"
-                    onError={e => {
-                      e.currentTarget.src = `https://picsum.photos/seed/picsum/200/300`;
-                    }}
-                  />
-                ) : (
-                  <span className="text-gray-500">사진이 들어갑니다.</span>
-                )}
-              </div>
-            )}
+                수정
+              </button>
+              <button
+                onClick={() => onDeleteClick(feed.feedId)}
+                className="px-3 py-1 text-sm bg-red-100 text-red-600 rounded hover:bg-red-200 transition-colors"
+              >
+                삭제
+              </button>
+            </div>
+          )}
+        </div>
 
-            {/* 리피드 카드 표시 */}
-            {feed.isRepost && feed.parentFeed && (
-              <div className="border border-gray-200 rounded-2xl overflow-hidden bg-gray-100">
-                {/* 2depth 리피드인 경우: PARENT FEED 정보가 ROOT FEED를 감쌈 */}
-                {feed.rootFeed &&
-                  feed.rootFeed.feedId !== feed.parentFeed.feedId && (
-                    <>
-                      {/* Parent Feed 헤더 */}
-                      <div className="bg-gray-100 border-b border-gray-200 p-3">
-                        <div className="flex items-center gap-1 text-xs text-gray-600 mb-2">
-                          <i className="ri-repeat-2-line"></i>
-                          <span>이 피드를 리피드함</span>
+        {/* 이미지 캐러셀 또는 리피드 카드 */}
+        <div className="relative">
+          {/* 일반 피드: 이미지 캐러셀 */}
+          {!feed.isRepost && (
+            <div
+              className="aspect-square bg-gray-200 flex items-center justify-center overflow-hidden"
+              onTouchStart={e => {
+                const touch = e.touches[0];
+                e.currentTarget.dataset.startX = touch.clientX.toString();
+              }}
+              onTouchEnd={e => {
+                const startX = parseFloat(
+                  e.currentTarget.dataset.startX || '0',
+                );
+                const endX = e.changedTouches[0].clientX;
+                const diff = startX - endX;
+
+                if (Math.abs(diff) > 50) {
+                  if (diff > 0) {
+                    handleNextImage();
+                  } else {
+                    handlePrevImage();
+                  }
+                }
+              }}
+            >
+              {feed.imageUrls.length > 0 ? (
+                <img
+                  src={feed.imageUrls[currentImageIndex]}
+                  alt={`피드 이미지 ${currentImageIndex + 1}`}
+                  className="w-full h-full object-cover"
+                  onError={e => {
+                    e.currentTarget.src = `https://picsum.photos/seed/picsum/200/300`;
+                  }}
+                />
+              ) : (
+                <span className="text-gray-500">원본 피드가 삭제됐습니다.</span>
+              )}
+            </div>
+          )}
+
+          {/* 리피드 카드 표시 */}
+          {feed.isRepost && feed.parentFeed && (
+            <div className="border border-gray-200 rounded-2xl overflow-hidden bg-gray-100">
+              {/* 2depth 리피드인 경우: PARENT FEED 정보가 ROOT FEED를 감쌈 */}
+              {feed.rootFeed &&
+                feed.rootFeed.feedId !== feed.parentFeed.feedId && (
+                  <>
+                    {/* Parent Feed 헤더 */}
+                    <div className="bg-gray-100 border-b border-gray-200 p-3">
+                      <div className="flex items-center gap-1 text-xs text-gray-600 mb-2">
+                        <i className="ri-repeat-2-line"></i>
+                        <span>이 피드를 리피드함</span>
+                      </div>
+
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
+                          <img
+                            src={feed.parentFeed.profileImage || userProfile}
+                            className="w-8 h-8 rounded-full"
+                            alt="프로필"
+                          />
                         </div>
+                        <div>
+                          <div className="text-sm font-medium text-gray-700">
+                            {feed.parentFeed.nickname}
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            {formatDate(feed.parentFeed.created)}
+                          </div>
+                        </div>
+                      </div>
 
-                        <div className="flex items-center gap-2.5">
-                          <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
+                      {/* Parent Feed 코멘트 */}
+                      {feed.parentFeed.content && (
+                        <div className="mt-2.5">
+                          <p className="text-sm text-gray-700 italic">
+                            "{feed.parentFeed.content}"
+                          </p>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* ROOT FEED (깔끔한 스타일) */}
+                    <div className="rounded-2xl bg-white border border-gray-200 overflow-hidden shadow-sm mx-3 mb-3">
+                      {/* rootFeed 작성자 정보 */}
+                      <div className="flex items-center justify-between p-4 border-b border-gray-100">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
                             <img
-                              src={feed.parentFeed.profileImage || userProfile}
-                              className="w-8 h-8 rounded-full"
+                              src={feed.rootFeed.profileImage || userProfile}
+                              className="w-10 h-10 rounded-full"
                               alt="프로필"
                             />
                           </div>
                           <div>
-                            <div className="text-sm font-medium text-gray-700">
+                            <div className="text-sm font-medium">
+                              {feed.rootFeed.nickname}
+                            </div>
+                            <div className="text-xs text-gray-500">
+                              {formatDate(feed.rootFeed.created)}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* rootFeed 이미지 */}
+                      <div className="relative">
+                        <div
+                          className="aspect-square bg-gray-200 flex items-center justify-center overflow-hidden cursor-pointer"
+                          onClick={e => {
+                            // 버튼이 아닌 경우에만 피드 상세로 이동
+                            if (!(e.target as Element).closest('button')) {
+                              e.stopPropagation();
+                              feed.rootFeed &&
+                                (feed.rootFeed as any).clubId &&
+                                onOriginalFeedClick(
+                                  (feed.rootFeed as any).clubId,
+                                  feed.rootFeed.feedId,
+                                );
+                            }
+                          }}
+                          onTouchStart={e => {
+                            const touch = e.touches[0];
+                            e.currentTarget.dataset.startX =
+                              touch.clientX.toString();
+                          }}
+                          onTouchEnd={e => {
+                            const startX = parseFloat(
+                              e.currentTarget.dataset.startX || '0',
+                            );
+                            const endX = e.changedTouches[0].clientX;
+                            const diff = startX - endX;
+
+                            if (Math.abs(diff) > 50) {
+                              if (diff > 0) {
+                                handleNextRootFeedImage();
+                              } else {
+                                handlePrevRootFeedImage();
+                              }
+                            }
+                          }}
+                        >
+                          {hasParent && hasRootImages ? (
+                            <img
+                              src={feed.rootFeed!.imageUrls[rootFeedImageIndex]}
+                              alt={`rootFeed 이미지 ${rootFeedImageIndex + 1}`}
+                              className="w-full h-full object-cover"
+                              onError={e => {
+                                e.currentTarget.src = `https://picsum.photos/seed/picsum/200/300`;
+                              }}
+                            />
+                          ) : (
+                            <span className="text-gray-500">
+                              원본 피드가 삭제됐습니다.
+                            </span>
+                          )}
+                        </div>
+
+                        {/* rootFeed 이미지 카운터 */}
+                        {feed.rootFeed.imageUrls.length > 1 && (
+                          <div className="absolute top-4 right-4 bg-black/50 text-white px-2 py-1 rounded text-sm">
+                            {rootFeedImageIndex + 1}/
+                            {feed.rootFeed.imageUrls.length}
+                          </div>
+                        )}
+
+                        {/* rootFeed 이미지 좌우 화살표 버튼 */}
+                        {feed.rootFeed.imageUrls.length > 1 && (
+                          <>
+                            <button
+                              onClick={e => {
+                                e.stopPropagation();
+                                handlePrevRootFeedImage();
+                              }}
+                              className="absolute left-4 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/50 text-white rounded-full flex items-center justify-center hover:bg-opacity-70"
+                            >
+                              <i className="ri-arrow-left-wide-line"></i>
+                            </button>
+                            <button
+                              onClick={e => {
+                                e.stopPropagation();
+                                handleNextRootFeedImage();
+                              }}
+                              className="absolute right-4 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/50 text-white rounded-full flex items-center justify-center hover:bg-opacity-70"
+                            >
+                              <i className="ri-arrow-right-wide-line"></i>
+                            </button>
+                          </>
+                        )}
+
+                        {/* rootFeed 이미지 네비게이션 점들 */}
+                        {feed.rootFeed.imageUrls.length > 1 && (
+                          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
+                            {feed.rootFeed.imageUrls.map((_, index) => (
+                              <button
+                                key={index}
+                                onClick={e => {
+                                  e.stopPropagation();
+                                  setRootFeedImageIndex(index);
+                                }}
+                                className={`w-1.5 h-1.5 rounded-full ${
+                                  index === rootFeedImageIndex
+                                    ? 'bg-brand-primary'
+                                    : 'bg-gray-300'
+                                }`}
+                              />
+                            ))}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* rootFeed 내용 */}
+                      <div className="px-4 py-3">
+                        <p className="text-sm">{feed.rootFeed.content}</p>
+                      </div>
+
+                      {/* 여기에 rootFeed 좋아요/댓글 정보 추가 */}
+                      <div className="flex items-center gap-4 px-4 py-2 border-t border-gray-100">
+                        <div className="flex items-center gap-1">
+                          <i
+                            className={`text-sm ${feed.rootFeed.liked ? 'ri-heart-fill text-red-500' : 'ri-heart-line text-gray-500'}`}
+                          />
+                          <span className="text-xs text-gray-600">
+                            {feed.rootFeed.likeCount}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <i className="ri-chat-3-line text-sm text-gray-500" />
+                          <span className="text-xs text-gray-600">
+                            {feed.rootFeed.commentCount}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <i className="ri-repeat-2-line text-sm text-gray-500" />
+                          <span className="text-xs text-gray-600">
+                            {feed.rootFeed.repostCount}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                )}
+
+              {/* 1depth 리피드인 경우: 회색 배경으로 구분, 원본 정보만 표시 */}
+              {(!feed.rootFeed ||
+                feed.rootFeed.feedId === feed.parentFeed.feedId) && (
+                <>
+                  {/* 원본 피드 카드 (회색 배경으로 감싸서 리피드임을 구분) */}
+                  <div className="bg-gray-100 p-3">
+                    {/* 리피드 표시 */}
+                    <div className="flex items-center gap-1 text-xs text-gray-600 mb-3">
+                      <i className="ri-repeat-2-line"></i>
+                      <span>이 피드를 리피드함</span>
+                    </div>
+
+                    <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm">
+                      {/* 원본 피드 작성자 정보 */}
+                      <div className="p-4 border-b border-gray-100">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
+                            <img
+                              src={feed.parentFeed.profileImage || userProfile}
+                              className="w-10 h-10 rounded-full"
+                              alt="프로필"
+                            />
+                          </div>
+                          <div>
+                            <div className="text-sm font-medium">
                               {feed.parentFeed.nickname}
                             </div>
                             <div className="text-xs text-gray-500">
@@ -256,429 +461,220 @@ const FeedItem = ({
                             </div>
                           </div>
                         </div>
+                      </div>
 
-                        {/* Parent Feed 코멘트 */}
-                        {feed.parentFeed.content && (
-                          <div className="mt-2.5">
-                            <p className="text-sm text-gray-700 italic">
-                              "{feed.parentFeed.content}"
-                            </p>
+                      {/* 원본 피드 이미지 */}
+                      <div className="relative">
+                        <div
+                          className="aspect-square bg-gray-200 flex items-center justify-center overflow-hidden cursor-pointer"
+                          onClick={e => {
+                            // 버튼이 아닌 경우에만 피드 상세로 이동
+                            if (!(e.target as Element).closest('button')) {
+                              e.stopPropagation();
+                              feed.parentFeed &&
+                                (feed.parentFeed as any).clubId &&
+                                onOriginalFeedClick(
+                                  (feed.parentFeed as any).clubId,
+                                  feed.parentFeed.feedId,
+                                );
+                            }
+                          }}
+                          onTouchStart={e => {
+                            const touch = e.touches[0];
+                            e.currentTarget.dataset.startX =
+                              touch.clientX.toString();
+                          }}
+                          onTouchEnd={e => {
+                            const startX = parseFloat(
+                              e.currentTarget.dataset.startX || '0',
+                            );
+                            const endX = e.changedTouches[0].clientX;
+                            const diff = startX - endX;
+
+                            if (Math.abs(diff) > 50) {
+                              if (diff > 0) {
+                                handleNextRootFeedImage();
+                              } else {
+                                handlePrevRootFeedImage();
+                              }
+                            }
+                          }}
+                        >
+                          {feed.parentFeed.imageUrls.length > 0 ? (
+                            <img
+                              src={
+                                feed.parentFeed.imageUrls[rootFeedImageIndex]
+                              }
+                              alt={`피드 이미지 ${rootFeedImageIndex + 1}`}
+                              className="w-full h-full object-cover"
+                              onError={e => {
+                                e.currentTarget.src = `https://picsum.photos/seed/picsum/200/300`;
+                              }}
+                            />
+                          ) : (
+                            <span className="text-gray-500">
+                              원본 피드가 삭제됐습니다.
+                            </span>
+                          )}
+                        </div>
+
+                        {/* 이미지 카운터 */}
+                        {feed.parentFeed.imageUrls.length > 1 && (
+                          <div className="absolute top-4 right-4 bg-black/50 text-white px-2 py-1 rounded text-sm">
+                            {rootFeedImageIndex + 1}/
+                            {feed.parentFeed.imageUrls.length}
+                          </div>
+                        )}
+
+                        {/* 이미지 좌우 화살표 버튼 */}
+                        {feed.parentFeed.imageUrls.length > 1 && (
+                          <>
+                            <button
+                              onClick={e => {
+                                e.stopPropagation();
+                                handlePrevRootFeedImage();
+                              }}
+                              className="absolute left-4 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/50 text-white rounded-full flex items-center justify-center hover:bg-opacity-70"
+                            >
+                              <i className="ri-arrow-left-wide-line"></i>
+                            </button>
+                            <button
+                              onClick={e => {
+                                e.stopPropagation();
+                                handleNextRootFeedImage();
+                              }}
+                              className="absolute right-4 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/50 text-white rounded-full flex items-center justify-center hover:bg-opacity-70"
+                            >
+                              <i className="ri-arrow-right-wide-line"></i>
+                            </button>
+                          </>
+                        )}
+
+                        {/* 이미지 네비게이션 점들 */}
+                        {feed.parentFeed.imageUrls.length > 1 && (
+                          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
+                            {feed.parentFeed.imageUrls.map((_, index) => (
+                              <button
+                                key={index}
+                                onClick={e => {
+                                  e.stopPropagation();
+                                  setRootFeedImageIndex(index);
+                                }}
+                                className={`w-1.5 h-1.5 rounded-full ${
+                                  index === rootFeedImageIndex
+                                    ? 'bg-brand-primary'
+                                    : 'bg-gray-300'
+                                }`}
+                              />
+                            ))}
                           </div>
                         )}
                       </div>
 
-                      {/* ROOT FEED (깔끔한 스타일) */}
-                      <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm mx-3 mb-3">
-                        {/* rootFeed 작성자 정보 */}
-                        <div className="flex items-center justify-between p-4 border-b border-gray-100">
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
-                              <img
-                                src={feed.rootFeed.profileImage || userProfile}
-                                className="w-10 h-10 rounded-full"
-                                alt="프로필"
-                              />
-                            </div>
-                            <div>
-                              <div className="text-sm font-medium">
-                                {feed.rootFeed.nickname}
-                              </div>
-                              <div className="text-xs text-gray-500">
-                                {formatDate(feed.rootFeed.created)}
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* rootFeed 이미지 */}
-                        <div className="relative">
-                          <div
-                            className="aspect-square bg-gray-200 flex items-center justify-center overflow-hidden cursor-pointer"
-                            onClick={e => {
-                              // 버튼이 아닌 경우에만 피드 상세로 이동
-                              if (!(e.target as Element).closest('button')) {
-                                e.stopPropagation();
-                                feed.rootFeed &&
-                                  (feed.rootFeed as any).clubId &&
-                                  onOriginalFeedClick(
-                                    (feed.rootFeed as any).clubId,
-                                    feed.rootFeed.feedId,
-                                  );
-                              }
-                            }}
-                            onTouchStart={e => {
-                              const touch = e.touches[0];
-                              e.currentTarget.dataset.startX =
-                                touch.clientX.toString();
-                            }}
-                            onTouchEnd={e => {
-                              const startX = parseFloat(
-                                e.currentTarget.dataset.startX || '0',
-                              );
-                              const endX = e.changedTouches[0].clientX;
-                              const diff = startX - endX;
-
-                              if (Math.abs(diff) > 50) {
-                                if (diff > 0) {
-                                  handleNextRootFeedImage();
-                                } else {
-                                  handlePrevRootFeedImage();
-                                }
-                              }
-                            }}
-                          >
-                            {feed.rootFeed.imageUrls.length > 0 ? (
-                              <img
-                                src={
-                                  feed.rootFeed.imageUrls[rootFeedImageIndex]
-                                }
-                                alt={`rootFeed 이미지 ${rootFeedImageIndex + 1}`}
-                                className="w-full h-full object-cover"
-                                onError={e => {
-                                  e.currentTarget.src = `https://picsum.photos/seed/picsum/200/300`;
-                                }}
-                              />
-                            ) : (
-                              <span className="text-gray-500">
-                                사진이 들어갑니다.
-                              </span>
-                            )}
-                          </div>
-
-                          {/* rootFeed 이미지 카운터 */}
-                          {feed.rootFeed.imageUrls.length > 1 && (
-                            <div className="absolute top-4 right-4 bg-black/50 text-white px-2 py-1 rounded text-sm">
-                              {rootFeedImageIndex + 1}/
-                              {feed.rootFeed.imageUrls.length}
-                            </div>
-                          )}
-
-                          {/* rootFeed 이미지 좌우 화살표 버튼 */}
-                          {feed.rootFeed.imageUrls.length > 1 && (
-                            <>
-                              <button
-                                onClick={e => {
-                                  e.stopPropagation();
-                                  handlePrevRootFeedImage();
-                                }}
-                                className="absolute left-4 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/50 text-white rounded-full flex items-center justify-center hover:bg-opacity-70"
-                              >
-                                <i className="ri-arrow-left-wide-line"></i>
-                              </button>
-                              <button
-                                onClick={e => {
-                                  e.stopPropagation();
-                                  handleNextRootFeedImage();
-                                }}
-                                className="absolute right-4 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/50 text-white rounded-full flex items-center justify-center hover:bg-opacity-70"
-                              >
-                                <i className="ri-arrow-right-wide-line"></i>
-                              </button>
-                            </>
-                          )}
-
-                          {/* rootFeed 이미지 네비게이션 점들 */}
-                          {feed.rootFeed.imageUrls.length > 1 && (
-                            <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
-                              {feed.rootFeed.imageUrls.map((_, index) => (
-                                <button
-                                  key={index}
-                                  onClick={e => {
-                                    e.stopPropagation();
-                                    setRootFeedImageIndex(index);
-                                  }}
-                                  className={`w-1.5 h-1.5 rounded-full ${
-                                    index === rootFeedImageIndex
-                                      ? 'bg-brand-primary'
-                                      : 'bg-gray-300'
-                                  }`}
-                                />
-                              ))}
-                            </div>
-                          )}
-                        </div>
-
-                        {/* rootFeed 내용 */}
-                        <div className="px-4 py-3">
-                          <p className="text-sm">{feed.rootFeed.content}</p>
-                        </div>
-
-                        {/* 여기에 rootFeed 좋아요/댓글 정보 추가 */}
-                        <div className="flex items-center gap-4 px-4 py-2 border-t border-gray-100">
-                          <div className="flex items-center gap-1">
-                            <i
-                              className={`text-sm ${feed.rootFeed.liked ? 'ri-heart-fill text-red-500' : 'ri-heart-line text-gray-500'}`}
-                            />
-                            <span className="text-xs text-gray-600">
-                              {feed.rootFeed.likeCount}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <i className="ri-chat-3-line text-sm text-gray-500" />
-                            <span className="text-xs text-gray-600">
-                              {feed.rootFeed.commentCount}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <i className="ri-repeat-2-line text-sm text-gray-500" />
-                            <span className="text-xs text-gray-600">
-                              {feed.rootFeed.repostCount}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    </>
-                  )}
-
-                {/* 1depth 리피드인 경우: 회색 배경으로 구분, 원본 정보만 표시 */}
-                {(!feed.rootFeed ||
-                  feed.rootFeed.feedId === feed.parentFeed.feedId) && (
-                  <>
-                    {/* 원본 피드 카드 (회색 배경으로 감싸서 리피드임을 구분) */}
-                    <div className="bg-gray-100 p-3">
-                      {/* 리피드 표시 */}
-                      <div className="flex items-center gap-1 text-xs text-gray-600 mb-3">
-                        <i className="ri-repeat-2-line"></i>
-                        <span>이 피드를 리피드함</span>
+                      {/* 원본 피드 내용 */}
+                      <div className="px-4 py-3">
+                        <p className="text-sm">{feed.parentFeed.content}</p>
                       </div>
 
-                      <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm">
-                        {/* 원본 피드 작성자 정보 */}
-                        <div className="p-4 border-b border-gray-100">
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
-                              <img
-                                src={
-                                  feed.parentFeed.profileImage || userProfile
-                                }
-                                className="w-10 h-10 rounded-full"
-                                alt="프로필"
-                              />
-                            </div>
-                            <div>
-                              <div className="text-sm font-medium">
-                                {feed.parentFeed.nickname}
-                              </div>
-                              <div className="text-xs text-gray-500">
-                                {formatDate(feed.parentFeed.created)}
-                              </div>
-                            </div>
-                          </div>
+                      {/* 여기에 rootFeed 좋아요/댓글 정보 추가 */}
+                      <div className="flex items-center gap-4 px-4 py-2 border-t border-gray-100">
+                        <div className="flex items-center gap-1">
+                          <i
+                            className={`text-sm ${feed.parentFeed.liked ? 'ri-heart-fill text-red-500' : 'ri-heart-line text-gray-500'}`}
+                          />
+                          <span className="text-xs text-gray-600">
+                            {feed.parentFeed.likeCount}
+                          </span>
                         </div>
-
-                        {/* 원본 피드 이미지 */}
-                        <div className="relative">
-                          <div
-                            className="aspect-square bg-gray-200 flex items-center justify-center overflow-hidden cursor-pointer"
-                            onClick={e => {
-                              // 버튼이 아닌 경우에만 피드 상세로 이동
-                              if (!(e.target as Element).closest('button')) {
-                                e.stopPropagation();
-                                feed.parentFeed &&
-                                  (feed.parentFeed as any).clubId &&
-                                  onOriginalFeedClick(
-                                    (feed.parentFeed as any).clubId,
-                                    feed.parentFeed.feedId,
-                                  );
-                              }
-                            }}
-                            onTouchStart={e => {
-                              const touch = e.touches[0];
-                              e.currentTarget.dataset.startX =
-                                touch.clientX.toString();
-                            }}
-                            onTouchEnd={e => {
-                              const startX = parseFloat(
-                                e.currentTarget.dataset.startX || '0',
-                              );
-                              const endX = e.changedTouches[0].clientX;
-                              const diff = startX - endX;
-
-                              if (Math.abs(diff) > 50) {
-                                if (diff > 0) {
-                                  handleNextRootFeedImage();
-                                } else {
-                                  handlePrevRootFeedImage();
-                                }
-                              }
-                            }}
-                          >
-                            {feed.parentFeed.imageUrls.length > 0 ? (
-                              <img
-                                src={
-                                  feed.parentFeed.imageUrls[rootFeedImageIndex]
-                                }
-                                alt={`피드 이미지 ${rootFeedImageIndex + 1}`}
-                                className="w-full h-full object-cover"
-                                onError={e => {
-                                  e.currentTarget.src = `https://picsum.photos/seed/picsum/200/300`;
-                                }}
-                              />
-                            ) : (
-                              <span className="text-gray-500">
-                                사진이 들어갑니다.
-                              </span>
-                            )}
-                          </div>
-
-                          {/* 이미지 카운터 */}
-                          {feed.parentFeed.imageUrls.length > 1 && (
-                            <div className="absolute top-4 right-4 bg-black/50 text-white px-2 py-1 rounded text-sm">
-                              {rootFeedImageIndex + 1}/
-                              {feed.parentFeed.imageUrls.length}
-                            </div>
-                          )}
-
-                          {/* 이미지 좌우 화살표 버튼 */}
-                          {feed.parentFeed.imageUrls.length > 1 && (
-                            <>
-                              <button
-                                onClick={e => {
-                                  e.stopPropagation();
-                                  handlePrevRootFeedImage();
-                                }}
-                                className="absolute left-4 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/50 text-white rounded-full flex items-center justify-center hover:bg-opacity-70"
-                              >
-                                <i className="ri-arrow-left-wide-line"></i>
-                              </button>
-                              <button
-                                onClick={e => {
-                                  e.stopPropagation();
-                                  handleNextRootFeedImage();
-                                }}
-                                className="absolute right-4 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/50 text-white rounded-full flex items-center justify-center hover:bg-opacity-70"
-                              >
-                                <i className="ri-arrow-right-wide-line"></i>
-                              </button>
-                            </>
-                          )}
-
-                          {/* 이미지 네비게이션 점들 */}
-                          {feed.parentFeed.imageUrls.length > 1 && (
-                            <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
-                              {feed.parentFeed.imageUrls.map((_, index) => (
-                                <button
-                                  key={index}
-                                  onClick={e => {
-                                    e.stopPropagation();
-                                    setRootFeedImageIndex(index);
-                                  }}
-                                  className={`w-1.5 h-1.5 rounded-full ${
-                                    index === rootFeedImageIndex
-                                      ? 'bg-brand-primary'
-                                      : 'bg-gray-300'
-                                  }`}
-                                />
-                              ))}
-                            </div>
-                          )}
+                        <div className="flex items-center gap-1">
+                          <i className="ri-chat-3-line text-sm text-gray-500" />
+                          <span className="text-xs text-gray-600">
+                            {feed.parentFeed.commentCount}
+                          </span>
                         </div>
-
-                        {/* 원본 피드 내용 */}
-                        <div className="px-4 py-3">
-                          <p className="text-sm">{feed.parentFeed.content}</p>
-                        </div>
-
-                        {/* 여기에 rootFeed 좋아요/댓글 정보 추가 */}
-                        <div className="flex items-center gap-4 px-4 py-2 border-t border-gray-100">
-                          <div className="flex items-center gap-1">
-                            <i
-                              className={`text-sm ${feed.parentFeed.liked ? 'ri-heart-fill text-red-500' : 'ri-heart-line text-gray-500'}`}
-                            />
-                            <span className="text-xs text-gray-600">
-                              {feed.parentFeed.likeCount}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <i className="ri-chat-3-line text-sm text-gray-500" />
-                            <span className="text-xs text-gray-600">
-                              {feed.parentFeed.commentCount}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <i className="ri-repeat-2-line  text-sm text-gray-500" />
-                            <span className="text-xs text-gray-600">
-                              {feed.parentFeed.repostCount}
-                            </span>
-                          </div>
+                        <div className="flex items-center gap-1">
+                          <i className="ri-repeat-2-line  text-sm text-gray-500" />
+                          <span className="text-xs text-gray-600">
+                            {feed.parentFeed.repostCount}
+                          </span>
                         </div>
                       </div>
                     </div>
-                  </>
-                )}
-              </div>
-            )}
+                  </div>
+                </>
+              )}
+            </div>
+          )}
 
-            {/* 일반 피드 - 이미지 카운터 */}
-            {!feed.isRepost && feed.imageUrls.length > 1 && (
-              <div className="absolute top-4 right-4 bg-black/50 text-white px-2 py-1 rounded text-sm">
-                {currentImageIndex + 1}/{feed.imageUrls.length}
-              </div>
-            )}
+          {/* 일반 피드 - 이미지 카운터 */}
+          {!feed.isRepost && feed.imageUrls.length > 1 && (
+            <div className="absolute top-4 right-4 bg-black/50 text-white px-2 py-1 rounded text-sm">
+              {currentImageIndex + 1}/{feed.imageUrls.length}
+            </div>
+          )}
 
-            {/* 일반 피드 - 좌우 화살표 버튼 */}
-            {!feed.isRepost && feed.imageUrls.length > 1 && (
-              <>
+          {/* 일반 피드 - 좌우 화살표 버튼 */}
+          {!feed.isRepost && feed.imageUrls.length > 1 && (
+            <>
+              <button
+                onClick={handlePrevImage}
+                className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/50 text-white rounded-full flex items-center justify-center hover:bg-opacity-70 text-xl"
+              >
+                <i className="ri-arrow-left-wide-line"></i>
+              </button>
+              <button
+                onClick={handleNextImage}
+                className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/50 text-white rounded-full flex items-center justify-center hover:bg-opacity-70 text-xl"
+              >
+                <i className="ri-arrow-right-wide-line"></i>
+              </button>
+            </>
+          )}
+
+          {/* 일반 피드 - 이미지 네비게이션 점들 */}
+          {!feed.isRepost && feed.imageUrls.length > 1 && (
+            <div className="flex justify-center gap-2 py-4">
+              {feed.imageUrls.map((_, index) => (
                 <button
-                  onClick={handlePrevImage}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/50 text-white rounded-full flex items-center justify-center hover:bg-opacity-70 text-xl"
-                >
-                  <i className="ri-arrow-left-wide-line"></i>
-                </button>
-                <button
-                  onClick={handleNextImage}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/50 text-white rounded-full flex items-center justify-center hover:bg-opacity-70 text-xl"
-                >
-                  <i className="ri-arrow-right-wide-line"></i>
-                </button>
-              </>
-            )}
+                  key={index}
+                  onClick={() => setCurrentImageIndex(index)}
+                  className={`w-2 h-2 rounded-full ${index === currentImageIndex ? 'bg-brand-primary' : 'bg-gray-300'}`}
+                />
+              ))}
+            </div>
+          )}
+        </div>
 
-            {/* 일반 피드 - 이미지 네비게이션 점들 */}
-            {!feed.isRepost && feed.imageUrls.length > 1 && (
-              <div className="flex justify-center gap-2 py-4">
-                {feed.imageUrls.map((_, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setCurrentImageIndex(index)}
-                    className={`w-2 h-2 rounded-full ${index === currentImageIndex ? 'bg-brand-primary' : 'bg-gray-300'}`}
-                  />
-                ))}
-              </div>
-            )}
-          </div>
+        {/* 피드 내용 */}
+        <div className="px-4 py-3">
+          <p className="text-sm">{feed.content}</p>
+        </div>
 
-          {/* 피드 내용 */}
-          <div className="px-4 py-3">
-            <p className="text-sm">{feed.content}</p>
-          </div>
-
-          {/* 좋아요와 댓글 버튼과 리피드 버튼 */}
-          <div className="flex items-center gap-4 px-4 py-3 border-t border-gray-100">
-            <button
-              className="flex items-center gap-2"
-              onClick={() => onLikeClick(feed.feedId)}
-            >
-              <i
-                className={`text-xl ${feed.liked ? 'ri-heart-fill text-red-500' : 'ri-heart-line'}`}
-              />
-              <span className="text-sm">{feed.likeCount}</span>
-            </button>
-            <button
-              className="flex items-center gap-2"
-              onClick={() => onCommentClick(feed.feedId)}
-            >
-              <i className="ri-chat-3-line text-xl" />
-              <span className="text-sm">{feed.commentCount}</span>
-            </button>
-            <button
-              className="flex items-center gap-2"
-              onClick={() => onRefeedClick(feed.feedId)}
-            >
-              <i className="ri-repeat-2-line text-xl" />
-              <span className="text-sm">{feed.repostCount}</span>
-            </button>
-          </div>
+        {/* 좋아요와 댓글 버튼과 리피드 버튼 */}
+        <div className="flex items-center gap-4 px-4 py-3 border-t border-gray-100">
+          <button
+            className="flex items-center gap-2"
+            onClick={() => onLikeClick(feed.feedId)}
+          >
+            <i
+              className={`text-xl ${feed.liked ? 'ri-heart-fill text-red-500' : 'ri-heart-line'}`}
+            />
+            <span className="text-sm">{feed.likeCount}</span>
+          </button>
+          <button
+            className="flex items-center gap-2"
+            onClick={() => onCommentClick(feed.feedId)}
+          >
+            <i className="ri-chat-3-line text-xl" />
+            <span className="text-sm">{feed.commentCount}</span>
+          </button>
+          <button
+            className="flex items-center gap-2"
+            onClick={() => onRefeedClick(feed.feedId)}
+          >
+            <i className="ri-repeat-2-line text-xl" />
+            <span className="text-sm">{feed.repostCount}</span>
+          </button>
         </div>
       </div>
     </div>
@@ -930,7 +926,7 @@ export const FeedList = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="z-10 bg-white px-4 py-3">
+      <div className="z-10 bg-white px-4 pt-3 pb-2">
         <SortChips value={sortMode} onChange={setSortMode} />
       </div>
       {/* 피드 리스트 */}
