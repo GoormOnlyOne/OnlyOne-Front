@@ -32,6 +32,7 @@ interface FeedData {
   feedMine: boolean;
   isRepost?: boolean;
   parentFeed?: {
+    cludId: number;
     feedId: number;
     content: string;
     imageUrls: string[];
@@ -47,6 +48,7 @@ interface FeedData {
     rootFeed?: any;
   } | null;
   rootFeed?: {
+    clubId: number;
     feedId: number;
     content: string;
     imageUrls: string[];
@@ -300,9 +302,9 @@ const FeedItem = ({
                             if (!(e.target as Element).closest('button')) {
                               e.stopPropagation();
                               feed.rootFeed &&
-                                (feed.rootFeed as any).clubId &&
+                                feed.rootFeed?.clubId &&
                                 onOriginalFeedClick(
-                                  (feed.rootFeed as any).clubId,
+                                  feed.rootFeed?.clubId,
                                   feed.rootFeed.feedId,
                                 );
                             }
@@ -472,9 +474,9 @@ const FeedItem = ({
                             if (!(e.target as Element).closest('button')) {
                               e.stopPropagation();
                               feed.parentFeed &&
-                                (feed.parentFeed as any).clubId &&
+                                feed.parentFeed.clubId &&
                                 onOriginalFeedClick(
-                                  (feed.parentFeed as any).clubId,
+                                  feed.parentFeed.clubId,
                                   feed.parentFeed.feedId,
                                 );
                             }
