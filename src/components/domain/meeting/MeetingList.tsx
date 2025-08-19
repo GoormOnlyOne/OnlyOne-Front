@@ -1,28 +1,37 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import apiClient from '../../../api/client';
-import MeetingCard, {type Meeting} from './MeetingCard';
+import MeetingCard, { type Meeting } from './MeetingCard';
 import EmptyState from '../search/EmptyState';
 import Loading from '../../common/Loading';
 import Modal from '../../../components/common/Modal';
-
+import SettlementCard from './SettlementCard';
 
 interface MeetingListProps {
   mode?: 'home' | 'full' | 'my';
   apiEndpoint?: string;
   showHomeSpecialSections?: boolean;
+  onNavigateToSettlement?: () => void;
+}
+
+// 백엔드의 "내 모임" 응답 타입 (mode === 'my')
+interface MyClubsResponse {
+  clubResponseDtoList: Meeting[];
+  isUnsettledScheduleExist: boolean;
 }
 
 export default function MeetingList({
   mode = 'home',
   apiEndpoint,
   showHomeSpecialSections = false,
+  onNavigateToSettlement,
 }: MeetingListProps) {
   const [meetings, setMeetings] = useState<Meeting[]>([]);
   const [partnerMeetings, setPartnerMeetings] = useState<Meeting[]>([]);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
+  const [hasUnsettledPayments, setHasUnsettledPayments] = useState(false);
   const navigate = useNavigate();
 
   const [isAlertOpen, setIsAlertOpen] = useState(false);
@@ -36,6 +45,7 @@ export default function MeetingList({
       case 'full':
         return { endpoint: apiEndpoint ?? '/search/recommendations', size: 20 };
       case 'home':
+      default:
         return { endpoint: apiEndpoint ?? '/search/recommendations', size: 20 };
     }
   };
@@ -48,6 +58,33 @@ export default function MeetingList({
     try {
       const { endpoint, size } = getEndpointAndSize();
 
+      // 내 모임 모드: 응답 스키마가 다르므로 별도 처리
+      if (mode === 'my') {
+        const response = await apiClient.get<MyClubsResponse>(endpoint, {
+          params: { page: pageNum, size },
+        });
+
+        if (response.success) {
+          const { clubResponseDtoList, isUnsettledScheduleExist } =
+            response.data;
+          // 리스트 갱신
+          if (isNewLoad) {
+            setMeetings(clubResponseDtoList);
+          } else {
+            setMeetings(prev => [...prev, ...clubResponseDtoList]);
+          }
+          // 정산 미완료 여부 세팅
+          setHasUnsettledPayments(!!isUnsettledScheduleExist);
+
+          // 페이지네이션 판단 (백엔드가 사이즈 미만이면 끝으로 간주)
+          if (clubResponseDtoList.length < size) {
+            setHasMore(false);
+          }
+        }
+        return; // my 분기 종료
+      }
+
+      // home/full 모드: 기존 배열 응답
       const response = await apiClient.get<Meeting[]>(endpoint, {
         params: { page: pageNum, size },
       });
@@ -79,9 +116,7 @@ export default function MeetingList({
     try {
       const response = await apiClient.get<Meeting[]>(
         '/search/teammates-clubs',
-        {
-          params: { page: 0, size: 5 },
-        },
+        { params: { page: 0, size: 5 } },
       );
       if (response.success) {
         setPartnerMeetings(response.data);
@@ -96,9 +131,11 @@ export default function MeetingList({
     loadMeetings(0, true);
     setPage(0);
     setHasMore(true);
+
     if (showHomeSpecialSections) {
       loadPartnerMeetings();
     }
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mode, apiEndpoint, showHomeSpecialSections]);
 
@@ -107,9 +144,8 @@ export default function MeetingList({
     if (mode !== 'full') return;
 
     const handleScroll = () => {
-      const scrollHeight = document.documentElement.scrollHeight;
-      const scrollTop = document.documentElement.scrollTop;
-      const clientHeight = document.documentElement.clientHeight;
+      const { scrollHeight, scrollTop, clientHeight } =
+        document.documentElement;
 
       if (
         scrollHeight - scrollTop - clientHeight < 100 &&
@@ -145,7 +181,7 @@ export default function MeetingList({
   if (mode === 'home') {
     return (
       <div className="px-4 pb-20">
-		{loading && meetings.length === 0 && (
+        {loading && meetings.length === 0 && (
           <div className="py-4">
             <Loading text="로딩 중..." overlay={false} />
           </div>
@@ -191,7 +227,7 @@ export default function MeetingList({
                 도 구경해 보세요.
               </h2>
 
-			  {loading && partnerMeetings.length === 0 && (
+              {loading && partnerMeetings.length === 0 && (
                 <div className="py-3">
                   <Loading text="불러오는 중..." overlay={false} />
                 </div>
@@ -236,12 +272,19 @@ export default function MeetingList({
 
   // 전체/내 모드 렌더링
   return (
-    <div className="bg-gray-50 relative">
+    <div className="bg-gray-50 relative p-4">
+      {/* 내 모임 모드에서 정산 대기가 있을 때만 SettlementCard 표시 */}
+      {mode === 'my' && hasUnsettledPayments && (
+        <div className="mb-4">
+          <SettlementCard onNavigateToSettlement={onNavigateToSettlement} />
+        </div>
+      )}
+
       {loading && meetings.length === 0 && (
         <Loading overlay text="로딩 중..." />
       )}
 
-	  {/* 모임 목록 */}
+      {/* 모임 목록 */}
       <div>
         <div className="space-y-4">
           {meetings.map(meeting => (

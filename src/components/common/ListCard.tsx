@@ -11,6 +11,7 @@ interface ListItem {
     color: string;
   };
   rightContent?: React.ReactNode;
+  bottomContent?: React.ReactNode;
   onClick?: () => void;
 }
 
@@ -94,40 +95,52 @@ const ListCard: React.FC<ListCardProps> = ({
           {items.map((item, idx) => (
             <div
               key={item.id}
-              onClick={item.onClick}
               className={clsx(
-                'flex items-center justify-between px-4 py-3 border-b border-gray-100 last:border-b-0',
-                item.onClick &&
-                  'cursor-pointer hover:bg-gray-50 transition-colors duration-200',
+                'px-4 py-3 border-b border-gray-100 last:border-b-0',
               )}
             >
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center flex-shrink-0">
-                  {renderImage(item.image)}
-                </div>
-                <div className="flex flex-col">
-                  <div className="text-sm font-medium text-gray-900">
-                    {item.title}
+              <div
+                onClick={item.onClick}
+                className={clsx(
+                  'flex items-center justify-between',
+                  item.onClick &&
+                    'cursor-pointer hover:bg-gray-50 transition-colors duration-200 rounded-lg -mx-2 px-2 py-1',
+                )}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center flex-shrink-0">
+                    {renderImage(item.image)}
                   </div>
-                  {item.subtitle && (
-                    <div className="text-xs text-gray-500">{item.subtitle}</div>
+                  <div className="flex flex-col">
+                    <div className="text-sm font-medium text-gray-900">
+                      {item.title}
+                    </div>
+                    {item.subtitle && (
+                      <div className="text-xs text-gray-500 whitespace-pre-line mt-1">
+                        {item.subtitle}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex flex-col items-end gap-1 w-30">
+                  {item.badge && (
+                    <div
+                      className={clsx(
+                        'px-2 py-1 rounded-full font-medium text-sm',
+                        item.badge.color,
+                      )}
+                    >
+                      {item.badge.text}
+                    </div>
                   )}
+                  {item.rightContent}
                 </div>
               </div>
 
-              <div className="flex flex-col items-end gap-1 w-30">
-                {item.badge && (
-                  <div
-                    className={clsx(
-                      'px-2 py-1 rounded-full font-medium text-sm',
-                      item.badge.color,
-                    )}
-                  >
-                    {item.badge.text}
-                  </div>
-                )}
-                {item.rightContent}
-              </div>
+              {item.bottomContent && (
+                <div className="mt-3">{item.bottomContent}</div>
+              )}
             </div>
           ))}
         </div>
