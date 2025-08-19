@@ -32,7 +32,7 @@ interface FeedData {
   feedMine: boolean;
   isRepost?: boolean;
   parentFeed?: {
-    cludId: number;
+    clubId: number;
     feedId: number;
     content: string;
     imageUrls: string[];
