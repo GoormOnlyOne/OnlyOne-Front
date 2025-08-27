@@ -6,13 +6,6 @@ export default function Navigation() {
 
   const tabs = [
     {
-      id: 'home',
-      label: '홈',
-      icon: 'ri-home-line',
-      activeIcon: 'ri-home-fill',
-      href: '/',
-    },
-    {
       id: 'category',
       label: '카테고리',
       icon: 'ri-apps-line',
@@ -27,6 +20,21 @@ export default function Navigation() {
       href: '/feed',
     },
     {
+      id: 'home',
+      label: '홈',
+      icon: 'ri-home-line',
+      activeIcon: 'ri-home-fill',
+      href: '/',
+      isSpecial: true,
+    },
+    {
+      id: 'my-meetings',
+      label: '내모임',
+      icon: 'ri-group-line',
+      activeIcon: 'ri-group-fill',
+      href: '/my-meetings',
+    },
+    {
       id: 'mypage',
       label: '마이페이지',
       icon: 'ri-user-line',
@@ -37,7 +45,7 @@ export default function Navigation() {
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-100 shadow-lg">
-      <div className="grid grid-cols-4 h-16">
+      <div className="grid grid-cols-5 h-16">
         {tabs.map(tab => {
           const isActive = pathname === tab.href;
           return (
@@ -48,14 +56,25 @@ export default function Navigation() {
                 relative flex flex-col items-center justify-center space-y-1 
                 transition-all duration-300 ease-in-out
                 ${
-                  isActive
+                  tab.isSpecial
+                    ? 'text-white'
+                    : isActive
                     ? 'text-brand-primary'
                     : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
                 }
               `}
             >
+              {/* 특별한 홈 버튼 배경 */}
+              {tab.isSpecial && (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="relative w-12 h-12 bg-gradient-to-br from-[#F5921F] via-[#EF7C30] to-[#FFAE00] rounded-full shadow-sm">
+                    <div className="absolute inset-0 bg-gradient-to-br from-white/30 via-white/20 to-white/10 rounded-full opacity-0 hover:opacity-100 hover:animate-pulse transition-all duration-300" />
+                  </div>
+                </div>
+              )}
+
               {/* 활성 탭 배경 애니메이션 */}
-              {isActive && (
+              {isActive && !tab.isSpecial && (
                 <div className="absolute inset-0 bg-brand-primary/10 opacity-50 scale-90 rounded-lg transition-all duration-300" />
               )}
 
@@ -66,6 +85,7 @@ export default function Navigation() {
                 text-xl w-6 h-6 flex items-center justify-center
                 transition-all duration-300
                 ${isActive ? 'scale-110 animate-bounce-once' : 'scale-100'}
+                ${tab.isSpecial ? 'relative z-10' : ''}
               `}
               ></i>
 
@@ -74,6 +94,7 @@ export default function Navigation() {
                 className={`
                 text-xs font-medium transition-all duration-300
                 ${isActive ? 'font-semibold' : 'font-normal'}
+                ${tab.isSpecial ? 'relative z-10' : ''}
               `}
               >
                 {tab.label}

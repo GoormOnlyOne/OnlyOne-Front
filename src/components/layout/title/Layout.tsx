@@ -6,7 +6,6 @@ import apiClient from '../../../api/client';
 import Modal from '../../common/Modal';
 import { showToast as globalToast } from '../../common/Toast/ToastProvider';
 import { fetchChatMessages } from '../../../api/chat';
-import type { PagedResponse } from '../../../types/chat/chat.types';
 
 export default function TitleLayout() {
   const location = useLocation();
@@ -34,8 +33,6 @@ export default function TitleLayout() {
       setDynamicTitle("채팅방");
     }
   };
-
-
 
   useEffect(() => {
     const chatRoomId = params.chatRoomId;
@@ -217,7 +214,6 @@ export default function TitleLayout() {
         titleText: dynamicTitle || '모임 상세',
         isLike: true,
         isOut: clubRole !== 'GUEST',
-        // ✅ 헤더에 콜백/디세이블 전달
         onOut: () => setIsLeaveModalOpen(true),
         outDisabled: leaving,
       };
@@ -325,7 +321,7 @@ export default function TitleLayout() {
       </main>
 
       {/* 고정 푸터 - 높이를 명시적으로 설정 */}
-      {(pathname === '/mypage' || pathname === '/feed') && (
+      {(pathname === '/mypage' || pathname === '/feed' || pathname === '/my-meetings') && (
         <div className="h-16 flex-shrink-0">
           <Footer />
         </div>
