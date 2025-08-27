@@ -6,7 +6,6 @@ import apiClient from '../../../api/client';
 import Modal from '../../common/Modal';
 import { showToast as globalToast } from '../../common/Toast/ToastProvider';
 import { fetchChatMessages } from '../../../api/chat';
-import type { PagedResponse } from '../../../types/chat/chat.types';
 
 export default function TitleLayout() {
   const location = useLocation();
@@ -34,8 +33,6 @@ export default function TitleLayout() {
       setDynamicTitle("채팅방");
     }
   };
-
-
 
   useEffect(() => {
     const chatRoomId = params.chatRoomId;
@@ -94,6 +91,9 @@ export default function TitleLayout() {
     }
   };
 
+  const pagesWithNavigation = ['/mypage', '/feed', '/my-meetings'];
+  const hasNavigation = pagesWithNavigation.includes(pathname);
+
   let headerProps = null;
 
   // 경로에 따른 props 설정
@@ -105,6 +105,7 @@ export default function TitleLayout() {
         titleText: '알림 목록',
         isLike: false,
         isOut: false,
+        isHome: !hasNavigation,
       };
       break;
 
@@ -115,6 +116,7 @@ export default function TitleLayout() {
         titleText: '마이페이지',
         isLike: false,
         isOut: false,
+        isHome: !hasNavigation,
       };
       break;
 
@@ -125,6 +127,7 @@ export default function TitleLayout() {
         titleText: '관심 모임',
         isLike: false,
         isOut: false,
+        isHome: !hasNavigation,
       };
       break;
 
@@ -135,16 +138,18 @@ export default function TitleLayout() {
         titleText: '프로필 수정하기',
         isLike: false,
         isOut: false,
+        isHome: !hasNavigation,
       };
       break;
 
-    case pathname === '/mypage/my-meetings':
+    case pathname === '/my-meetings':
       headerProps = {
         isBack: true,
         isTitle: true,
         titleText: '내 모임 보기',
         isLike: false,
         isOut: false,
+        isHome: !hasNavigation,
       };
       break;
 
@@ -155,6 +160,7 @@ export default function TitleLayout() {
         titleText: '정산내역 확인하기',
         isLike: false,
         isOut: false,
+        isHome: !hasNavigation,
       };
       break;
 
@@ -165,6 +171,7 @@ export default function TitleLayout() {
         titleText: '게시글 생성',
         isLike: false,
         isOut: false,
+        isHome: !hasNavigation,
       };
       break;
 
@@ -175,6 +182,7 @@ export default function TitleLayout() {
         titleText: '게시글 수정',
         isLike: false,
         isOut: false,
+        isHome: !hasNavigation,
       };
       break;
 
@@ -185,6 +193,7 @@ export default function TitleLayout() {
         titleText: '게시글',
         isLike: false,
         isOut: false,
+        isHome: !hasNavigation,
       };
       break;
 
@@ -195,6 +204,7 @@ export default function TitleLayout() {
         titleText: '모임 만들기',
         isLike: false,
         isOut: false,
+        isHome: !hasNavigation,
       };
       break;
 
@@ -205,6 +215,7 @@ export default function TitleLayout() {
         titleText: '모임 수정하기',
         isLike: false,
         isOut: false,
+        isHome: !hasNavigation,
       };
       break;
 
@@ -217,9 +228,9 @@ export default function TitleLayout() {
         titleText: dynamicTitle || '모임 상세',
         isLike: true,
         isOut: clubRole !== 'GUEST',
-        // ✅ 헤더에 콜백/디세이블 전달
         onOut: () => setIsLeaveModalOpen(true),
         outDisabled: leaving,
+        isHome: !hasNavigation,
       };
       break;
 
@@ -236,6 +247,7 @@ export default function TitleLayout() {
         titleText: type === 'settlement' ? '정산 현황' : '참여 현황',
         isLike: false,
         isOut: false,
+        isHome: !hasNavigation,
       };
       break;
 
@@ -246,6 +258,7 @@ export default function TitleLayout() {
         titleText: '정모 만들기',
         isLike: false,
         isOut: false,
+        isHome: !hasNavigation,
       };
       break;
 
@@ -256,6 +269,7 @@ export default function TitleLayout() {
         titleText: '정모 수정하기',
         isLike: false,
         isOut: false,
+        isHome: !hasNavigation,
       };
       break;
 
@@ -266,6 +280,7 @@ export default function TitleLayout() {
         titleText: '맞춤 모임',
         isLike: false,
         isOut: false,
+        isHome: !hasNavigation,
       };
       break;
 
@@ -276,6 +291,7 @@ export default function TitleLayout() {
         titleText: '동료들의 모임',
         isLike: false,
         isOut: false,
+        isHome: !hasNavigation,
       };
       break;
 
@@ -293,6 +309,7 @@ export default function TitleLayout() {
             navigate(-1);
           }
         },
+        isHome: !hasNavigation,
       };
       break;
 
@@ -303,6 +320,7 @@ export default function TitleLayout() {
         titleText: '피드 목록',
         isLike: false,
         isOut: false,
+        isHome: !hasNavigation,
       };
       break;
     default:
@@ -325,7 +343,7 @@ export default function TitleLayout() {
       </main>
 
       {/* 고정 푸터 - 높이를 명시적으로 설정 */}
-      {(pathname === '/mypage' || pathname === '/feed') && (
+      {(pathname === '/mypage' || pathname === '/feed' || pathname === '/my-meetings') && (
         <div className="h-16 flex-shrink-0">
           <Footer />
         </div>

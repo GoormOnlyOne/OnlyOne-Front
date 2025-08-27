@@ -149,7 +149,7 @@ export default function CategorySection({
               key={id}
               onClick={() => handleCategoryClick(id)}
               disabled={!selectable && mode === 'multi-select'}
-              className={`relative flex flex-col items-center justify-center aspect-square w-full p-2 sm:p-3 rounded-2xl transition-all duration-300 transform group
+              className={`relative flex flex-col items-center justify-center aspect-square w-full p-2 sm:p-3 rounded-full transition-all duration-300 transform group
                 ${selectable ? 'cursor-pointer' : 'cursor-not-allowed'}
                 ${
                   selected
@@ -161,10 +161,10 @@ export default function CategorySection({
               `}
             >
               {selected && (
-                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/30 via-white/20 to-white/10 animate-pulse" />
+                <div className="absolute inset-0 rounded-full bg-gradient-to-br from-white/30 via-white/20 to-white/10 animate-pulse" />
               )}
               <div
-                className={`w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center mb-1 sm:mb-2 rounded-xl transition-all duration-300 ${selected ? 'bg-white/20 backdrop-blur-sm' : 'bg-white/40'}`}
+                className={`w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center mb-1 sm:mb-2 rounded-full transition-all duration-300 ${selected ? 'bg-white/20 backdrop-blur-sm' : 'bg-white/40'}`}
               >
                 <span
                   className={`transition-all duration-300 ${selected ? 'text-2xl sm:text-3xl animate-bounce-once drop-shadow-sm' : selectable ? 'text-xl sm:text-2xl group-hover:scale-110' : 'text-xl sm:text-2xl opacity-50'}`}

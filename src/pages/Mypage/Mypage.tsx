@@ -213,7 +213,7 @@ export const Mypage = () => {
               <i className="ri-arrow-right-s-line text-xl text-gray-400"></i>
             </Link>
             <Link
-              to="/mypage/my-meetings"
+              to="/my-meetings"
               className="flex items-center justify-between py-3 hover:bg-gray-50 cursor-pointer"
             >
               <div className="flex items-center">
