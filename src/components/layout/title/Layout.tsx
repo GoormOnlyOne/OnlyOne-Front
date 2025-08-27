@@ -17,7 +17,9 @@ export default function TitleLayout() {
   const [dynamicTitle, setDynamicTitle] = useState('');
   const [leaving, setLeaving] = useState(false);
   const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false); // 확인 모달
-  const [clubRole, setClubRole] = useState<'LEADER' | 'MEMBER' | 'GUEST' | null>(null);
+  const [clubRole, setClubRole] = useState<
+    'LEADER' | 'MEMBER' | 'GUEST' | null
+  >(null);
 
   const fetchChatRoomTitle = async (chatRoomId: string) => {
     try {
@@ -126,6 +128,16 @@ export default function TitleLayout() {
         isBack: true,
         isTitle: true,
         titleText: '프로필 수정하기',
+        isLike: false,
+        isOut: false,
+      };
+      break;
+
+    case pathname === '/mypage/my-meetings':
+      headerProps = {
+        isBack: true,
+        isTitle: true,
+        titleText: '내 모임 보기',
         isLike: false,
         isOut: false,
       };

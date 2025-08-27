@@ -90,7 +90,14 @@ const WalletHistory = ({ type }: WalletHistoryProps) => {
         [];
 
       const transformed: WalletTransaction[] = list.map(
-        ({ type, title, amount, status, mainImage, createdAt }: WalletTransactionResponse) => ({
+        ({
+          type,
+          title,
+          amount,
+          status,
+          mainImage,
+          createdAt,
+        }: WalletTransactionResponse) => ({
           type,
           title,
           amount,
@@ -173,7 +180,7 @@ const WalletHistory = ({ type }: WalletHistoryProps) => {
   }));
 
   return (
-    <div className="bg-white min-h-screen px-4 py-4">
+    <div className="bg-white min-h-screen py-4">
       <ListCard
         items={listItems}
         emptyMessage="거래 내역이 없습니다."
