@@ -138,7 +138,7 @@ export default function TitleLayout() {
       };
       break;
 
-    case pathname === '/mypage/my-meetings':
+    case pathname === '/my-meetings':
       headerProps = {
         isBack: true,
         isTitle: true,
