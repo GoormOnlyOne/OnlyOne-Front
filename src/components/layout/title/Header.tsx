@@ -6,8 +6,8 @@ interface TitleHeaderProps {
   titleText?: string;
   isLike?: boolean;
   isOut?: boolean;
+  isHome?: boolean;
   onBack?: () => void;
-
   onOut?: () => void;
   outDisabled?: boolean;
 }
@@ -18,6 +18,7 @@ export default function TitleHeader({
   titleText = '타이틀',
   isLike = false,
   isOut = false,
+  isHome = false,
   onBack,
   onOut,
   outDisabled,
@@ -57,6 +58,16 @@ export default function TitleHeader({
 
         {/* 우측: 아이콘 버튼들 */}
         <div className="flex items-center gap-2">
+          {isHome && (
+            <button
+              onClick={() => navigate('/')}
+              className="cursor-pointer w-10 h-10 flex items-center justify-center rounded-full bg-neutral-50 hover:bg-neutral-100 transition-colors"
+              aria-label="홈으로 가기"
+              title="홈으로 가기"
+            >
+              <i className="ri-home-line text-gray-600 text-lg"></i>
+            </button>
+          )}
           {/* {isLike && (
             <button
               className="cursor-pointer w-10 h-10 flex items-center justify-center rounded-full bg-neutral-50 hover:bg-neutral-100 transition-colors cursor-pointer"
