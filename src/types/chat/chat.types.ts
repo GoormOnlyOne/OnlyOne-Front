@@ -42,5 +42,10 @@ export interface ChatRoomMessageResponse {
 // 공통 응답 타입
 export interface PagedResponse<T> {
   success: boolean;
-  data: T;
+  data: {
+    content: T[];
+    page: number;
+    size: number;
+    totalPages: number;
+  };
 }

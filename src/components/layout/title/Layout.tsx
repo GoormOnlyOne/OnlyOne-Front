@@ -6,6 +6,7 @@ import apiClient from '../../../api/client';
 import Modal from '../../common/Modal';
 import { showToast as globalToast } from '../../common/Toast/ToastProvider';
 import { fetchChatMessages } from '../../../api/chat';
+import type { PagedResponse } from '../../../types/chat/chat.types';
 
 export default function TitleLayout() {
   const location = useLocation();
@@ -24,13 +25,17 @@ export default function TitleLayout() {
   const fetchChatRoomTitle = async (chatRoomId: string) => {
     try {
       const res = await fetchChatMessages(Number(chatRoomId));
-      const name = res?.data?.chatRoomName ?? null;
+      const firstItem = res.data.data.content?.[0]; 
+      const name = firstItem?.chatRoomName ?? null;
+
       setDynamicTitle(name || `채팅방 #${chatRoomId}`);
     } catch (error) {
-      console.error('채팅방 제목 불러오기 실패:', error);
-      setDynamicTitle(`채팅방`);
+      console.error("채팅방 제목 불러오기 실패:", error);
+      setDynamicTitle("채팅방");
     }
   };
+
+
 
   useEffect(() => {
     const chatRoomId = params.chatRoomId;
