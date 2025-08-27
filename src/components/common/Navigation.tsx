@@ -66,9 +66,9 @@ export default function Navigation() {
             >
               {/* 특별한 홈 버튼 배경 */}
               {tab.isSpecial && (
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="relative w-12 h-12 bg-gradient-to-br from-[#F5921F] via-[#EF7C30] to-[#FFAE00] rounded-full shadow-sm">
-                    <div className="absolute inset-0 bg-gradient-to-br from-white/30 via-white/20 to-white/10 rounded-full opacity-0 hover:opacity-100 hover:animate-pulse transition-all duration-300" />
+                <div className="absolute inset-x-0 top-0 bottom-0 flex items-center justify-center">
+                  <div className="relative w-full h-16 bg-gradient-to-br from-[#F5921F] via-[#EF7C30] to-[#FFAE00] rounded-full shadow-lg transform -translate-y-2">
+                    <div className="absolute inset-0 bg-brand-primary/10 opacity-50 scale-90 rounded-lg transition-all duration-300" />
                   </div>
                 </div>
               )}
@@ -85,7 +85,7 @@ export default function Navigation() {
                 text-xl w-6 h-6 flex items-center justify-center
                 transition-all duration-300
                 ${isActive ? 'scale-110 animate-bounce-once' : 'scale-100'}
-                ${tab.isSpecial ? 'relative z-10' : ''}
+                ${tab.isSpecial ? 'relative z-10 transform -translate-y-2' : ''}
               `}
               ></i>
 
@@ -94,7 +94,7 @@ export default function Navigation() {
                 className={`
                 text-xs font-medium transition-all duration-300
                 ${isActive ? 'font-semibold' : 'font-normal'}
-                ${tab.isSpecial ? 'relative z-10' : ''}
+                ${tab.isSpecial ? 'relative z-10 transform -translate-y-2' : ''}
               `}
               >
                 {tab.label}
