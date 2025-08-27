@@ -174,7 +174,6 @@ export const Category = () => {
               onAddressChange={handleAddressChange}
               initialCity="서울"
               initialDistrict="종로구"
-              className="mb-4"
             />
           </div>
 
