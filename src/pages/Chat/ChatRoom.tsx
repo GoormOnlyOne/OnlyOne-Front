@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react';
+// src/pages/chat/ChatRoom.tsx
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 
 import MyChatMessage from '../../components/domain/chat/MyChatMessage';
@@ -7,12 +8,11 @@ import OtherChatMessage from '../../components/domain/chat/OtherChatMessage';
 import { fetchChatMessages, deleteChatMessage } from '../../api/chat';
 import { uploadImage } from '../../api/upload';
 import { useChatSocket } from '../../hooks/useChatSocket';
-import type { ChatMessageDto } from '../../types/chat/chat.types';
+import type { ChatMessageDto, ChatRoomMessageResponse } from '../../types/chat/chat.types';
 import { getUserIdFromToken } from '../../utils/auth';
 import { Image } from 'lucide-react';
 import Loading from '../../components/common/Loading';
 import Modal from '../../components/common/Modal';
-
 
 const formatChatTime = (iso: string) => {
   const d = new Date(iso);
@@ -35,65 +35,160 @@ const ChatRoom: React.FC = () => {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   const { messages: liveMessages, sendMessage } = useChatSocket(chatRoomIdNum, currentUserId!);
+
+  // 무한 스크롤 관련
+  const [hasMore, setHasMore] = useState(true);
+  const [nextCursorId, setNextCursorId] = useState<number | null>(null);
+  const [nextCursorAt, setNextCursorAt] = useState<string | null>(null);
+  const [loadingMore, setLoadingMore] = useState(false);
+
+  // 스크롤/위치 refs
+  const listRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
 
+  // 알림 모달
   const [isAlertOpen, setIsAlertOpen] = useState(false);
   const [alertMsg, setAlertMsg] = useState('');
   const [alertVariant, setAlertVariant] = useState<'default' | 'danger'>('default');
   const [onAlertConfirm, setOnAlertConfirm] = useState<(() => void) | undefined>(undefined);
 
+  // 초기 로드
   useEffect(() => {
     if (!chatRoomIdNum) return;
+
     (async () => {
       try {
         setLoading(true);
         setError(null);
-        const res = await fetchChatMessages(chatRoomIdNum);
-        const data = res?.data;
-        if (data) {
-          setChatRoomName(data.chatRoomName);
-          setMessages(data.messages);
-        } else {
-          setChatRoomName('');
-          setMessages([]);
-        }
+
+        // 초기: 최신부터 size개 (커서 없음)
+        const raw = await fetchChatMessages(chatRoomIdNum, { size: 50 });
+        const page: ChatRoomMessageResponse =
+          (raw as any)?.data?.data ?? (raw as any)?.data ?? raw;
+
+        setChatRoomName(page.chatRoomName ?? '');
+        setMessages(page.messages ?? []);
+        setHasMore(!!page.hasMore);
+        setNextCursorId(page.nextCursorId ?? null);
+        setNextCursorAt(page.nextCursorAt ?? null);
+
+        // 처음엔 하단으로 스크롤
+        requestAnimationFrame(() => {
+          bottomRef.current?.scrollIntoView({ behavior: 'auto' });
+        });
       } catch (e: any) {
         setError(e?.message ?? '메시지를 불러오지 못했습니다.');
+        setChatRoomName('');
+        setMessages([]);
+        setHasMore(false);
+        setNextCursorId(null);
+        setNextCursorAt(null);
       } finally {
         setLoading(false);
       }
     })();
   }, [chatRoomIdNum]);
 
+  // 라이브 메시지 수신
   useEffect(() => {
-    if (liveMessages.length === 0) return;
+    if (!liveMessages.length) return;
     const latest = liveMessages[liveMessages.length - 1];
+
     setMessages(prev => [...prev, latest]);
+
+    // 바닥 근처일 때만 자동 스크롤
+    const el = listRef.current;
+    if (!el) return;
+    const nearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 80;
+    if (nearBottom) {
+      requestAnimationFrame(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' }));
+    }
   }, [liveMessages]);
 
+  // 이전 배치 로드 (커서 기반, 리스트 앞에 prepend)
+  const loadOlder = useCallback(async () => {
+    if (!hasMore || loadingMore || !chatRoomIdNum || nextCursorId == null || !nextCursorAt) return;
+
+    setLoadingMore(true);
+    const container = listRef.current;
+    const prevHeight = container?.scrollHeight ?? 0;
+
+    try {
+      const raw = await fetchChatMessages(chatRoomIdNum, {
+        size: 50,
+        cursorId: nextCursorId,
+        cursorAt: nextCursorAt,
+      });
+      const page: ChatRoomMessageResponse =
+        (raw as any)?.data?.data ?? (raw as any)?.data ?? raw;
+
+      // 서버가 오래→최신(ASC)로 주므로 앞에 붙인다
+      setMessages(prev => [...(page.messages ?? []), ...prev]);
+      setHasMore(!!page.hasMore);
+      setNextCursorId(page.nextCursorId ?? null);
+      setNextCursorAt(page.nextCursorAt ?? null);
+
+      // 스크롤 위치 보정
+      requestAnimationFrame(() => {
+        const newHeight = container?.scrollHeight ?? 0;
+        if (container) {
+          container.scrollTop = newHeight - prevHeight;
+        }
+      });
+    } catch (e) {
+      console.error('이전 메시지 로드 실패:', e);
+    } finally {
+      setLoadingMore(false);
+    }
+  }, [hasMore, loadingMore, chatRoomIdNum, nextCursorId, nextCursorAt]);
+
+  // 스크롤 핸들러: 맨 위 근처에서 loadOlder()
+  const handleScroll = useCallback(() => {
+    const el = listRef.current;
+    if (!el || loading || loadingMore) return;
+    if (el.scrollTop <= 60) {
+      loadOlder();
+    }
+  }, [loading, loadingMore, loadOlder]);
+
+  // 스크롤 이벤트 바인딩
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+    const el = listRef.current;
+    if (!el) return;
+    el.addEventListener('scroll', handleScroll);
+    return () => el.removeEventListener('scroll', handleScroll);
+  }, [handleScroll]);
 
   if (!accessToken || !currentUserId || isNaN(currentUserId)) {
     return <div className="p-4 text-center text-red-500">로그인이 필요합니다.</div>;
   }
 
+  // 전송
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!chatRoomIdNum) return;
 
     try {
+      // 이미지 선택 시 텍스트 동시 입력 차단 (UX 레벨)
+      if (imageFile && text.trim()) {
+        setAlertMsg('이미지 전송 시 텍스트는 함께 보낼 수 없어요.');
+        setAlertVariant('default');
+        setIsAlertOpen(true);
+        return;
+      }
+
       let imageUrl: string | null = null;
       if (imageFile) {
-        imageUrl = await uploadImage(imageFile, 'chat');
+        imageUrl = await uploadImage(imageFile, 'chat'); // CDN URL
       }
 
       const trimmedText = text.trim();
       if (!trimmedText && !imageUrl) return;
 
+      // 소켓 전송
       sendMessage({ text: trimmedText, imageUrl });
 
+      // 입력 초기화
       setText('');
       setImageFile(null);
       if (imagePreview) {
@@ -108,6 +203,7 @@ const ChatRoom: React.FC = () => {
     }
   };
 
+  // 파일 선택
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -116,6 +212,7 @@ const ChatRoom: React.FC = () => {
     }
   };
 
+  // 삭제
   const handleDeleteMessage = async (messageId: number) => {
     setAlertMsg('이 메시지를 삭제하시겠습니까?');
     setAlertVariant('default');
@@ -133,7 +230,7 @@ const ChatRoom: React.FC = () => {
         console.error('메시지 삭제 실패:', err);
         setAlertMsg('메시지 삭제에 실패했습니다.');
         setAlertVariant('default');
-        setOnAlertConfirm(undefined); // 에러 알림은 확인만
+        setOnAlertConfirm(undefined);
         setIsAlertOpen(true);
         return;
       } finally {
@@ -145,16 +242,22 @@ const ChatRoom: React.FC = () => {
   };
 
   return (
-  <div className="flex flex-col h-[calc(100dvh-56px)] bg-gray-50 overflow-hidden max-w-full w-full">
-    {/* 채팅 메시지 영역 */}
-    <div
-      className="flex-1 min-h-0 overflow-y-auto no-scrollbar px-2 sm:px-4 py-3 space-y-2 w-full max-w-full relative"
-      aria-busy={loading}
-    >
-        {/* ★ 변경: 공통 로딩(오버레이) */}
+    <div className="flex flex-col h-[calc(100dvh-56px)] bg-gray-50 overflow-hidden max-w-full w-full">
+      {/* 리스트 */}
+      <div
+        ref={listRef}
+        className="flex-1 min-h-0 overflow-y-auto no-scrollbar px-2 sm:px-4 py-3 space-y-2 w-full max-w-full relative"
+        aria-busy={loading}
+      >
         {loading && <Loading overlay text="로딩 중..." />}
 
-        {/* ★ 변경: 텍스트 로더 제거, 에러만 표시 */}
+        {/* 상단 로딩 인디케이터: 과거 배치 로드 */}
+        {loadingMore && (
+          <div className="w-full flex justify-center py-2 text-xs text-neutral-500">
+            로딩 중...
+          </div>
+        )}
+
         {error && (
           <div className="text-red-600 bg-red-50 border border-red-200 rounded-md px-3 py-2 text-sm">
             {error}
@@ -264,6 +367,7 @@ const ChatRoom: React.FC = () => {
           </div>
         </form>
       </div>
+
       <Modal
         isOpen={isAlertOpen}
         onClose={() => {

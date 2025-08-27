@@ -33,7 +33,10 @@ export interface ChatRoomSummary {
 export interface ChatRoomMessageResponse {
   chatRoomId: number;
   chatRoomName: string;
-  messages: ChatMessageDto[];
+  messages: ChatMessageDto[]; // 오래→최신(ASC)
+  hasMore: boolean;
+  nextCursorId?: number | null;
+  nextCursorAt?: string | null; // ISO
 }
 
 // 공통 응답 타입

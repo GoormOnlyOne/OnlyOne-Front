@@ -10,8 +10,14 @@ import type {
 /**
  * 특정 채팅방의 메시지 목록 조회
  */
-export const fetchChatMessages = (chatRoomId: number) =>
-  apiClient.get<ChatRoomMessageResponse>(`/chat/${chatRoomId}/messages`);
+export const fetchChatMessages = (
+  chatRoomId: number,
+  params?: { size?: number; cursorId?: number | null; cursorAt?: string | null }
+) =>
+  apiClient.get< PagedResponse<ChatRoomMessageResponse> >(
+    `/chat/${chatRoomId}/messages`,
+    { params }
+  );
 
 /**
  * 클럽 내 채팅방 목록 조회
