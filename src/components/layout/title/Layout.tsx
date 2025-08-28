@@ -36,7 +36,6 @@ export default function TitleLayout() {
 
   useEffect(() => {
     const chatRoomId = params.chatRoomId;
-    const meetingId = params.id;
 
     if (chatRoomId && /^\/chat\/\d+\/messages\/?$/.test(pathname)) {
       fetchChatRoomTitle(chatRoomId);
@@ -91,7 +90,7 @@ export default function TitleLayout() {
     }
   };
 
-  const pagesWithNavigation = ['/mypage', '/feed', '/my-meetings'];
+  const pagesWithNavigation = ['/mypage', '/feed', '/my-meetings', '/payment', '/payment/charge'];
   const hasNavigation = pagesWithNavigation.includes(pathname);
 
   let headerProps = null;
@@ -119,6 +118,17 @@ export default function TitleLayout() {
         isHome: !hasNavigation,
       };
       break;
+
+    case pathname === '/payment/charge' || pathname === '/payment':
+    headerProps = {
+      isBack: true,
+      isTitle: true,
+      titleText: '충전하기',
+      isLike: false,
+      isOut: false,
+      isHome: !hasNavigation,
+    };
+    break;
 
     case pathname === '/mypage/interest':
       headerProps = {
