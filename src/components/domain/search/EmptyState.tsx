@@ -13,14 +13,15 @@ export default function EmptyState({
   showCreateButton = true,
 }: EmptyStateProps) {
   return (
-    <div className="flex flex-col items-center justify-center">
-      <h3 className="text-base font-semibold text-gray-800 mb-2">{title}</h3>
-      <p className="text-sm text-gray-600 mb-8 text-center">
-        {description}
-      </p>
-
-      <div className="w-full">
-        {showCreateButton && <CreateMeetingCard />}
+    <div className="p-4">
+      <div className="flex flex-col items-center justify-center">
+        <h3 className="text-base font-semibold text-gray-800 mb-2">{title}</h3>
+        <p className="text-sm text-gray-600 mb-8 text-center">
+          {description}
+        </p>
+        <div className="w-full">
+          {showCreateButton && <CreateMeetingCard />}
+        </div>
       </div>
     </div>
   );
