@@ -86,8 +86,16 @@ export const ScheduleForm = ({
   };
 
   const handleUserLimitChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const value = parseInt(e.target.value.replace(/[^0-9]/g, '')) || 1;
-    onFormChange('userLimit', Math.max(1, Math.min(value, 100)));
+    const value = e.target.value;
+    // 숫자가 아닌 문자는 제거하되, 임시적으로 허용
+    const cleanValue = value.replace(/[^0-9]/g, '');
+    onFormChange('userLimit', parseInt(cleanValue) || 0);
+  };
+
+  const handleUserLimitBlur = (e: ChangeEvent<HTMLInputElement>) => {
+    const parsed = parseInt(e.target.value) || 1;
+    const bounded = Math.max(1, Math.min(parsed, 100));
+    onFormChange('userLimit', bounded);
   };
 
   const handleDateChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -273,8 +281,9 @@ export const ScheduleForm = ({
               <div className="relative">
                 <input
                   type="text"
-                  value={formData.userLimit}
+                  value={formData.userLimit || ''}
                   onChange={handleUserLimitChange}
+                  onBlur={handleUserLimitBlur}
                   placeholder="정모 인원을 설정해주세요."
                   className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   required
