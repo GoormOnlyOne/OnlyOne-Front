@@ -33,7 +33,7 @@ export const RefeedBottomSheet = ({
 		try {
 			setClubsLoading(true);
 			const response = await apiClient.get('/search/user');
-			const clubsData = response.data || [];
+			const clubsData = response.data.clubResponseDtoList || [];
 			setMyClubs(clubsData);
 		} catch (error) {
 			console.error('내 모임 목록 로드 실패:', error);
