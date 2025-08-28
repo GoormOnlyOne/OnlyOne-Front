@@ -45,8 +45,7 @@ export default function MeetingList({
       case 'full':
         return { endpoint: apiEndpoint ?? '/search/recommendations', size: 20 };
       case 'home':
-      default:
-        return { endpoint: apiEndpoint ?? '/search/recommendations', size: 20 };
+        return { endpoint: apiEndpoint ?? '/search/recommendations', size: 5 };
     }
   };
 
