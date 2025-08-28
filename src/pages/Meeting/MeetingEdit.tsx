@@ -71,6 +71,9 @@ export const MeetingEdit = () => {
       } else if (typeof data.profileImage === 'string') {
         // 기존 이미지 URL이 있는 경우 그대로 사용
         clubImageUrl = data.profileImage;
+      } else if (data.profileImageUrl) {
+        // profileImageUrl에서 기존 이미지 URL 가져오기
+        clubImageUrl = data.profileImageUrl;
       }
 
       const payload = {

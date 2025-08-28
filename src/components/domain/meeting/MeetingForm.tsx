@@ -78,7 +78,7 @@ export const MeetingForm = ({
       introduction: initialData.introduction ?? prev.introduction,
       profileImage:
         typeof initialData.profileImage === 'string'
-          ? null
+          ? prev.profileImage
           : (initialData.profileImage ?? prev.profileImage),
       userLimit: initialData.userLimit ?? prev.userLimit,
       accountNumber: initialData.accountNumber ?? prev.accountNumber,
@@ -187,7 +187,11 @@ export const MeetingForm = ({
   };
 
   const handleSubmit = () => {
-    onSubmit(formData, selectedAddress);
+    const submittedData = {
+      ...formData,
+      profileImageUrl: imagePreview && !formData.profileImage ? imagePreview : undefined,
+    };
+    onSubmit(submittedData, selectedAddress);
   };
   const onClickMeetingDelete = () => setIsModalOpen(true);
   const handleMeetingDelete = () => setIsModalOpen(false);
