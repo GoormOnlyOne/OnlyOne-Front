@@ -110,8 +110,8 @@ export default function ScheduleList({ clubRole }: ScheduleListProps) {
   };
 
   const getStatusCard = (scheduleStatus: string) => {
-  const baseStyle =
-    'inline-flex items-center px-2.5 py-0.5 rounded-full text-medium font-medium';
+    const baseStyle =
+      'inline-flex items-center px-2.5 py-0.5 rounded-full text-medium font-medium';
     switch (scheduleStatus) {
       case 'READY': // 모집중
         return `${baseStyle} bg-[var(--color-brand-primary)]/10 text-[var(--color-brand-primary)] ring-1 ring-[var(--color-brand-primary)]/20`;
@@ -185,12 +185,14 @@ export default function ScheduleList({ clubRole }: ScheduleListProps) {
       setSelectedSchedule(schedule);
       setModalAction('join');
       setIsModalOpen(true);
-      setModalTitle(`${schedule.name}에 참여 하시겠습니까?`);
+      setModalTitle(
+        `${schedule.name}에 참여 하시겠습니까?\n자동 정산을 위한 예약금이 보관됩니다.`,
+      );
     } else if (action === '정산하기') {
       setSelectedSchedule(schedule);
       setModalAction('settlement');
       setIsModalOpen(true);
-      setModalTitle(`${schedule.name} 정산하시겠습니까?`);
+      setModalTitle(`${schedule.name} 자동 정산하시겠습니까?`);
     } else {
       setSelectedSchedule(schedule);
       setModalAction('leave');
@@ -428,7 +430,9 @@ export default function ScheduleList({ clubRole }: ScheduleListProps) {
         )}
 
         {/* 리스트 */}
-        {!loading && !error && safeSchedules.length > 0 && (
+        {!loading &&
+          !error &&
+          safeSchedules.length > 0 &&
           safeSchedules.map(schedule => (
             <div
               key={schedule.scheduleId}
@@ -445,15 +449,20 @@ export default function ScheduleList({ clubRole }: ScheduleListProps) {
                     </p>
                     <div className="text-sm text-gray-600">
                       <span>
-                        💰 {`인당 비용 | ${schedule.cost === 0 ? '무료' : `${schedule.cost.toLocaleString()}₩`}`}
+                        💰{' '}
+                        {`인당 비용 | ${schedule.cost === 0 ? '무료' : `${schedule.cost.toLocaleString()}₩`}`}
                       </span>
                     </div>
                   </div>
 
                   <div className="flex items-center gap-3">
                     <div className="flex items-center gap-2">
-                      <div className={`rounded-full ${getDdayDot(schedule.dday)}`}></div>
-                      <span className="text-md font-medium text-gray-600">{schedule.dday}</span>
+                      <div
+                        className={`rounded-full ${getDdayDot(schedule.dday)}`}
+                      ></div>
+                      <span className="text-md font-medium text-gray-600">
+                        {schedule.dday}
+                      </span>
                     </div>
 
                     <span className={getStatusCard(schedule.scheduleStatus)}>
@@ -464,7 +473,11 @@ export default function ScheduleList({ clubRole }: ScheduleListProps) {
                       <div className="relative">
                         <button
                           onClick={() =>
-                            setOpenMenuId(openMenuId === schedule.scheduleId ? null : schedule.scheduleId)
+                            setOpenMenuId(
+                              openMenuId === schedule.scheduleId
+                                ? null
+                                : schedule.scheduleId,
+                            )
                           }
                           className="p-1 rounded hover:bg-gray-100"
                         >
@@ -477,7 +490,9 @@ export default function ScheduleList({ clubRole }: ScheduleListProps) {
                             onMouseLeave={() => setOpenMenuId(null)}
                           >
                             <button
-                              onClick={() => handleScheduleEdit(schedule.scheduleId)}
+                              onClick={() =>
+                                handleScheduleEdit(schedule.scheduleId)
+                              }
                               className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
                             >
                               수정
@@ -503,8 +518,7 @@ export default function ScheduleList({ clubRole }: ScheduleListProps) {
                 </div>
               </div>
             </div>
-          ))
-        )}
+          ))}
       </div>
 
       {/* 모달 창 */}
