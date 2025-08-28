@@ -98,7 +98,7 @@ export const router = createBrowserRouter([
         element: <Mypage />,
       },
       {
-        path: 'mypage/my-meetings',
+        path: 'my-meetings',
         element: <MyMeeting />,
       },
       {

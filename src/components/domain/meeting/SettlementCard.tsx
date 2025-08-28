@@ -13,7 +13,7 @@ export default function SettlementCard({
     if (onNavigateToSettlement) {
       onNavigateToSettlement(); // 부모 콜백 호출
     } else {
-      navigate('/mypage/my-meetings', { state: { activeTab: 'mySettlement' } });
+      navigate('/my-meetings', { state: { activeTab: 'mySettlement' } });
     }
   };
 

@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect, useRef } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import KoreaData from '../../assets/json/korea_administrative_divisions.json';
 
 // JSON 데이터 타입 정의
@@ -61,8 +61,8 @@ const AddressSelector: React.FC<AddressSelectorProps> = ({
   const [selectedCity, setSelectedCity] = useState<string>(initialCity);
   const [selectedDistrict, setSelectedDistrict] =
     useState<string>(initialDistrict);
-  const cityScrollRef = useRef<HTMLDivElement>(null);
-  const districtScrollRef = useRef<HTMLDivElement>(null);
+  const [isCityOpen, setIsCityOpen] = useState(false);
+  const [isDistrictOpen, setIsDistrictOpen] = useState(false);
 
   // initialCity와 initialDistrict가 변경될 때 상태 업데이트
   useEffect(() => {
@@ -98,31 +98,6 @@ const AddressSelector: React.FC<AddressSelectorProps> = ({
     return name;
   }, []);
 
-  // 선택된 항목으로 스크롤하는 함수
-  const scrollToElement = useCallback(
-    (container: HTMLDivElement | null, targetText: string) => {
-      if (!container) return;
-
-      const buttons = container.querySelectorAll('button');
-      const targetButton = Array.from(buttons).find(
-        button => button.textContent?.trim() === targetText,
-      );
-
-      if (targetButton) {
-        const buttonRect = targetButton.getBoundingClientRect();
-        const containerRect = container.getBoundingClientRect();
-        const scrollTop = container.scrollTop;
-        
-        const targetScrollTop = scrollTop + buttonRect.top - containerRect.top;
-        
-        container.scrollTo({
-          top: targetScrollTop,
-          behavior: 'smooth',
-        });
-      }
-    },
-    [],
-  );
 
   // 주소 변경 시 완료 상태와 함께 콜백 호출
   useEffect(() => {
@@ -134,21 +109,6 @@ const AddressSelector: React.FC<AddressSelectorProps> = ({
     onAddressChange?.(addressData);
   }, [selectedCity, selectedDistrict, isComplete]);
 
-  // 초기 로드 시 선택된 항목으로 스크롤
-  useEffect(() => {
-    if (selectedCity) {
-      setTimeout(
-        () => scrollToElement(cityScrollRef.current, selectedCity),
-        300,
-      );
-    }
-    if (selectedDistrict) {
-      setTimeout(
-        () => scrollToElement(districtScrollRef.current, selectedDistrict),
-        300,
-      );
-    }
-  }, [selectedCity, selectedDistrict, scrollToElement]);
 
   const handleCityChange = useCallback(
     (city: string) => {
@@ -167,10 +127,10 @@ const AddressSelector: React.FC<AddressSelectorProps> = ({
         onDistrictChange?.(firstDistrict);
       }
 
-      // 선택된 시/도로 스크롤
-      setTimeout(() => scrollToElement(cityScrollRef.current, city), 100);
+      // 드롭다운 닫기
+      setIsCityOpen(false);
     },
-    [onCityChange, onDistrictChange, scrollToElement],
+    [onCityChange, onDistrictChange],
   );
 
   const handleDistrictChange = useCallback(
@@ -180,66 +140,81 @@ const AddressSelector: React.FC<AddressSelectorProps> = ({
       // 콜백 호출
       onDistrictChange?.(district);
 
-      // 선택된 구/군으로 스크롤
-      setTimeout(
-        () => scrollToElement(districtScrollRef.current, district),
-        100,
-      );
+      // 드롭다운 닫기
+      setIsDistrictOpen(false);
     },
-    [onDistrictChange, scrollToElement],
+    [onDistrictChange],
   );
 
   return (
-    <div
-      className={`w-full max-w-4xl mx-auto border border-gray-300 ${className}`}
-    >
-      {/* 선택된 지역 표시 - 상단 고정 */}
-      {(selectedCity || selectedDistrict) && (
-        <div className="bg-brand-light border-b border-gray-300 px-4 py-3 sticky top-0 z-10">
-          <div className="text-sm font-medium text-brand-deepest">
-            선택된 지역: {selectedCity}{selectedDistrict ? ` > ${selectedDistrict}` : ''}
-          </div>
+    <div className={`w-full ${className}`}>
+      <div className="flex gap-4">
+        {/* 시/도 드롭다운 */}
+        <div className="flex-1 relative">
+          <button
+            onClick={() => setIsCityOpen(!isCityOpen)}
+            className="w-full px-4 py-3 text-left border border-gray-300 rounded-lg bg-white hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-brand-primary transition-colors"
+          >
+            <span className={selectedCity ? 'text-gray-900' : 'text-gray-500'}>
+              {selectedCity || placeholder.city}
+            </span>
+            <i className={`ri-arrow-down-s-line absolute right-3 top-1/2 transform -translate-y-1/2 transition-transform ${
+              isCityOpen ? 'rotate-180' : ''
+            }`}></i>
+          </button>
+          
+          {isCityOpen && (
+            <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+              {cities.map(city => (
+                <button
+                  key={city}
+                  onClick={() => handleCityChange(city)}
+                  className={`w-full text-left px-4 py-3 hover:bg-gray-100 transition-colors ${
+                    selectedCity === city
+                      ? 'bg-brand-light text-brand-deepest'
+                      : 'text-gray-700'
+                  }`}
+                >
+                  {getSimpleName(city)}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
-      )}
 
-      {/* 모든 화면에서 좌우 분할 */}
-      <div className="flex h-40 sm:h-56">
-        {/* 좌측: 시/도 선택 */}
-        <div className="w-2/5 sm:w-1/3 border-r border-gray-300 bg-gray-50">
-          <div ref={cityScrollRef} className="overflow-y-auto h-full">
-            {cities.map(city => (
-              <button
-                key={city}
-                onClick={() => handleCityChange(city)}
-                className={`w-full text-left px-2 sm:px-3 md:px-4 py-2 md:py-3 hover:bg-gray-100 border-b border-gray-200 transition-colors text-xs sm:text-sm md:text-base ${
-                  selectedCity === city
-                    ? 'bg-brand-light text-brand-deepest border-r-2 border-r-brand-primary'
-                    : 'text-gray-700'
-                }`}
-              >
-                {getSimpleName(city)}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* 우측: 구/군 선택 */}
-        <div className="w-3/5 sm:w-2/3 bg-white">
-          <div ref={districtScrollRef} className="overflow-y-auto h-full">
-            {!selectedCity ? (
-              <div className="flex items-center justify-center h-20 md:h-32 text-gray-500 text-xs sm:text-sm md:text-base px-2 text-center">
-                {placeholder.city}
-              </div>
-            ) : districts.length === 0 ? (
-              <div className="flex items-center justify-center h-20 md:h-32 text-gray-500 text-xs sm:text-sm md:text-base px-2 text-center leading-tight">
-                {getSimpleName(selectedCity)}는 별도의 구/군 구분이 없습니다
-              </div>
-            ) : (
-              districts.map(district => (
+        {/* 시/군/구 드롭다운 */}
+        <div className="flex-1 relative">
+          <button
+            onClick={() => setIsDistrictOpen(!isDistrictOpen)}
+            disabled={!selectedCity || districts.length === 0}
+            className={`w-full px-4 py-3 text-left border border-gray-300 rounded-lg bg-white transition-colors ${
+              !selectedCity || districts.length === 0
+                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                : 'hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-brand-primary'
+            }`}
+          >
+            <span className={selectedDistrict ? 'text-gray-900' : 'text-gray-500'}>
+              {!selectedCity
+                ? placeholder.city
+                : districts.length === 0
+                ? `${getSimpleName(selectedCity)}는 별도의 구/군 구분이 없습니다`
+                : selectedDistrict || placeholder.district
+              }
+            </span>
+            {selectedCity && districts.length > 0 && (
+              <i className={`ri-arrow-down-s-line absolute right-3 top-1/2 transform -translate-y-1/2 transition-transform ${
+                isDistrictOpen ? 'rotate-180' : ''
+              }`}></i>
+            )}
+          </button>
+          
+          {isDistrictOpen && selectedCity && districts.length > 0 && (
+            <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+              {districts.map(district => (
                 <button
                   key={district}
                   onClick={() => handleDistrictChange(district)}
-                  className={`w-full text-left px-2 sm:px-3 md:px-4 py-2 md:py-3 hover:bg-gray-100 border-b border-gray-200 transition-colors text-xs sm:text-sm md:text-base ${
+                  className={`w-full text-left px-4 py-3 hover:bg-gray-100 transition-colors ${
                     selectedDistrict === district
                       ? 'bg-brand-light text-brand-deepest'
                       : 'text-gray-700'
@@ -247,9 +222,9 @@ const AddressSelector: React.FC<AddressSelectorProps> = ({
                 >
                   {district}
                 </button>
-              ))
-            )}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>
