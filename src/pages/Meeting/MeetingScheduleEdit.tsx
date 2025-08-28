@@ -35,7 +35,12 @@ export const MeetingScheduleEdit = () => {
           setInitialData({
             meetingName: data.name,
             meetingDate: scheduleDate.toISOString().split('T')[0],
-            meetingTime: scheduleDate.toTimeString().slice(0, 5),
+            meetingTime: scheduleDate.toLocaleTimeString('ko-KR', {
+              hour: '2-digit',
+              minute: '2-digit',
+              hour12: false,
+              timeZone: 'Asia/Seoul'
+            }),
             location: data.location,
             costPerPerson: data.cost,
             userLimit: data.userLimit,
@@ -55,14 +60,16 @@ export const MeetingScheduleEdit = () => {
 
   const handleSubmit = async (data: ScheduleFormData) => {
     try {
+      const scheduleDateTime = new Date(`${data.meetingDate}T${data.meetingTime}`);
+      // 한국 시간대 보정 (UTC+9)
+      scheduleDateTime.setHours(scheduleDateTime.getHours() + 9);
+      
       const payload = {
         name: data.meetingName,
         location: data.location,
         cost: data.costPerPerson,
         userLimit: data.userLimit,
-        scheduleTime: new Date(
-          `${data.meetingDate}T${data.meetingTime}`,
-        ).toISOString(),
+        scheduleTime: scheduleDateTime.toISOString(),
       };
 
       const response = await apiClient.patch<{

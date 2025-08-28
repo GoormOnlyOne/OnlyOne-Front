@@ -78,7 +78,7 @@ export const MeetingForm = ({
       introduction: initialData.introduction ?? prev.introduction,
       profileImage:
         typeof initialData.profileImage === 'string'
-          ? null
+          ? prev.profileImage
           : (initialData.profileImage ?? prev.profileImage),
       userLimit: initialData.userLimit ?? prev.userLimit,
       accountNumber: initialData.accountNumber ?? prev.accountNumber,
@@ -181,13 +181,24 @@ export const MeetingForm = ({
   };
 
   const handleUserLimitChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    // 숫자가 아닌 문자는 제거하되, 임시적으로 허용
+    const cleanValue = value.replace(/[^0-9]/g, '');
+    onFormChange('userLimit', parseInt(cleanValue) || 0);
+  };
+
+  const handleUserLimitBlur = (e: ChangeEvent<HTMLInputElement>) => {
     const parsed = parseInt(e.target.value) || 1;
-    const bounded = Math.min(parsed, 100);
+    const bounded = Math.max(1, Math.min(parsed, 100));
     onFormChange('userLimit', bounded);
   };
 
   const handleSubmit = () => {
-    onSubmit(formData, selectedAddress);
+    const submittedData = {
+      ...formData,
+      profileImageUrl: imagePreview && !formData.profileImage ? imagePreview : undefined,
+    };
+    onSubmit(submittedData, selectedAddress);
   };
   const onClickMeetingDelete = () => setIsModalOpen(true);
   const handleMeetingDelete = () => setIsModalOpen(false);
@@ -327,12 +338,12 @@ export const MeetingForm = ({
                 <span className="text-red-400 mr-1">*</span>정원
               </label>
               <input
-                type="number"
-                value={formData.userLimit}
+                type="text"
+                value={formData.userLimit || ''}
                 onChange={handleUserLimitChange}
+                onBlur={handleUserLimitBlur}
                 className="w-full px-4 py-3 border rounded-lg"
-                min={1}
-                max={100}
+                placeholder="정원을 입력하세요"
                 required
               />
               <p className="text-xs text-gray-500 mt-1">
