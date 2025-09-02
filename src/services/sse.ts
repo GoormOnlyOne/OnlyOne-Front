@@ -1,14 +1,14 @@
-import { createSSEConnection } from '../api/notification';
+import { EventSourcePolyfill } from 'event-source-polyfill';
 
 export interface SSEEvent {
   id?: string;
   type: string;
-  data: any;
+  data: unknown;
   timestamp: number;
 }
 
 export class SSEService {
-  private eventSource: EventSource | null = null;
+  private eventSource: EventSourcePolyfill | null = null;
   private userId: number | null = null;
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 5;
@@ -25,17 +25,26 @@ export class SSEService {
     return new Promise((resolve, reject) => {
       try {
         this.userId = userId;
-        this.eventSource = createSSEConnection(
-          userId,
-          this.lastEventId || undefined,
-        );
+        
+        const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/';
+        const url = new URL(`sse/subscribe`, baseUrl);
+        
+        const token = localStorage.getItem('accessToken');
+        
+        this.eventSource = new EventSourcePolyfill(url.toString(), {
+          headers: token ? {
+            'Authorization': `Bearer ${token}`,
+          } : {},
+          withCredentials: true,
+          heartbeatTimeout: 60000,
+        });
 
         this.eventSource.onopen = () => {
           this.reconnectAttempts = 0;
           resolve();
         };
 
-        this.eventSource.onmessage = (event) => {
+        this.eventSource.onmessage = (event: any) => {
           this.handleMessage(event);
         };
 
@@ -55,8 +64,8 @@ export class SSEService {
           'comment',
         ];
         eventTypes.forEach(type => {
-          this.eventSource?.addEventListener(type, event => {
-            this.handleMessage(event as MessageEvent, type);
+          this.eventSource?.addEventListener(type, (event: any) => {
+            this.handleMessage(event, type);
           });
         });
       } catch (error) {
@@ -96,9 +105,10 @@ export class SSEService {
         }));
         
         // 읽지 않은 개수 업데이트 이벤트 (data에 unreadCount가 있는 경우)
-        if (sseEvent.data.unreadCount !== undefined) {
+        const data = sseEvent.data as { unreadCount?: number };
+        if (data.unreadCount !== undefined) {
           window.dispatchEvent(new CustomEvent('unread-count-updated', {
-            detail: { count: sseEvent.data.unreadCount }
+            detail: { count: data.unreadCount }
           }));
         }
       }

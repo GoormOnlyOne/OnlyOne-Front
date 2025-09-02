@@ -55,7 +55,7 @@ export const useNotifications = ({
 
   const markAllAsRead = useCallback(async () => {
     try {
-      const response = await apiMarkAllAsRead(userId);
+      const response = await apiMarkAllAsRead();
       if (response.success) {
         setNotifications(prev =>
           prev.map(notification => ({ ...notification, isRead: true })),

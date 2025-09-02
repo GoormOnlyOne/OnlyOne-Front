@@ -27,7 +27,6 @@ export interface CreateNotificationResponse {
   content: string;
   type: NotificationType;
   isRead: boolean;
-  fcmSent: boolean;
   createdAt: string;
 }
 

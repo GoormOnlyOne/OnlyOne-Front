@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SSE with EventSource Polyfill Test</title>
+    <script src="https://cdn.jsdelivr.net/npm/event-source-polyfill@1.0.31/src/eventsource.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+        .controls {
+            margin: 20px 0;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        .connect-btn {
+            background: #667eea;
+            color: white;
+        }
+        .connect-btn:hover {
+            background: #5563d1;
+        }
+        .disconnect-btn {
+            background: #e74c3c;
+            color: white;
+        }
+        .disconnect-btn:hover {
+            background: #c0392b;
+        }
+        .clear-btn {
+            background: #95a5a6;
+            color: white;
+        }
+        .clear-btn:hover {
+            background: #7f8c8d;
+        }
+        .status {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .status.connected {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status.disconnected {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .status.connecting {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+        }
+        .config {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .config input {
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .config label {
+            display: block;
+            margin-top: 10px;
+            font-weight: bold;
+            color: #555;
+        }
+        .messages {
+            margin-top: 20px;
+        }
+        .message {
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            animation: slideIn 0.3s ease-out;
+        }
+        @keyframes slideIn {
+            from {
+                transform: translateX(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        .message-header {
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+        .message-time {
+            color: #6c757d;
+            font-size: 12px;
+            float: right;
+        }
+        .message-content {
+            margin-top: 10px;
+            padding: 10px;
+            background: white;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            overflow-x: auto;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .stat-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+        }
+        .stat-label {
+            color: #6c757d;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 SSE EventSource Polyfill Test</h1>
+        
+        <div class="config">
+            <label for="baseUrl">Backend URL:</label>
+            <input type="text" id="baseUrl" value="http://localhost:8080/" placeholder="http://localhost:8080/">
+            
+            <label for="token">JWT Token (Optional):</label>
+            <input type="text" id="token" placeholder="Bearer token...">
+            
+            <label for="userId">User ID:</label>
+            <input type="text" id="userId" value="1" placeholder="1">
+        </div>
+
+        <div class="controls">
+            <button onclick="connect()" class="connect-btn">🔌 Connect with Polyfill</button>
+            <button onclick="disconnect()" class="disconnect-btn">🔌 Disconnect</button>
+            <button onclick="clearMessages()" class="clear-btn">🗑️ Clear Messages</button>
+        </div>
+
+        <div id="status" class="status disconnected">
+            ⚡ Status: Disconnected
+        </div>
+
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-value" id="messageCount">0</div>
+                <div class="stat-label">Messages Received</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="connectionTime">0s</div>
+                <div class="stat-label">Connection Time</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="lastMessageTime">-</div>
+                <div class="stat-label">Last Message</div>
+            </div>
+        </div>
+
+        <div class="messages">
+            <h2>📨 Messages</h2>
+            <div id="messages"></div>
+        </div>
+    </div>
+
+    <script>
+        let eventSource = null;
+        let messageCount = 0;
+        let connectionStartTime = null;
+        let connectionTimer = null;
+
+        function updateConnectionTime() {
+            if (connectionStartTime) {
+                const elapsed = Math.floor((Date.now() - connectionStartTime) / 1000);
+                document.getElementById('connectionTime').textContent = `${elapsed}s`;
+            }
+        }
+
+        function connect() {
+            if (eventSource) {
+                disconnect();
+            }
+
+            const baseUrl = document.getElementById('baseUrl').value;
+            const token = document.getElementById('token').value;
+            const userId = document.getElementById('userId').value;
+            
+            const url = new URL('sse/subscribe', baseUrl);
+            
+            // EventSourcePolyfill configuration
+            const options = {
+                headers: {},
+                withCredentials: true,
+                heartbeatTimeout: 60000 // 60 seconds
+            };
+            
+            if (token) {
+                options.headers['Authorization'] = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
+            }
+
+            updateStatus('connecting', '🔄 Connecting...');
+            
+            try {
+                // Use EventSourcePolyfill instead of native EventSource
+                eventSource = new EventSourcePolyfill(url.toString(), options);
+                
+                eventSource.onopen = function() {
+                    console.log('SSE Connection opened');
+                    updateStatus('connected', '✅ Connected with EventSource Polyfill');
+                    connectionStartTime = Date.now();
+                    connectionTimer = setInterval(updateConnectionTime, 1000);
+                    addMessage('System', 'Connection established using EventSource Polyfill', 'success');
+                };
+
+                eventSource.onmessage = function(event) {
+                    console.log('Message received:', event);
+                    messageCount++;
+                    document.getElementById('messageCount').textContent = messageCount;
+                    document.getElementById('lastMessageTime').textContent = new Date().toLocaleTimeString();
+                    
+                    let data;
+                    try {
+                        data = JSON.parse(event.data);
+                    } catch (e) {
+                        data = event.data;
+                    }
+                    
+                    addMessage('Message', data, 'message');
+                };
+
+                // Listen for specific event types
+                eventSource.addEventListener('notification', function(event) {
+                    console.log('Notification event:', event);
+                    messageCount++;
+                    document.getElementById('messageCount').textContent = messageCount;
+                    document.getElementById('lastMessageTime').textContent = new Date().toLocaleTimeString();
+                    
+                    let data;
+                    try {
+                        data = JSON.parse(event.data);
+                    } catch (e) {
+                        data = event.data;
+                    }
+                    
+                    addMessage('Notification', data, 'notification');
+                });
+
+                eventSource.addEventListener('ping', function(event) {
+                    console.log('Ping received');
+                    addMessage('Ping', 'Server heartbeat', 'ping');
+                });
+
+                eventSource.onerror = function(error) {
+                    console.error('SSE Error:', error);
+                    
+                    if (eventSource.readyState === EventSource.CONNECTING) {
+                        updateStatus('connecting', '🔄 Reconnecting...');
+                        addMessage('System', 'Connection lost, attempting to reconnect...', 'error');
+                    } else if (eventSource.readyState === EventSource.CLOSED) {
+                        updateStatus('disconnected', '❌ Connection closed');
+                        addMessage('System', 'Connection closed', 'error');
+                        clearInterval(connectionTimer);
+                    }
+                };
+                
+            } catch (error) {
+                console.error('Failed to create EventSource:', error);
+                updateStatus('disconnected', '❌ Failed to connect');
+                addMessage('System', `Connection error: ${error.message}`, 'error');
+            }
+        }
+
+        function disconnect() {
+            if (eventSource) {
+                eventSource.close();
+                eventSource = null;
+                updateStatus('disconnected', '⚡ Disconnected');
+                addMessage('System', 'Disconnected from server', 'info');
+                clearInterval(connectionTimer);
+                connectionStartTime = null;
+                document.getElementById('connectionTime').textContent = '0s';
+            }
+        }
+
+        function updateStatus(state, text) {
+            const statusEl = document.getElementById('status');
+            statusEl.className = `status ${state}`;
+            statusEl.textContent = text;
+        }
+
+        function addMessage(type, content, className = '') {
+            const messagesEl = document.getElementById('messages');
+            const messageEl = document.createElement('div');
+            messageEl.className = `message ${className}`;
+            
+            const time = new Date().toLocaleTimeString();
+            const contentStr = typeof content === 'object' ? JSON.stringify(content, null, 2) : content;
+            
+            messageEl.innerHTML = `
+                <div class="message-header">
+                    ${type}
+                    <span class="message-time">${time}</span>
+                </div>
+                <div class="message-content">${contentStr}</div>
+            `;
+            
+            messagesEl.insertBefore(messageEl, messagesEl.firstChild);
+            
+            // Keep only last 50 messages
+            while (messagesEl.children.length > 50) {
+                messagesEl.removeChild(messagesEl.lastChild);
+            }
+        }
+
+        function clearMessages() {
+            document.getElementById('messages').innerHTML = '';
+            messageCount = 0;
+            document.getElementById('messageCount').textContent = '0';
+            document.getElementById('lastMessageTime').textContent = '-';
+        }
+
+        // Auto-fill token from localStorage if available
+        window.onload = function() {
+            const storedToken = localStorage.getItem('accessToken');
+            if (storedToken) {
+                document.getElementById('token').value = storedToken;
+            }
+        };
+    </script>
+</body>
+</html>
