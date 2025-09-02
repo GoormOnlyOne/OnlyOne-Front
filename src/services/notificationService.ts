@@ -1,11 +1,11 @@
-import { createSSEConnection } from '../api/notification';
+import { EventSourcePolyfill } from 'event-source-polyfill';
 import type { Notification } from '../types/notification';
 
 export type SSEEventType = 'notification' | 'unread-count' | 'heartbeat';
 
 export interface SSEEvent {
   type: SSEEventType;
-  data: any;
+  data: unknown;
 }
 
 export interface NotificationEvent extends SSEEvent {
@@ -20,11 +20,11 @@ export interface UnreadCountEvent extends SSEEvent {
 
 export interface HeartbeatEvent extends SSEEvent {
   type: 'heartbeat';
-  data: {};
+  data: Record<string, never>;
 }
 
 export class NotificationService {
-  private eventSource: EventSource | null = null;
+  private eventSource: EventSourcePolyfill | null = null;
   private userId: number | null = null;
   private listeners: Map<SSEEventType, Set<(event: SSEEvent) => void>> =
     new Map();
@@ -55,8 +55,20 @@ export class NotificationService {
         this.eventSource = null;
       }
 
-      // SSE 연결
-      this.eventSource = createSSEConnection(userId);
+      // SSE 연결 with EventSource polyfill
+      const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/';
+      const url = new URL(`sse/subscribe`, baseUrl);
+      
+      const token = localStorage.getItem('accessToken');
+      
+      this.eventSource = new EventSourcePolyfill(url.toString(), {
+        headers: token ? {
+          'Authorization': `Bearer ${token}`,
+        } : {},
+        withCredentials: true,
+        heartbeatTimeout: 60000,
+      });
+      
       this.setupEventListeners();
     } catch (error) {
       this.isConnecting = false;
@@ -96,7 +108,7 @@ export class NotificationService {
   private setupEventListeners(): void {
     if (!this.eventSource) return;
 
-    this.eventSource.addEventListener('notification', event => {
+    this.eventSource.addEventListener('notification', (event: any) => {
       try {
         const data = JSON.parse(event.data);
         this.emitEvent('notification', data);
@@ -105,7 +117,7 @@ export class NotificationService {
       }
     });
 
-    this.eventSource.addEventListener('unread-count', event => {
+    this.eventSource.addEventListener('unread-count', (event: any) => {
       try {
         const data = JSON.parse(event.data);
         this.emitEvent('unread-count', data);
@@ -114,15 +126,15 @@ export class NotificationService {
       }
     });
 
-    this.eventSource.addEventListener('heartbeat', event => {
+    this.eventSource.addEventListener('heartbeat', (event: any) => {
       try {
         // heartbeat는 단순 문자열일 수 있으므로 JSON 파싱을 시도하되, 실패하면 문자열 그대로 사용
         let data;
         try {
           data = JSON.parse(event.data);
-        } catch (parseError) {
+        } catch {
           // JSON이 아닌 경우 문자열 그대로 사용
-          data = { status: event.data };
+          data = { status: event.data as string };
         }
         this.emitEvent('heartbeat', data);
       } catch {
@@ -141,7 +153,7 @@ export class NotificationService {
     };
   }
 
-  private emitEvent(type: SSEEventType, data: any): void {
+  private emitEvent(type: SSEEventType, data: unknown): void {
     const listeners = this.listeners.get(type);
     if (listeners) {
       const event: SSEEvent = { type, data };
