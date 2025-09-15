@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SSE Connection Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .status { padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .connected { background-color: #d4edda; color: #155724; }
+        .disconnected { background-color: #f8d7da; color: #721c24; }
+        .log { background-color: #f8f9fa; padding: 10px; border: 1px solid #dee2e6; max-height: 300px; overflow-y: auto; }
+        .controls { margin: 20px 0; }
+        button { padding: 10px 15px; margin: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>SSE Connection Test - localhost:8080</h1>
+    
+    <div class="controls">
+        <input type="number" id="userId" placeholder="사용자 ID 입력" value="100001">
+        <button onclick="connect()">SSE 연결</button>
+        <button onclick="disconnect()">연결 해제</button>
+        <button onclick="clearLog()">로그 클리어</button>
+    </div>
+    
+    <div id="status" class="status disconnected">연결 안됨</div>
+    
+    <h3>실시간 로그:</h3>
+    <div id="log" class="log"></div>
+
+    <script>
+        let eventSource = null;
+        
+        function log(message, type = 'info') {
+            const logDiv = document.getElementById('log');
+            const time = new Date().toLocaleTimeString();
+            const color = type === 'error' ? 'red' : type === 'success' ? 'green' : 'black';
+            logDiv.innerHTML += `<div style="color: ${color};">[${time}] ${message}</div>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+        
+        function updateStatus(connected) {
+            const statusDiv = document.getElementById('status');
+            if (connected) {
+                statusDiv.className = 'status connected';
+                statusDiv.textContent = 'SSE 연결됨';
+            } else {
+                statusDiv.className = 'status disconnected';
+                statusDiv.textContent = '연결 안됨';
+            }
+        }
+        
+        function connect() {
+            const userId = document.getElementById('userId').value;
+            if (!userId) {
+                alert('사용자 ID를 입력하세요');
+                return;
+            }
+            
+            disconnect(); // 기존 연결 해제
+            
+            // localStorage에 토큰 저장 (실제 앱처럼)
+            const token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMDAwMDEiLCJrYWthb0lkIjoxMDAwMDEsIm5pY2tuYW1lIjoi6rmA7KeA66-8IiwidHlwZSI6ImFjY2VzcyIsImlhdCI6MTUxNjIzOTAyMiwiZXhwIjoxOTAwMDAwMDAwfQ.oGdxAoR1vex8PPcxDgGHIbF1Y7Q7DswrANLoJubaezc";
+            localStorage.setItem('accessToken', token);
+            
+            const url = `http://localhost:8080/sse/subscribe?token=${token}`;
+            log(`SSE 연결 시도: ${url}`);
+            
+            eventSource = new EventSource(url);
+            
+            eventSource.onopen = function(event) {
+                log('SSE 연결 성공!', 'success');
+                updateStatus(true);
+            };
+            
+            eventSource.onmessage = function(event) {
+                log(`일반 메시지 수신: ${event.data}`);
+            };
+            
+            eventSource.onerror = function(event) {
+                log('SSE 연결 오류 발생', 'error');
+                updateStatus(false);
+            };
+            
+            // 커스텀 이벤트 리스너들
+            const eventTypes = ['notification', 'chat', 'settlement', 'like', 'comment', 'heartbeat'];
+            eventTypes.forEach(type => {
+                eventSource.addEventListener(type, function(event) {
+                    log(`${type.toUpperCase()} 이벤트 수신: ${event.data}`, 'success');
+                });
+            });
+        }
+        
+        function disconnect() {
+            if (eventSource) {
+                eventSource.close();
+                eventSource = null;
+                log('SSE 연결 해제됨');
+                updateStatus(false);
+            }
+        }
+        
+        function clearLog() {
+            document.getElementById('log').innerHTML = '';
+        }
+        
+        // 페이지 언로드 시 연결 정리
+        window.addEventListener('beforeunload', disconnect);
+    </script>
+</body>
+</html>

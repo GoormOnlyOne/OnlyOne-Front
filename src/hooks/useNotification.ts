@@ -152,7 +152,7 @@ export function useNotification(
   const handleMarkAllAsRead = useCallback(async () => {
     try {
       setError(null);
-      await markAllAsRead(userId);
+      await markAllAsRead();
       setUnreadCount(0);
 
       // 알림 목록의 isRead 상태 업데이트
@@ -193,8 +193,8 @@ export function useNotification(
 
     // 읽지 않은 카운트 업데이트 리스너
     const handleUnreadCount = (event: SSEEvent) => {
-      const { count } = event.data;
-      setUnreadCount(count);
+      const data = event.data as { count: number };
+      setUnreadCount(data.count);
     };
 
     // 이벤트 리스너 등록

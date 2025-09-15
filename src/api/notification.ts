@@ -29,9 +29,7 @@ export const createNotification = async (
 
 // 모든 알림 읽음 처리 (백엔드에서 자동으로 처리되므로 더 이상 필요 없음)
 // 첫 페이지 조회 시 자동으로 모든 알림이 읽음 처리됨
-export const markAllAsRead = async (
-  userId: number,
-): Promise<{ success: boolean; data: null }> => {
+export const markAllAsRead = async (): Promise<{ success: boolean; data: null }> => {
   // 백엔드에서 getNotifications 첫 페이지 호출 시 자동 처리
   // 호환성을 위해 함수는 유지하되 실제로는 getNotifications를 호출
   await getNotifications();
@@ -59,24 +57,6 @@ export const getUnreadCount = async (): Promise<number> => {
   return response.data;
 };
 
-// SSE 연결 생성
-export const createSSEConnection = (
-  userId: number,
-  lastEventId?: string,
-): EventSource => {
-  // 환경변수에서 API 베이스 URL 가져오기 (다른 API와 동일)
-  const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/';
-  const url = new URL(`sse/subscribe/${userId}`, baseUrl);
-
-  // JWT 토큰이 있으면 쿼리 파라미터로 추가 (EventSource는 헤더 설정 불가)
-  const token = localStorage.getItem('accessToken');
-  if (token) {
-    url.searchParams.set('token', token);
-  }
-
-  // EventSource에 Last-Event-ID 헤더를 설정하려면 직접 설정할 수 없으므로
-  // 브라우저가 자동으로 처리하도록 합니다
-  const eventSource = new EventSource(url.toString());
-
-  return eventSource;
-};
+// SSE 연결은 sseService를 통해 관리
+// @deprecated Use sseService directly instead
+export { sseService } from '../services/sseService';
