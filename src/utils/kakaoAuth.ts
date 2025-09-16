@@ -21,7 +21,5 @@ export const kakaoLogin = () => {
 
   const kakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize?client_id=${REST_API_KEY}&redirect_uri=${REDIRECT_URI}&response_type=code&prompt=login`;
 
-  console.log('카카오 로그인 URL:', kakaoAuthUrl);
-
   window.location.href = kakaoAuthUrl;
 };
