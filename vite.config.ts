@@ -10,4 +10,7 @@ export default defineConfig({
   define: {
     global: 'globalThis',
   },
+  preview: {
+    allowedHosts: ['buddkit.com'],
+  },
 });
