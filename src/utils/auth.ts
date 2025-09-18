@@ -59,7 +59,7 @@ export const isTokenExpired = (token: string): boolean => {
 export const getUserIdFromToken = (token: string): number | null => {
   try {
     const payload = parseJwtPayload(token);
-    return payload.sub ? parseInt(payload.sub) : null;
+    return payload.kakaoId ? parseInt(payload.kakaoId) : null;
   } catch (error) {
     console.error('토큰에서 사용자 ID 추출 오류:', error);
     return null;
